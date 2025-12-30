@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  /* Cosmic Clay Palette */
+  --void: #0F1115;
+  --surface: #181A20;
+  --overlay: #23262F;
+  --clay: #E86F52;
+  --peach: #F4A261;
+  --jade: #2A9D8F;
+  --spirit: #8D99AE;
+  --gold: #FFD700;
+
+  --background: var(--void);
+  --foreground: #EDEDED;
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-surface: var(--surface);
+  --color-overlay: var(--overlay);
+  --color-clay: var(--clay);
+  --color-peach: var(--peach);
+  --color-jade: var(--jade);
+  --color-spirit: var(--spirit);
+  --color-gold: var(--gold);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Custom Utilities */
+  --animate-fade-in: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+  background: rgba(24, 26, 32, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
