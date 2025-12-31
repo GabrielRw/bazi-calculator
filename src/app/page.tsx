@@ -41,7 +41,158 @@ export default function Home() {
         engine: "True Bazi Calculator v2026"
       }
     };
-    navigator.clipboard.writeText(JSON.stringify(fullData, null, 2));
+
+    const dmInfo = result?.day_master.info;
+    const dmName = dmInfo?.pinyin || dmInfo?.name || "Day Master";
+
+    const aiPrompt = `You are an expert BaZi (Four Pillars) analyst and a world-class technical writer.
+
+Your job: generate a **complete, deeply explanatory BaZi report** from the **JSON input** provided below.  
+The reader may be a beginner, but they want maximum value and “no stone unturned.”
+
+## Core rules
+1) **Use ONLY the data in the JSON.**  
+   - If something is missing (e.g., no spouse palace interpretation), say what’s missing and what you *can still infer safely*.  
+   - Never invent pillars, stems, branches, solar terms, or extra stars not present.
+2) **Explain everything you mention.**  
+   Every technical term must be defined the first time it appears (DM strength, structure, Ten Gods, NaYin, Xun Kong, 6-He, 6-Chong, Po, Hai harm, directional harmony, life stage, etc.).
+3) **Be explicit and structured.**  
+   Output must be organized with clear headings, subheadings, bullet points, and “so-what” summaries.
+4) **Actionable value.**  
+   For each major section, include:  
+   - “How this can show up in real life”  
+   - “What to lean into”  
+   - “What to watch out for”  
+   - “Practical suggestions” (habits, work styles, environments, timing)
+5) **Tone:** insightful, grounded, non-fatalistic. No fear-mongering.
+
+---
+
+# OUTPUT FORMAT (must follow exactly)
+
+## 0) Executive Snapshot (TL;DR)
+- 8–12 bullets summarizing the chart: dominant elements, DM strength, structure, favorable/unfavorable elements, standout interactions/stars, and main life themes.
+- Add a “Top 3 Levers” section: the 3 highest-impact recommendations.
+
+## 1) Chart at a Glance (Raw Map)
+Present a compact recap derived from JSON:
+- Day Master (stem, element, polarity)
+- Four Pillars (Year/Month/Day/Hour): gan-zhi, elements, Ten Gods (stem + hidden), NaYin, life stage
+- Luck Cycle direction + start age and the list of 10-year pillars with dates
+
+## 2) Day Master Deep Dive (${result?.day_master.stem} ${dmInfo?.polarity} ${dmInfo?.element})
+Explain:
+- The archetype of ${dmInfo?.polarity} ${dmInfo?.element} (${dmName}): strengths, blind spots, needs
+- What “Strong DM” means in THIS chart (use professional.dm_strength and professional_debug to justify)
+- The “balance objective”: what the chart needs more/less of, based on favorable/unfavorable elements
+
+## 3) Five Elements Balance & Temperature
+Use elements.points and elements.percentages:
+- Dominant vs weak elements (Water, Wood, Metal, Earth, Fire)
+- What the distribution implies about temperament, stress patterns, and decision style
+- “Temperature” and dryness/wetness logic using only what’s inferable (e.g., strong Water + Metal support, low Fire)
+
+## 4) Structure /格局 and Yong Shen Logic
+Use professional.structure + yong_shen_candidates + rationale:
+- Define “Structure” and what the detected structure means
+- Explain why specific elements are candidates (drain/control logic)
+- Translate this into practical life strategy (work modes, learning style, leadership style)
+
+## 5) Ten Gods: Full Mapping & Meaning
+For EACH pillar:
+- List stem Ten God and hidden stems Ten Gods (from JSON)
+- Explain what each Ten God means for a ${dmName} DM
+- Interpret pillar-by-pillar: Year (social persona), Month (career/parents), Day (self/intimacy), Hour (legacy/drive)
+- Then synthesize: which Ten Gods dominate, which are missing, and what that implies
+
+## 6) Pillar-by-Pillar Interpretation (High Resolution)
+Dedicated subsections for:
+- Year pillar analysis
+- Month pillar analysis
+- Day pillar analysis (include spouse palace discussion using Day Branch only, without inventing spouse details)
+- Hour pillar analysis
+Include: NaYin meaning (as symbolic layer), life stage meanings, and how hidden stems modify the visible story.
+
+## 7) Stars / Shen Sha (as given)
+For each star in natal_chart.stars:
+- Define the star (in plain language)
+- Explain the trigger_rule and trigger_text as written
+- Give balanced interpretations: gifts, risks, and constructive use
+Do not add extra stars not listed.
+
+## 8) Natal Interactions & Formations
+For each interaction in natal_chart.interactions:
+- Define the interaction type (Self Punishment, Harm, Directional Harmony)
+- Explain which pillars are involved, and the likely life arenas affected
+- Provide mitigation strategies and positive expressions
+Also explain “partial vs full transform” and what it means when is_formed = true.
+
+## 9) Xun Kong / Void Branches
+Use natal_chart.xun_kong:
+- Explain what void branches mean
+- Interpret the void branches in a practical way
+- Explain how voids might show up in timing (without adding new calculations)
+
+## 10) Luck Cycles (10-Year Da Yun)
+Using natal_chart.luck_cycle:
+For EACH 10-year pillar:
+- Ages + years
+- What the Gan brings + what the Zhi brings (elemental + Ten God style inference relative to ${dmName}; keep it general)
+- How this likely shifts the balance vs favorable/unfavorable elements
+- A short “theme” + “best moves” + “watch-outs”
+Do not claim certainty; frame as tendencies.
+
+## 11) Current & Near-Term Timing Focus
+Using flow_data for year 2025:
+### 11.1 Annual Overview (2025 乙巳)
+- Explain the annual pillar meaning relative to natal chart
+- Use listed interactions (annual_overlay, luck_overlay) and stars to justify themes
+### 11.2 Monthly Flow Breakdown (All months in JSON)
+For each month object:
+- Identify month gan-zhi
+- List its interactions and stars
+- Interpret what it favors/challenges (career, relationships, health, study, travel, money) with clear rationale
+- Give 1–3 practical “do this” suggestions per month
+
+## 12) Career, Money, Relationships, Health, Spiritual Growth
+Create separate sections:
+- Career & learning style (tie to structure + Ten Gods)
+- Money & risk profile (wealth gods present in hidden stems, volatility markers)
+- Relationships (include Widow Star, harms/clashes, self-punishment patterns)
+- Health & nervous system themes (use element balance; avoid medical claims)
+- Spiritual growth / meaning (frame as psychological growth)
+Each section must include “Strengths / Pitfalls / Practices”.
+
+## 13) Personalization Cheatsheet
+- “If you’re this chart, you thrive when…”
+- “You suffer when…”
+- “Non-negotiables”
+- “Best environments” (social + climate + work setting)
+- “Fast alignment checklist” (10 bullets)
+
+## 14) Data Quality & What’s Missing
+Use natal_chart.metadata + astro_debug:
+- Confirm time_standard, resolved_timezone, and that true solar time was used
+- Mention engine version, rulesets
+- List any missing data that would improve interpretation (e.g., spouse gender assumptions, dayun ten gods not provided, etc.)
+
+## 15) Appendix
+- Glossary of all terms used
+- A compact table-like bullet list of pillars and key tags (no markdown tables required)
+
+---
+
+# INPUT JSON
+Paste and analyze the following JSON exactly:
+
+${JSON.stringify(fullData, null, 2)}
+
+---
+
+## Final constraint
+The report must be long, detailed, and helpful — but never repetitive. Prefer depth over fluff.`;
+
+    navigator.clipboard.writeText(aiPrompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
