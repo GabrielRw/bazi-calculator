@@ -43,9 +43,14 @@ export default function Home() {
     };
 
     const dmInfo = result?.day_master.info;
-    const dmName = dmInfo?.pinyin || dmInfo?.name || "Day Master";
+    const dmName = dmInfo ? `${dmInfo.pinyin} ${dmInfo.polarity} ${dmInfo.element}` : "Day Master";
+    const annualFlow = flowResult?.years[0];
+    const targetYear = annualFlow?.year || 2025;
+    const targetGanZhi = annualFlow?.gan_zhi || "乙巳";
+    const targetAge = annualFlow?.age || "N/A";
+    const activeLuck = annualFlow?.active_luck;
 
-    const aiPrompt = `You are an expert BaZi (Four Pillars) analyst and a world-class technical writer.
+    const natalAiPrompt = `You are an expert BaZi (Four Pillars) analyst and a world-class technical writer.
 
 Your job: generate a **complete, deeply explanatory BaZi report** from the **JSON input** provided below.  
 The reader may be a beginner, but they want maximum value and “no stone unturned.”
@@ -80,9 +85,9 @@ Present a compact recap derived from JSON:
 - Four Pillars (Year/Month/Day/Hour): gan-zhi, elements, Ten Gods (stem + hidden), NaYin, life stage
 - Luck Cycle direction + start age and the list of 10-year pillars with dates
 
-## 2) Day Master Deep Dive (${result?.day_master.stem} ${dmInfo?.polarity} ${dmInfo?.element})
+## 2) Day Master Deep Dive (${result?.day_master.stem} ${dmName})
 Explain:
-- The archetype of ${dmInfo?.polarity} ${dmInfo?.element} (${dmName}): strengths, blind spots, needs
+- The archetype of ${dmName}: strengths, blind spots, needs
 - What “Strong DM” means in THIS chart (use professional.dm_strength and professional_debug to justify)
 - The “balance objective”: what the chart needs more/less of, based on favorable/unfavorable elements
 
@@ -143,8 +148,8 @@ For EACH 10-year pillar:
 Do not claim certainty; frame as tendencies.
 
 ## 11) Current & Near-Term Timing Focus
-Using flow_data for year 2025:
-### 11.1 Annual Overview (2025 乙巳)
+Using flow_data for year ${targetYear}:
+### 11.1 Annual Overview (${targetYear} ${targetGanZhi})
 - Explain the annual pillar meaning relative to natal chart
 - Use listed interactions (annual_overlay, luck_overlay) and stars to justify themes
 ### 11.2 Monthly Flow Breakdown (All months in JSON)
@@ -191,6 +196,143 @@ ${JSON.stringify(fullData, null, 2)}
 
 ## Final constraint
 The report must be long, detailed, and helpful — but never repetitive. Prefer depth over fluff.`;
+
+    const flowAiPrompt = `You are an expert BaZi timing analyst (Da Yun + Liu Nian + Liu Yue) and a world-class technical writer.
+
+Your job: generate a **high-value, deeply practical YEAR FLOW REPORT** for the specific year contained in the JSON \`flow_data.years[0]\`.
+
+The reader wants maximum actionable value: what themes are likely, where the friction is, where the support is, and how to use each month intelligently.
+
+## Core rules
+1) **Use ONLY the data in the JSON.**
+   - Do not invent missing months, stars, interactions, Ten Gods, or extra calculations.
+   - If something is not present (e.g., no month start dates, no day-level flow), say so and work with what exists.
+2) **Explain every technical term** the first time it appears:
+   - annual pillar, monthly flow pillar, active luck pillar
+   - 6-He, 6-Chong, Po (Break), Harm (Hai), Self-Punishment
+   - Stem Combination/Clash, Directional Harmony (partial/full), Triple Harmony (partial/full), Half-3-Harmony
+   - transform_to, transform_level, is_formed, mitigation, missing branch, transform_score
+3) **Ground everything in the natal chart.**
+   Always relate timing back to:
+   - Day Master (${result?.day_master.stem} ${dmName})
+   - element balance (dominant ${result?.elements.dominant}, weaker elements)
+   - favorable/unfavorable elements (${result?.professional?.favorable_elements?.join('/') || 'N/A'} favorable, ${result?.professional?.unfavorable_elements?.join('/') || 'N/A'} unfavorable from professional)
+4) **Non-fatalistic.** Describe tendencies + choices. No fear-mongering.
+5) **Actionable outputs.**
+   Every major section must include:
+   - “How it can show up in real life”
+   - “Best moves”
+   - “Watch-outs”
+   - “Practical suggestions” (planning, relationships, work, money, energy management)
+
+---
+
+# OUTPUT FORMAT (must follow exactly)
+
+## 0) Year Dashboard (TL;DR)
+- Year pillar (Gan-Zhi: ${targetGanZhi}) + age (${targetAge}) + active luck pillar (${activeLuck?.gan_zhi || 'N/A'} for ${activeLuck?.start_year}-${activeLuck?.end_year})
+- 8–12 bullet summary of the whole year: biggest supportive forces, biggest conflicts, key repeating patterns
+- “Top 3 Priorities” (the highest ROI strategies for this year)
+
+## 1) Baseline Context (Natal + Luck Frame)
+### 1.1 Natal anchors (from natal_chart)
+- Day Master summary (${result?.day_master.stem} ${dmName})
+- Element distribution (points + percentages)
+- DM strength + structure + favorable/unfavorable elements (from \`professional\`)
+- Natal stars + natal interactions that are likely to be “re-activated” in timing
+
+### 1.2 The active 10-year luck pillar
+- Identify active luck pillar: ${activeLuck?.gan_zhi || 'N/A'} (${activeLuck?.start_year} to ${activeLuck?.end_year})
+- Explain, in general terms, how this luck pillar tends to color the year (elemental + “feel”)
+- Keep it general: do not add unprovided Ten Gods for luck unless explicitly in JSON
+
+## 2) The Annual Pillar Focus (Liu Nian)
+Using \`flow_data.years[0].gan_zhi\` (${targetGanZhi}):
+- Explain what the Heavenly Stem (gan) contributes and what the Earthly Branch (zhi) contributes (elemental & behavioral meaning)
+- Compare annual element tendencies against favorable/unfavorable elements
+- Summarize the “main storyline” of the year in 3–6 bullet themes
+
+## 3) Year-Level Overlay Interactions & Stars (Big Levers)
+Using \`flow_data.years[0].interactions\` and \`flow_data.years[0].stars\`:
+For EACH interaction:
+- Define the interaction type
+- List involved pillars (hour/month/year/day/luck/annual)
+- Explain what areas it most likely touches (self, career, relationships, money, travel, reputation)
+- Note if it’s partial/full and what transform_to implies
+
+For EACH star:
+- Define it in plain language
+- Explain how it tends to manifest during a year
+- Give “best use” and “watch-out”
+
+End this section with:
+- “Top 5 Hotspots” (the most important overlays this year)
+- “Stabilizers” (anything in the data that reduces volatility)
+
+## 4) Month-by-Month Playbook (Liu Yue)
+You MUST analyze EVERY month object in \`months\` (including index -1 if present).
+
+For each month, output the following template:
+
+### Month [index]: [gan_zhi] ([gan] / [zhi])
+**A) What’s activated**
+- List month interactions (with short plain-English meaning)
+- List month stars
+
+**B) Dominant pattern**
+- Identify the strongest theme of the month (choose 1–2 only)
+- Explain why using the interactions/stars (cite ids and transform_to)
+
+**C) How it may show up**
+- Career/work
+- Money/risk
+- Relationships/social
+- Health/energy (non-medical, stress/pace framing)
+- Learning/creativity/spiritual focus
+
+**D) Best moves (1–5 bullets)**
+**E) Watch-outs (1–5 bullets)**
+**F) One practical “ritual”**
+A simple weekly or daily practice aligned to the month’s pattern (planning habit, communication rule, declutter, training focus, etc.)
+
+## 5) Repeating Patterns & Theme Clusters
+Across all months, identify:
+- Interactions that repeat (e.g., recurring Hai harm, recurring directional harmony, recurring stem combos)
+- The 2–4 biggest “season arcs” (early/mid/late-year shifts) based strictly on the month data
+- What to do differently in each arc
+
+## 6) Tactical Strategy by Life Area (for THIS year)
+Create separate sections:
+- Career & execution (planning style for this year)
+- Money & volatility management (budgeting, risk timing)
+- Relationships & communication (how to prevent avoidable harm patterns)
+- Health/energy management (sleep, pace, recovery, environment)
+- Personal growth (meaning, discipline, emotional patterns)
+Each must include: Strengths / Pitfalls / Practices
+
+## 7) Timing Cheatsheet
+- “Green-light months” (best months for launches, negotiations, travel, study, healing) — justify using month interactions/stars
+- “Caution months” (more clash/harm/self-punishment) — justify using month interactions/stars
+- A one-page style bullet summary that someone could screenshot and use
+
+## 8) Data Quality & Limits
+- Confirm year, gan_zhi, active luck, and that natal context is included
+- List what’s missing that would make timing more precise (e.g., exact solar month start dates, daily flow, personal goals, location shifts)
+- Do NOT blame the user; just state limitations clearly
+
+---
+
+# INPUT JSON
+Paste and analyze the following JSON exactly:
+
+${JSON.stringify(fullData, null, 2)}
+
+---
+
+## Final constraint
+The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
+
+    const aiPrompt = activeTab === "flow" ? flowAiPrompt : natalAiPrompt;
 
     navigator.clipboard.writeText(aiPrompt);
     setCopied(true);
@@ -350,7 +492,7 @@ The report must be long, detailed, and helpful — but never repetitive. Prefer 
                 )}
               >
                 {copied ? <Check className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                {copied ? "Copied JSON!" : "Extract to AI"}
+                {copied ? "Copied! Paste into AI tool" : "Extract to AI"}
               </button>
             </div>
 
