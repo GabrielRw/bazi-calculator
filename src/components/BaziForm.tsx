@@ -2,13 +2,9 @@ import { useState, useEffect } from "react";
 import { Search, Settings, MapPin, Calendar, Clock, Loader2, History, X, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { BaziResult, BaziFlowResult } from "@/types/bazi";
 
-interface BaziFormProps {
-    onSubmit: (data: FormData) => void;
-    isLoading: boolean;
-}
-
-interface FormData {
+export interface FormData {
     name?: string;
     year: number;
     month: number;
@@ -21,16 +17,33 @@ interface FormData {
     calendar: string;
 }
 
-interface HistoryItem extends FormData {
+export interface HistoryItem extends FormData {
     timestamp: number;
     label: string;
+    result?: BaziResult;
+    flowResult?: BaziFlowResult;
 }
 
-export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
+interface BaziFormProps {
+    onSubmit: (data: FormData) => void;
+    isLoading: boolean;
+    history: HistoryItem[];
+    onDeleteHistory: (index: number) => void;
+    onSelectHistory: (item: HistoryItem) => void;
+    loadedData?: FormData | null;
+}
+
+export default function BaziForm({
+    onSubmit,
+    isLoading,
+    history,
+    onDeleteHistory,
+    onSelectHistory,
+    loadedData
+}: BaziFormProps) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
-    const [history, setHistory] = useState<HistoryItem[]>([]);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<any>({
         name: "",
         year: "",
         month: "",
@@ -38,71 +51,37 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
         hour: "",
         minute: "",
         city: "",
-        gender: "male" as "male" | "female",
+        gender: "male",
         timeStandard: "true_solar_absolute",
         calendar: "gregorian",
     });
 
+    // Populate form when parent passes loaded data (e.g. from history)
     useEffect(() => {
-        const saved = localStorage.getItem("bazi_history");
-        if (saved) {
-            try {
-                setHistory(JSON.parse(saved));
-            } catch (e) {
-                console.error("Failed to load history", e);
-            }
+        if (loadedData) {
+            setFormData({
+                name: loadedData.name || "",
+                year: loadedData.year.toString(),
+                month: loadedData.month.toString(),
+                day: loadedData.day.toString(),
+                hour: loadedData.hour.toString(),
+                minute: loadedData.minute.toString(),
+                city: loadedData.city,
+                gender: loadedData.gender,
+                timeStandard: loadedData.timeStandard,
+                calendar: loadedData.calendar
+            });
         }
-    }, []);
+    }, [loadedData]);
 
-    const saveToHistory = (data: FormData) => {
-        const label = data.name
-            ? data.name
-            : `${data.year}-${data.month}-${data.day} ${data.city}`;
-
-        const newItem: HistoryItem = {
-            ...data,
-            timestamp: Date.now(),
-            label
-        };
-
-        const updated = [newItem, ...history.filter(h => {
-            // If names match (and aren't empty), treat as update
-            if (data.name && h.name === data.name) return false;
-
-            // Otherwise check for exact duplicate data parameters
-            return h.year !== newItem.year ||
-                h.month !== newItem.month ||
-                h.day !== newItem.day ||
-                h.hour !== newItem.hour ||
-                h.city !== newItem.city
-        }
-        )].slice(0, 10);
-
-        setHistory(updated);
-        localStorage.setItem("bazi_history", JSON.stringify(updated));
-    };
-
-    const loadHistoryItem = (item: HistoryItem) => {
-        setFormData({
-            name: item.name || "",
-            year: item.year.toString(),
-            month: item.month.toString(),
-            day: item.day.toString(),
-            hour: item.hour.toString(),
-            minute: item.minute.toString(),
-            city: item.city,
-            gender: item.gender,
-            timeStandard: item.timeStandard,
-            calendar: item.calendar
-        });
+    const handleLoadHistoryItem = (item: HistoryItem) => {
+        onSelectHistory(item);
         setShowHistory(false);
     };
 
-    const deleteHistoryItem = (e: React.MouseEvent, index: number) => {
+    const handleDeleteHistoryItem = (e: React.MouseEvent, index: number) => {
         e.stopPropagation();
-        const updated = history.filter((_, i) => i !== index);
-        setHistory(updated);
-        localStorage.setItem("bazi_history", JSON.stringify(updated));
+        onDeleteHistory(index);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -120,7 +99,6 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
             calendar: formData.calendar
         };
 
-        saveToHistory(data);
         onSubmit(data);
     };
 
@@ -174,7 +152,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                                 {history.map((item, idx) => (
                                                     <div
                                                         key={item.timestamp}
-                                                        onClick={() => loadHistoryItem(item)}
+                                                        onClick={() => handleLoadHistoryItem(item)}
                                                         className="p-3 hover:bg-white/5 cursor-pointer group transition-colors flex justify-between items-center"
                                                     >
                                                         <div>
@@ -186,7 +164,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                                             </div>
                                                         </div>
                                                         <button
-                                                            onClick={(e) => deleteHistoryItem(e, idx)}
+                                                            onClick={(e) => handleDeleteHistoryItem(e, idx)}
                                                             className="p-1.5 rounded-full hover:bg-red-500/20 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                                                         >
                                                             <X className="w-3 h-3" />
@@ -212,7 +190,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
-                        placeholder="Name (e.g. 'John Doe' or 'My 2024 Chart')"
+                        placeholder="Name (e.g. John Doe)"
                     />
                 </div>
 

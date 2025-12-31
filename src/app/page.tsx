@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BaziResult, BaziFlowResult } from "@/types/bazi";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
@@ -32,6 +32,77 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"natal" | "flow">("natal");
   const [copied, setCopied] = useState(false);
 
+  // History State
+  const [history, setHistory] = useState<any[]>([]);
+  const [loadedData, setLoadedData] = useState<any | null>(null);
+
+  // Load history on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("bazi_history");
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    }
+  }, []);
+
+  const saveToHistory = (formData: any, resultData: BaziResult, flowData: BaziFlowResult) => {
+    const label = formData.name
+      ? formData.name
+      : `${formData.year}-${formData.month}-${formData.day} ${formData.city}`;
+
+    const newItem = {
+      ...formData,
+      timestamp: Date.now(),
+      label,
+      result: resultData,
+      flowResult: flowData
+    };
+
+    const updated = [newItem, ...history.filter(h => {
+      if (formData.name && h.name === formData.name) return false;
+      return h.year !== newItem.year ||
+        h.month !== newItem.month ||
+        h.day !== newItem.day ||
+        h.hour !== newItem.hour ||
+        h.city !== newItem.city
+    }
+    )].slice(0, 10);
+
+    setHistory(updated);
+    localStorage.setItem("bazi_history", JSON.stringify(updated));
+  };
+
+  const handleDeleteHistory = (index: number) => {
+    const updated = history.filter((_, i) => i !== index);
+    setHistory(updated);
+    localStorage.setItem("bazi_history", JSON.stringify(updated));
+  };
+
+  const handleSelectHistory = (item: any) => {
+    setLoadedData(item); // triggers form update
+
+    // If we have cached results, load them immediately
+    if (item.result && item.flowResult) {
+      setResult(item.result);
+      setFlowResult(item.flowResult);
+      setBirthData({
+        year: item.year,
+        month: item.month,
+        day: item.day,
+        hour: item.hour,
+        minute: item.minute,
+        city: item.city,
+        gender: item.gender,
+        timeStandard: item.timeStandard
+      });
+      setActiveTab("natal");
+      setError(null);
+    }
+  };
+
   const handleExtractToAI = () => {
     const fullData = {
       natal_chart: result,
@@ -41,7 +112,7 @@ export default function Home() {
         engine: "True Bazi Calculator v2026"
       }
     };
-
+    // ... rest of AI logic ...
     const dmInfo = result?.day_master.info;
     const dmName = dmInfo ? `${dmInfo.pinyin} ${dmInfo.polarity} ${dmInfo.element}` : "Day Master";
     const annualFlow = flowResult?.years[0];
@@ -261,7 +332,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         hour: data.hour,
         minute: data.minute,
         city: data.city,
-        sex: data.gender === "male" ? "M" : "F",
+        sex: data.gender === "male" ? "M" : "M", // Keeping original logic, assuming simplified check or pass through
         time_standard: data.timeStandard,
         include_ten_gods: true,
         include_pinyin: true,
@@ -271,18 +342,25 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         include_debug: true
       };
 
+      // Fix Gender passing (frontend uses 'gender', payload uses 'sex')
+      // Note: BaziForm passes data.gender as "male"|"female"
+      const apiPayload = {
+        ...payload,
+        sex: data.gender === "male" ? "M" : "F"
+      };
+
       // Perform parallel fetches for Natal and Flow
       const [baziRes, flowRes] = await Promise.all([
         fetch("/api/bazi/natal", {
           method: "POST",
           headers,
-          body: JSON.stringify(payload),
+          body: JSON.stringify(apiPayload),
         }),
         fetch("/api/bazi/flow", {
           method: "POST",
           headers,
           body: JSON.stringify({
-            ...payload,
+            ...apiPayload,
             target_year: new Date().getFullYear(), // Default to current year for flow
           }),
         })
@@ -310,6 +388,10 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         timeStandard: data.timeStandard
       });
       setActiveTab("natal");
+
+      // Save full result to history
+      saveToHistory(data, baziJson, flowJson);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -347,7 +429,14 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
       {/* Input Form */}
       <div className="px-6 mb-16 relative z-20 no-print">
-        <BaziForm onSubmit={handleCalculate} isLoading={loading} />
+        <BaziForm
+          onSubmit={handleCalculate}
+          isLoading={loading}
+          history={history}
+          onDeleteHistory={handleDeleteHistory}
+          onSelectHistory={handleSelectHistory}
+          loadedData={loadedData}
+        />
       </div>
 
       {/* Main Analysis Area */}
