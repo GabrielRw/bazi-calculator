@@ -229,14 +229,8 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                     value={formData.year}
                                     onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                                     className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
-                                    placeholder="Year"
+                                    placeholder="YYYY"
                                 />
-                                <span className={clsx(
-                                    "absolute right-3 top-3 text-gray-500 text-xs font-mono transition-opacity pointer-events-none",
-                                    (formData.year || isLoading) ? "opacity-0" : "opacity-100 group-focus-within:opacity-0"
-                                )}>
-                                    YYYY
-                                </span>
                             </div>
                             <div className="group relative">
                                 <input
