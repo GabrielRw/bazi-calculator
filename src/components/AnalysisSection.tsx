@@ -1,12 +1,66 @@
 "use client";
 
 import { BaziResult } from "@/types/bazi";
-import { motion } from "framer-motion";
-import { Star, Zap, Briefcase } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Zap, Briefcase, Info } from "lucide-react";
 import { getBranchData, getGanzhiPinyin, getGanzhiTranslation } from "@/lib/ganzhi";
+import { useState } from "react";
 
 interface AnalysisSectionProps {
     result: BaziResult;
+}
+
+function StarCard({ star, index }: { star: any, index: number }) {
+    const [showInfo, setShowInfo] = useState(false);
+
+    return (
+        <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="relative p-4 bg-white/5 rounded-xl border border-white/5 hover:border-spirit/30 transition-colors group"
+        >
+            <div className="flex justify-between items-start mb-2">
+                <span className="text-white font-bold text-sm">{star.name}</span>
+                <span className="text-[10px] text-gray-500 uppercase px-2 py-0.5 bg-black/30 rounded-full">
+                    {star.pillar} ({star.zhi})
+                </span>
+            </div>
+
+            {/* Description Toggle */}
+            <AnimatePresence>
+                {showInfo && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: "auto", marginTop: 8 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <p className="text-xs text-gray-400 leading-relaxed pt-2 border-t border-white/5 text-justify">
+                            {star.desc}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Info Icon */}
+            {!showInfo && (
+                <div className="h-6" /> /* Spacer to prevent layout jump if description is hidden */
+            )}
+
+            <button
+                onClick={() => setShowInfo(!showInfo)}
+                className={`absolute bottom-2 right-2 p-1.5 rounded-full transition-all ${showInfo
+                        ? "text-spirit bg-spirit/10"
+                        : "text-gray-600 hover:text-gray-300 hover:bg-white/5"
+                    }`}
+                title="View Star Details"
+            >
+                <Info className="w-3.5 h-3.5" />
+            </button>
+        </motion.div>
+    );
 }
 
 export default function AnalysisSection({ result }: AnalysisSectionProps) {
@@ -19,21 +73,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                     {(result.stars || []).map((star, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className="p-3 bg-white/5 rounded-xl border border-white/5 hover:border-spirit/30 transition-colors"
-                        >
-                            <div className="flex justify-between items-start mb-1">
-                                <span className="text-white font-bold text-sm">{star.name}</span>
-                                <span className="text-[10px] text-gray-500 uppercase px-2 py-0.5 bg-black/30 rounded-full">
-                                    {star.pillar} ({star.zhi})
-                                </span>
-                            </div>
-                            <p className="text-xs text-gray-400 leading-relaxed">{star.desc}</p>
-                        </motion.div>
+                        <StarCard key={i} star={star} index={i} />
                     ))}
                 </div>
             </div>
