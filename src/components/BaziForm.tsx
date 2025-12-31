@@ -1,7 +1,5 @@
-"use client";
-
-import { useState } from "react";
-import { Search, Settings, MapPin, Calendar, Clock, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Settings, MapPin, Calendar, Clock, Loader2, History, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
@@ -22,8 +20,15 @@ interface FormData {
     calendar: string;
 }
 
+interface HistoryItem extends FormData {
+    timestamp: number;
+    label: string;
+}
+
 export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
     const [formData, setFormData] = useState({
         year: "",
         month: "",
@@ -36,16 +41,75 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
         calendar: "gregorian",
     });
 
+    useEffect(() => {
+        const saved = localStorage.getItem("bazi_history");
+        if (saved) {
+            try {
+                setHistory(JSON.parse(saved));
+            } catch (e) {
+                console.error("Failed to load history", e);
+            }
+        }
+    }, []);
+
+    const saveToHistory = (data: FormData) => {
+        const newItem: HistoryItem = {
+            ...data,
+            timestamp: Date.now(),
+            label: `${data.year}-${data.month}-${data.day} ${data.city}`
+        };
+
+        const updated = [newItem, ...history.filter(h =>
+            h.year !== newItem.year ||
+            h.month !== newItem.month ||
+            h.day !== newItem.day ||
+            h.hour !== newItem.hour ||
+            h.city !== newItem.city
+        )].slice(0, 10);
+
+        setHistory(updated);
+        localStorage.setItem("bazi_history", JSON.stringify(updated));
+    };
+
+    const loadHistoryItem = (item: HistoryItem) => {
+        setFormData({
+            year: item.year.toString(),
+            month: item.month.toString(),
+            day: item.day.toString(),
+            hour: item.hour.toString(),
+            minute: item.minute.toString(),
+            city: item.city,
+            gender: item.gender,
+            timeStandard: item.timeStandard,
+            calendar: item.calendar
+        });
+        setShowHistory(false);
+    };
+
+    const deleteHistoryItem = (e: React.MouseEvent, index: number) => {
+        e.stopPropagation();
+        const updated = history.filter((_, i) => i !== index);
+        setHistory(updated);
+        localStorage.setItem("bazi_history", JSON.stringify(updated));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({
+        const data: FormData = {
             ...formData,
             year: parseInt(formData.year) || 0,
             month: parseInt(formData.month) || 0,
             day: parseInt(formData.day) || 0,
             hour: parseInt(formData.hour) || 0,
             minute: parseInt(formData.minute) || 0,
-        });
+            city: formData.city,
+            gender: formData.gender,
+            timeStandard: formData.timeStandard,
+            calendar: formData.calendar
+        };
+
+        saveToHistory(data);
+        onSubmit(data);
     };
 
     return (
@@ -54,7 +118,78 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto w-full"
         >
-            <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 md:p-8 space-y-6 relative">
+                {/* History Toggle */}
+                <div className="absolute top-4 right-4 z-20">
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setShowHistory(!showHistory)}
+                            className={clsx(
+                                "p-2 rounded-lg transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-wider",
+                                showHistory ? "bg-clay text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+                            )}
+                        >
+                            <History className="w-4 h-4" />
+                            <span className="hidden md:inline">History</span>
+                        </button>
+
+                        <AnimatePresence>
+                            {showHistory && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute right-0 top-full mt-2 w-72 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
+                                >
+                                    <div className="p-3 border-b border-white/5 flex justify-between items-center bg-black/20">
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Saved Charts</span>
+                                        <button
+                                            onClick={() => setShowHistory(false)}
+                                            className="text-gray-500 hover:text-white transition-colors"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                    <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                                        {history.length === 0 ? (
+                                            <div className="p-6 text-center text-gray-500 text-xs italic">
+                                                No saved charts yet.
+                                                <br />Calculate one to save it automatically.
+                                            </div>
+                                        ) : (
+                                            <div className="divide-y divide-white/5">
+                                                {history.map((item, idx) => (
+                                                    <div
+                                                        key={item.timestamp}
+                                                        onClick={() => loadHistoryItem(item)}
+                                                        className="p-3 hover:bg-white/5 cursor-pointer group transition-colors flex justify-between items-center"
+                                                    >
+                                                        <div>
+                                                            <div className="text-sm text-gray-200 font-medium">
+                                                                {item.city || "Unknown City"}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                                {item.year}-{item.month}-{item.day} {item.hour}:{item.minute.toString().padStart(2, '0')}
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => deleteHistoryItem(e, idx)}
+                                                            className="p-1.5 rounded-full hover:bg-red-500/20 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Date & Time Section */}
                     <div className="flex-1 space-y-4">
