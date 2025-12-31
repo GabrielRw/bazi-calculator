@@ -2,7 +2,7 @@
 
 import { BaziResult } from "@/types/bazi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Zap, Briefcase, Info } from "lucide-react";
+import { Star, Zap, Briefcase, Info, Activity, Sparkles } from "lucide-react";
 import { getBranchData, getGanzhiPinyin, getGanzhiTranslation } from "@/lib/ganzhi";
 import { useState } from "react";
 
@@ -52,8 +52,8 @@ function StarCard({ star, index }: { star: any, index: number }) {
             <button
                 onClick={() => setShowInfo(!showInfo)}
                 className={`absolute bottom-2 right-2 p-1.5 rounded-full transition-all ${showInfo
-                        ? "text-spirit bg-spirit/10"
-                        : "text-gray-600 hover:text-gray-300 hover:bg-white/5"
+                    ? "text-spirit bg-spirit/10"
+                    : "text-gray-600 hover:text-gray-300 hover:bg-white/5"
                     }`}
                 title="View Star Details"
             >
@@ -115,48 +115,63 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
             {/* Interactions */}
             <div className="glass-card rounded-2xl p-6">
                 <h3 className="flex items-center gap-2 text-jade text-sm font-bold uppercase tracking-widest mb-4">
-                    <Zap className="w-4 h-4" /> Interactions
+                    <Activity className="w-4 h-4" /> Elemental Interactions
                 </h3>
                 <div className="space-y-4">
-                    {(result.interactions || []).map((interaction, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 + i * 0.05 }}
-                            className="p-4 bg-white/5 rounded-xl border border-white/5 relative overflow-hidden"
-                        >
-                            <div className="flex gap-4 items-start relative z-10">
-                                <div className="flex flex-col items-center bg-black/20 p-2 rounded-lg min-w-[4rem]">
-                                    <div className="text-2xl font-serif text-gray-500">
-                                        {interaction.stems?.join('') || interaction.branches?.join('') || "⚡️"}
-                                    </div>
-                                    <div className="flex flex-col items-center gap-0.5 mt-1">
-                                        <div className="text-[7px] text-gray-600 uppercase font-mono">
-                                            {(interaction.stems || interaction.branches || []).map(c => getGanzhiPinyin(c)).join('•')}
+                    {(result.interactions || []).map((interaction, i) => {
+                        const type = interaction.type.toLowerCase();
+                        let style = { color: "text-spirit", bg: "bg-white/5", border: "border-white/5", icon: Activity, title: "Neutral" };
+
+                        if (type.includes("harmony") || type.includes("combination") || type.includes("support")) {
+                            style = { color: "text-jade", bg: "bg-jade/10", border: "border-jade/20", icon: Sparkles, title: "Synthesis" };
+                        } else if (type.includes("clash") || type.includes("harm") || type.includes("punishment") || type.includes("break")) {
+                            style = { color: "text-peach", bg: "bg-peach/10", border: "border-peach/20", icon: Zap, title: "Friction" };
+                        }
+
+                        const Icon = style.icon;
+
+                        return (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 + i * 0.05 }}
+                                className={`p-4 rounded-xl border ${style.bg} ${style.border} relative overflow-hidden group hover:brightness-110 transition-all`}
+                            >
+                                <div className="flex gap-4 items-start relative z-10">
+                                    <div className="flex flex-col items-center bg-black/20 p-2 rounded-lg min-w-[4rem]">
+                                        <div className="text-2xl font-serif text-gray-200">
+                                            {interaction.stems?.join('') || interaction.branches?.join('') || "⚡️"}
                                         </div>
-                                        <div className="text-[7px] text-spirit/50 uppercase font-bold">
-                                            {(interaction.stems || interaction.branches || []).map(c => getGanzhiTranslation(c).split(' ').pop()).join('•')}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <div className="text-sm text-jade font-bold uppercase tracking-tight">{interaction.id?.replace(/_/g, ' ') || interaction.type}</div>
-                                        {interaction.transform_to && (
-                                            <div className="text-[10px] bg-jade/20 text-jade px-2 py-0.5 rounded-full font-bold uppercase">
-                                                Turns to {interaction.transform_to} ({interaction.transform_level})
+                                        <div className="flex flex-col items-center gap-0.5 mt-1">
+                                            <div className="text-[7px] text-gray-400 uppercase font-mono">
+                                                {(interaction.stems || interaction.branches || []).map(c => getGanzhiPinyin(c)).join('•')}
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
-                                    <div className="text-[10px] text-gray-500 mb-2 uppercase tracking-wide font-mono flex items-center gap-1">
-                                        Found in: {(interaction.pillars || []).map(p => <span key={p} className="text-spirit">{p}</span>).reduce((prev, curr) => [prev, ' + ', curr] as any, [])}
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className={`text-sm font-bold uppercase tracking-tight flex items-center gap-2 ${style.color}`}>
+                                                <Icon className="w-3.5 h-3.5" />
+                                                {interaction.id?.replace(/_/g, ' ') || interaction.type}
+                                            </div>
+                                            {interaction.transform_to && (
+                                                <div className="text-[10px] bg-black/30 text-white px-2 py-0.5 rounded-full font-bold uppercase border border-white/10">
+                                                    → {interaction.transform_to}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-[10px] text-gray-500 mb-2 uppercase tracking-wide font-mono flex items-center gap-1">
+                                            Affects: {(interaction.pillars || []).map(p => <span key={p} className="text-gray-300 font-bold">{p}</span>).reduce((prev, curr) => [prev, ' + ', curr] as any, [])}
+                                        </div>
+                                        <p className="text-xs text-gray-300 leading-relaxed font-light">
+                                            {interaction.interpretation || "This interaction creates a specific energy dynamic between the pillars, influencing your life stability and potential changes."}
+                                        </p>
                                     </div>
-                                    <p className="text-xs text-gray-300 leading-relaxed font-light">{interaction.interpretation}</p>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
 
