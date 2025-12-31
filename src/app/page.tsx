@@ -100,13 +100,8 @@ STYLE REQUIREMENTS (PAID USER)
 OUTPUT FORMAT (MUST FOLLOW EXACTLY)
 ========================
 
-## 0) Executive Snapshot (Read this first)
-- 6–8 bullets maximum.
-- Include: DM, DM strength label, dominant element(s), missing element(s), structure, favorable/unfavorable elements, 2–3 standout natal interactions/stars, and 2–3 core life themes.
-- “Top 3 Levers”: the three highest-impact recommendations (very concrete).
-
 ## 1) Your Core Engine (Who you are)
-### 1.1 Day Master Archetype (from JSON)
+### 1.1 Day Master Archetype (${result?.day_master.stem} ${dmName})
 - Explain the DM archetype in human terms.
 - Show how weak/strong DM matters *in daily life* using professional.dm_strength (but keep it readable).
 - “So what?” summary.
@@ -144,7 +139,7 @@ Each section must include:
 - Practices (concrete habits + environment + boundaries)
 
 ## 5) Timing: Current Phase + ${targetYear} Focus (Do NOT overwhelm)
-### 5.1 Current 10-year Luck pillar (active_luck)
+### 5.1 Current 10-year Luck pillar (${activeLuck?.gan_zhi || 'N/A'})
 - Explain the decade theme in 8–12 bullets max:
   - what the stem brings, what the branch brings (general elemental + Ten God style inference relative to DM, without inventing hidden stems).
   - how it shifts balance vs favorable/unfavorable elements.
@@ -179,12 +174,12 @@ Include:
 - Full list of natal interactions (definitions + mitigation)
 - Xun Kong / void branches explanation
 - Data quality notes: metadata + astro_debug details (time_standard, timezone, engine)
-- If any debug numbers exist (professional_debug), put them ONLY here.
+- If any debug scores exist (professional_debug), put them ONLY here.
 
 ========================
 FINAL CONSTRAINTS
 ========================
-- The main report (sections 0–6) must feel premium, clear, not bloated.
+- The main report (sections 1–6) must feel premium, clear, not bloated.
 - The appendix can be thorough, but avoid repetition.
 - Never exceed 2–3 paragraphs without a “So what?” summary or bullets.
 
