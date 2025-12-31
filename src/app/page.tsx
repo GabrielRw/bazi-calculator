@@ -9,7 +9,7 @@ import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Activity, Info, Clock, Map } from "lucide-react";
+import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check } from "lucide-react";
 import clsx from "clsx";
 
 interface BirthData {
@@ -30,6 +30,21 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"natal" | "flow">("natal");
+  const [copied, setCopied] = useState(false);
+
+  const handleExtractToAI = () => {
+    const fullData = {
+      natal_chart: result,
+      flow_data: flowResult,
+      metadata: {
+        generated_at: new Date().toISOString(),
+        engine: "True Bazi Calculator v2026"
+      }
+    };
+    navigator.clipboard.writeText(JSON.stringify(fullData, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleCalculate = async (data: any) => {
     setLoading(true);
@@ -173,6 +188,19 @@ export default function Home() {
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
               >
                 <Clock className="w-4 h-4" /> Print Full Report
+              </button>
+
+              <button
+                onClick={handleExtractToAI}
+                className={clsx(
+                  "px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border",
+                  copied
+                    ? "bg-jade/20 text-jade border-jade/50"
+                    : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
+                )}
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                {copied ? "Copied JSON!" : "Extract to AI"}
               </button>
             </div>
 
