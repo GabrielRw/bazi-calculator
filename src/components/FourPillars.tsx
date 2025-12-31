@@ -53,26 +53,35 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
             </div>
 
             {/* Detailed Overlay View (Portaled to Body) */}
-            <AnimatePresence>
-                {activePillarIndex !== null && mounted && createPortal(
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setActivePillarIndex(null)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all"
-                        />
-                        <div className="relative z-[101] w-full max-w-lg pointer-events-none flex justify-center">
-                            <PillarDetailView
-                                pillar={pillars[activePillarIndex]}
-                                onClose={() => setActivePillarIndex(null)}
+            {mounted && createPortal(
+                <AnimatePresence>
+                    {activePillarIndex !== null && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                            <motion.div
+                                key="backdrop"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setActivePillarIndex(null)}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all"
                             />
+                            <motion.div
+                                key="modal"
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="relative z-[101] w-full max-w-lg pointer-events-none flex justify-center"
+                            >
+                                <PillarDetailView
+                                    pillar={pillars[activePillarIndex]}
+                                    onClose={() => setActivePillarIndex(null)}
+                                />
+                            </motion.div>
                         </div>
-                    </div>,
-                    document.body
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </>
     );
 }
