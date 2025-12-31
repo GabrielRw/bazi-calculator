@@ -24,21 +24,28 @@ interface FormData {
 
 export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [formData, setFormData] = useState<FormData>({
-        year: 1995,
-        month: 9,
-        day: 29,
-        hour: 20,
-        minute: 30,
-        city: "New York",
-        gender: "male",
+    const [formData, setFormData] = useState({
+        year: "",
+        month: "",
+        day: "",
+        hour: "",
+        minute: "",
+        city: "",
+        gender: "male" as "male" | "female",
         timeStandard: "true_solar_absolute",
         calendar: "gregorian",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({
+            ...formData,
+            year: parseInt(formData.year) || 0,
+            month: parseInt(formData.month) || 0,
+            day: parseInt(formData.day) || 0,
+            hour: parseInt(formData.hour) || 0,
+            minute: parseInt(formData.minute) || 0,
+        });
     };
 
     return (
@@ -59,17 +66,22 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                 <input
                                     type="number"
                                     value={formData.year}
-                                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                                     className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
                                     placeholder="Year"
                                 />
-                                <span className="absolute right-3 top-3 text-gray-500 text-xs font-mono group-focus-within:text-clay">YYYY</span>
+                                <span className={clsx(
+                                    "absolute right-3 top-3 text-gray-500 text-xs font-mono transition-opacity pointer-events-none",
+                                    (formData.year || isLoading) ? "opacity-0" : "opacity-100 group-focus-within:opacity-0"
+                                )}>
+                                    YYYY
+                                </span>
                             </div>
                             <div className="group relative">
                                 <input
                                     type="number"
                                     value={formData.month}
-                                    onChange={(e) => setFormData({ ...formData, month: parseInt(e.target.value) })}
+                                    onChange={(e) => setFormData({ ...formData, month: e.target.value })}
                                     className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
                                     placeholder="MM"
                                 />
@@ -78,7 +90,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                 <input
                                     type="number"
                                     value={formData.day}
-                                    onChange={(e) => setFormData({ ...formData, day: parseInt(e.target.value) })}
+                                    onChange={(e) => setFormData({ ...formData, day: e.target.value })}
                                     className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
                                     placeholder="DD"
                                 />
@@ -92,21 +104,21 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                             <input
                                 type="number"
                                 value={formData.hour}
-                                onChange={(e) => setFormData({ ...formData, hour: parseInt(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, hour: e.target.value })}
                                 className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-peach focus:outline-none transition-colors"
                                 placeholder="HH"
                             />
                             <input
                                 type="number"
                                 value={formData.minute}
-                                onChange={(e) => setFormData({ ...formData, minute: parseInt(e.target.value) })}
+                                onChange={(e) => setFormData({ ...formData, minute: e.target.value })}
                                 className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-peach focus:outline-none transition-colors"
                                 placeholder="MM"
                             />
                         </div>
                     </div>
 
-                    {/* Location & Advanced */}
+                    {/* Location & Advanced Section */}
                     <div className="flex-1 space-y-4">
                         <h3 className="text-jade font-bold uppercase tracking-wider text-xs flex items-center gap-2">
                             <MapPin className="w-4 h-4" /> Location
@@ -122,7 +134,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                             <Search className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
                         </div>
 
-                        {/* Gender Selector - Visible */}
+                        {/* Gender Selector */}
                         <div className="pt-2">
                             <h3 className="text-clay font-bold uppercase tracking-wider text-xs flex items-center gap-2 mb-2">
                                 Gender (for Luck Cycles)
@@ -243,6 +255,6 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                     )}
                 </button>
             </form>
-        </motion.div >
+        </motion.div>
     );
 }
