@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Settings, MapPin, Calendar, Clock, Loader2, History, X } from "lucide-react";
+import { Search, Settings, MapPin, Calendar, Clock, Loader2, History, X, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 
@@ -9,6 +9,7 @@ interface BaziFormProps {
 }
 
 interface FormData {
+    name?: string;
     year: number;
     month: number;
     day: number;
@@ -30,6 +31,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
     const [showHistory, setShowHistory] = useState(false);
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [formData, setFormData] = useState({
+        name: "",
         year: "",
         month: "",
         day: "",
@@ -53,18 +55,27 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
     }, []);
 
     const saveToHistory = (data: FormData) => {
+        const label = data.name
+            ? data.name
+            : `${data.year}-${data.month}-${data.day} ${data.city}`;
+
         const newItem: HistoryItem = {
             ...data,
             timestamp: Date.now(),
-            label: `${data.year}-${data.month}-${data.day} ${data.city}`
+            label
         };
 
-        const updated = [newItem, ...history.filter(h =>
-            h.year !== newItem.year ||
-            h.month !== newItem.month ||
-            h.day !== newItem.day ||
-            h.hour !== newItem.hour ||
-            h.city !== newItem.city
+        const updated = [newItem, ...history.filter(h => {
+            // If names match (and aren't empty), treat as update
+            if (data.name && h.name === data.name) return false;
+
+            // Otherwise check for exact duplicate data parameters
+            return h.year !== newItem.year ||
+                h.month !== newItem.month ||
+                h.day !== newItem.day ||
+                h.hour !== newItem.hour ||
+                h.city !== newItem.city
+        }
         )].slice(0, 10);
 
         setHistory(updated);
@@ -73,6 +84,7 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
 
     const loadHistoryItem = (item: HistoryItem) => {
         setFormData({
+            name: item.name || "",
             year: item.year.toString(),
             month: item.month.toString(),
             day: item.day.toString(),
@@ -166,11 +178,11 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                                         className="p-3 hover:bg-white/5 cursor-pointer group transition-colors flex justify-between items-center"
                                                     >
                                                         <div>
-                                                            <div className="text-sm text-gray-200 font-medium">
-                                                                {item.city || "Unknown City"}
+                                                            <div className="text-sm text-white font-bold">
+                                                                {item.name || item.city || "Unknown"}
                                                             </div>
                                                             <div className="text-xs text-gray-500 mt-0.5">
-                                                                {item.year}-{item.month}-{item.day} {item.hour}:{item.minute.toString().padStart(2, '0')}
+                                                                {item.year}-{item.month}-{item.day} {item.city && item.name ? `• ${item.city}` : ''}
                                                             </div>
                                                         </div>
                                                         <button
@@ -188,6 +200,20 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                             )}
                         </AnimatePresence>
                     </div>
+                </div>
+
+                {/* Name Input (Optional) */}
+                <div className="space-y-4">
+                    <h3 className="text-gray-400 font-bold uppercase tracking-wider text-xs flex items-center gap-2">
+                        <User className="w-4 h-4" /> Personal Details (Optional)
+                    </h3>
+                    <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full bg-void/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-clay focus:outline-none transition-colors"
+                        placeholder="Name (e.g. 'John Doe' or 'My 2024 Chart')"
+                    />
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-6">
