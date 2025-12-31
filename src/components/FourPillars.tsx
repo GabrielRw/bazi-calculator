@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pillar } from "@/types/bazi";
 import { cn, getElementColor } from "@/lib/utils";
@@ -32,6 +33,11 @@ const tenGodArchetypes: Record<string, string> = {
 
 export default function FourPillars({ pillars }: FourPillarsProps) {
     const [activePillarIndex, setActivePillarIndex] = useState<number | null>(null);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <>
@@ -46,24 +52,25 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
                 ))}
             </div>
 
-            {/* Detailed Overlay View */}
+            {/* Detailed Overlay View (Portaled to Body) */}
             <AnimatePresence>
-                {activePillarIndex !== null && (
-                    <>
+                {activePillarIndex !== null && mounted && createPortal(
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setActivePillarIndex(null)}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all"
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all"
                         />
-                        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none p-6">
+                        <div className="relative z-[101] w-full max-w-lg pointer-events-none flex justify-center">
                             <PillarDetailView
                                 pillar={pillars[activePillarIndex]}
                                 onClose={() => setActivePillarIndex(null)}
                             />
                         </div>
-                    </>
+                    </div>,
+                    document.body
                 )}
             </AnimatePresence>
         </>
@@ -81,7 +88,7 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
             onClick={onClick}
-            className="glass-card rounded-2xl p-6 flex flex-col items-center relative overflow-hidden group border border-white/5 hover:border-clay/50 cursor-pointer hover:shadow-2xl hover:shadow-clay/10 transition-all duration-300"
+            className="glass-card rounded-2xl p-6 pb-16 flex flex-col items-center relative overflow-hidden group border border-white/5 hover:border-clay/50 cursor-pointer hover:shadow-2xl hover:shadow-clay/10 transition-all duration-300"
         >
             {/* Hover visual cue */}
             <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-clay/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -137,8 +144,8 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
                 </div>
             </div>
 
-            {/* Tap to View hint */}
-            <div className="mt-8 text-[10px] uppercase tracking-widest text-gray-600 flex items-center gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+            {/* Tap to View hint (Absolute Bottom) */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center text-[10px] uppercase tracking-widest text-gray-600 gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
                 <Info className="w-3 h-3" /> Tap to Analyze
             </div>
         </motion.div>
