@@ -51,8 +51,7 @@ export default function Home() {
     setError(null);
     try {
       const headers = {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_ASTRO_API_KEY || ""
+        "Content-Type": "application/json"
       };
 
       const payload = {
@@ -74,12 +73,12 @@ export default function Home() {
 
       // Perform parallel fetches for Natal and Flow
       const [baziRes, flowRes] = await Promise.all([
-        fetch("https://astro-api-1qnc.onrender.com/api/v1/chinese/bazi", {
+        fetch("/api/bazi/natal", {
           method: "POST",
           headers,
           body: JSON.stringify(payload),
         }),
-        fetch("https://astro-api-1qnc.onrender.com/api/v1/chinese/bazi/flow", {
+        fetch("/api/bazi/flow", {
           method: "POST",
           headers,
           body: JSON.stringify({

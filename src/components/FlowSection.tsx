@@ -61,11 +61,10 @@ export default function FlowSection({ initialFlow, birthData }: FlowSectionProps
         setError(null);
 
         try {
-            const response = await fetch("https://astro-api-1qnc.onrender.com/api/v1/chinese/bazi/flow", {
+            const response = await fetch("/api/bazi/flow", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "x-api-key": process.env.NEXT_PUBLIC_ASTRO_API_KEY || ""
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     year: birthData.year,
