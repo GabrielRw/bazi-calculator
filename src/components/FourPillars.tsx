@@ -120,11 +120,12 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
                         {pillar.gan}
                     </div>
                     {archetype && (
-                        <div className="text-xs font-bold text-clay uppercase tracking-wider mb-1">
+                        <div className="text-xs font-bold text-clay uppercase tracking-wider mb-0.5">
                             {archetype}
                         </div>
                     )}
-                    <span className="text-[10px] text-gray-500 uppercase">{pillar.gan_info.element} {pillar.gan_info.polarity}</span>
+                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">{pillar.gan_info.pinyin}</span>
+                    <span className="text-[9px] text-gray-600 uppercase">{pillar.gan_info.element} {pillar.gan_info.polarity}</span>
                 </div>
 
                 {/* Branch */}
@@ -137,10 +138,11 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
                     <div className={cn("text-5xl font-serif font-bold mb-2 transition-transform group-hover:scale-110", zhiColor.text)}>
                         {pillar.zhi}
                     </div>
-                    <div className="text-xs font-bold text-white uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-white uppercase tracking-wider mb-0.5">
                         {pillar.zhi_info.zodiac}
                     </div>
-                    <span className="text-[10px] text-gray-500 uppercase">{pillar.zhi_info.element} {pillar.zhi_info.polarity}</span>
+                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">{pillar.zhi_info.pinyin}</span>
+                    <span className="text-[9px] text-gray-600 uppercase">{pillar.zhi_info.element} {pillar.zhi_info.polarity}</span>
                 </div>
             </div>
 
