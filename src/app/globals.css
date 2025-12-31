@@ -66,3 +66,66 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+@media print {
+  @page {
+    margin: 20mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Hide non-report elements */
+  .no-print,
+  button,
+  .hero-decoration,
+  form,
+  .tabs-nav,
+  .scroll-btn {
+    display: none !important;
+  }
+
+  /* Ensure report visibility */
+  .glass-card {
+    background: white !important;
+    border: 1px solid #eee !important;
+    color: black !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+
+  .text-white {
+    color: black !important;
+  }
+
+  .text-spirit {
+    color: #666 !important;
+  }
+
+  .text-gray-400,
+  .text-gray-500 {
+    color: #888 !important;
+  }
+
+  /* Preserve element colors if possible, but black is safer for text */
+  [class*="text-emerald"],
+  [class*="text-red"],
+  [class*="text-amber"],
+  [class*="text-blue"],
+  [class*="text-gray-300"] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .min-height-screen {
+    min-height: 0 !important;
+  }
+
+  .padding-bottom-20 {
+    padding-bottom: 0 !important;
+  }
+}

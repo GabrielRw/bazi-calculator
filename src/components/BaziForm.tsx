@@ -176,27 +176,44 @@ export default function BaziForm({ onSubmit, isLoading }: BaziFormProps) {
                                         className="overflow-hidden mt-3"
                                     >
                                         <div className="p-4 bg-black/40 rounded-xl border border-white/5 grid grid-cols-2 gap-4">
-                                            <div>
+                                            <div className="col-span-2">
                                                 <label className="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1.5 block">Time Standard</label>
-                                                <select
-                                                    value={formData.timeStandard}
-                                                    onChange={(e) => setFormData({ ...formData, timeStandard: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-gray-300 focus:border-clay focus:outline-none"
-                                                >
-                                                    <option value="civil">Standard (Civil)</option>
-                                                    <option value="true_solar_absolute">True Solar (High Precision)</option>
-                                                    <option value="lmt">Local Mean Time (LMT)</option>
-                                                </select>
+                                                <div className="space-y-3">
+                                                    <select
+                                                        value={formData.timeStandard}
+                                                        onChange={(e) => setFormData({ ...formData, timeStandard: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-clay focus:outline-none transition-all"
+                                                    >
+                                                        <option value="true_solar_absolute" className="bg-void">True Solar Absolute (Recommended)</option>
+                                                        <option value="true_solar_relative" className="bg-void">True Solar Relative</option>
+                                                        <option value="civil" className="bg-void">Standard Civil Time</option>
+                                                    </select>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                        <div className={clsx("p-2 rounded-lg border text-[10px] leading-relaxed transition-all", formData.timeStandard === "true_solar_absolute" ? "bg-clay/10 border-clay/30 text-white" : "bg-white/5 border-transparent text-gray-500")}>
+                                                            <span className="font-bold block text-clay mb-0.5">Absolute</span>
+                                                            Corrects for both longitude and the equation of time for maximum precision.
+                                                        </div>
+                                                        <div className={clsx("p-2 rounded-lg border text-[10px] leading-relaxed transition-all", formData.timeStandard === "true_solar_relative" ? "bg-peach/10 border-peach/30 text-white" : "bg-white/5 border-transparent text-gray-500")}>
+                                                            <span className="font-bold block text-peach mb-0.5">Relative</span>
+                                                            Uses localized true solar adjustments relative to the mean solar noon.
+                                                        </div>
+                                                        <div className={clsx("p-2 rounded-lg border text-[10px] leading-relaxed transition-all", formData.timeStandard === "civil" ? "bg-jade/10 border-jade/30 text-white" : "bg-white/5 border-transparent text-gray-500")}>
+                                                            <span className="font-bold block text-jade mb-0.5">Civil</span>
+                                                            Standard clock time without solar corrections (least accurate for Bazi).
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
+                                            <div className="col-span-2">
                                                 <label className="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1.5 block">Calendar</label>
                                                 <select
                                                     value={formData.calendar}
                                                     onChange={(e) => setFormData({ ...formData, calendar: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-gray-300 focus:border-clay focus:outline-none"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-clay focus:outline-none"
                                                 >
-                                                    <option value="gregorian">Gregorian</option>
-                                                    <option value="julian">Julian</option>
+                                                    <option value="gregorian" className="bg-void">Gregorian (Standard)</option>
+                                                    <option value="julian" className="bg-void">Julian (Historical)</option>
                                                 </select>
                                             </div>
                                         </div>

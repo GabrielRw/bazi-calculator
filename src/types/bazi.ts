@@ -79,6 +79,9 @@ export interface Interaction {
     branches?: string[];
     interpretation?: string;
     transform_to?: string;
+    can_transform?: boolean;
+    transform_level?: string;
+    transform_score?: number;
 }
 
 export interface Professional {
@@ -88,6 +91,48 @@ export interface Professional {
     favorable_elements: string[];
     unfavorable_elements: string[];
     interpretation: string;
+    professional_debug?: {
+        dm_strength_score: number;
+        seasonal_factor: number;
+        season_reason: string;
+        balance_ratio: number;
+        yong_shen_rationale: string[];
+        structure_rationale: string;
+    };
+}
+
+export interface BaziFlowMonth {
+    index: number;
+    gan_zhi: string;
+    gan: string;
+    zhi: string;
+    gan_pinyin: string;
+    zhi_pinyin: string;
+    interactions?: Interaction[];
+    stars?: Star[];
+}
+
+export interface BaziFlowYear {
+    year: number;
+    gan_zhi: string;
+    gan: string;
+    zhi: string;
+    gan_pinyin?: string;
+    zhi_pinyin?: string;
+    age: number;
+    months: BaziFlowMonth[];
+    interactions: Interaction[];
+    stars: Star[];
+    active_luck?: {
+        gan_zhi: string;
+        start_year: number;
+        end_year: number;
+    };
+}
+
+export interface BaziFlowResult {
+    target_year: number;
+    years: BaziFlowYear[];
 }
 
 export interface BaziResult {
@@ -98,8 +143,23 @@ export interface BaziResult {
     summary: {
         lunar_date: string;
         zodiac: string;
+        solar_term: string | null;
     };
     stars: Star[];
     interactions: Interaction[];
     professional: Professional;
+    xun_kong?: {
+        void_branches: string[];
+        xun_name: string;
+        xun_index: number;
+        day_pillar: string;
+        applies_to?: string[];
+    };
+    astro_debug?: {
+        input_local_time: string;
+        effective_solar_time: string;
+        resolved_timezone: string;
+        time_standard: string;
+        solar_terms: Record<string, string>;
+    };
 }

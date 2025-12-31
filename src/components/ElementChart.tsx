@@ -35,7 +35,10 @@ export default function ElementChart({ data }: ElementChartProps) {
                                     initial={{ width: 0 }}
                                     animate={{ width: `${percentage}%` }}
                                     transition={{ duration: 1, delay: i * 0.1 }}
-                                    className={`h-full rounded-full ${colors.bg.replace('/10', '')} ${colors.text.replace('text-', 'bg-')}`}
+                                    className={`h-full rounded-full transition-all ${colors.base} shadow-lg`}
+                                    style={{
+                                        boxShadow: percentage > 0 ? `0 0 10px ${colors.text.replace('text-', '')}` : 'none'
+                                    }}
                                 />
                             </div>
                         </div>
