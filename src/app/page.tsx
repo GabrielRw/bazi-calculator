@@ -545,9 +545,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
               />
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-jade">
-              <Sparkles className="w-3 h-3" /> Modern 2026 Engine
-            </div>
+
           </motion.div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-gray-600">
