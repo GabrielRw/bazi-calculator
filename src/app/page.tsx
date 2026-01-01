@@ -112,8 +112,35 @@ export default function Home() {
 
   const handleExtractToAI = () => {
     if (activeMode === "synastry") {
-      const prompt = `Analyze this BaZi Synastry: ${JSON.stringify(synastryResult, null, 2)}`;
-      navigator.clipboard.writeText(prompt);
+      const synastryPrompt = `🔹 PRECISION BaZi SYNASTRY PROMPT (COMPATIBILITY ENGINE)
+You are an expert BaZi Synastry analyst.
+Generate a premium compatibility reading for ${synastryNames?.a || "Person A"} (Day Master: ${synastryResult?.day_master_analysis.dm_a}) and ${synastryNames?.b || "Person B"} (Day Master: ${synastryResult?.day_master_analysis.dm_b}).
+
+CORE RULES
+1) Grounding
+Every insight must come from the JSON data:
+- Pillar interactions (Year/Month/Day/Hour)
+- Element balance comparison
+- Ten Gods (Deities) cross-analysis
+- Void/Star interactions
+
+2) No "Perfect Match" Myths
+Do not say "Good" or "Bad". Use "High Friction", "Deep Support", "Growth Opportunity", "Comfort Zone".
+Real relationships are mixed. Reflect that.
+
+3) Structure
+0) The Synastry Archetype: Give the couple a title (e.g. "The Anchor and the Sail", "Fire forging Metal").
+1) The Core Spark: What attracts them instantly (Day Master + Element check).
+2) The Friction Point: Where they hurt each other most (Clashes/Harms in Day/Month).
+3) The Support System: How they help each other grow (Element support, noble people).
+4) Long-term Viability: Marriage palace analysis (Day Branch interaction).
+5) Practical Advice for ${synastryNames?.a || "Person A"} regarding ${synastryNames?.b || "Person B"}.
+6) Practical Advice for ${synastryNames?.b || "Person B"} regarding ${synastryNames?.a || "Person A"}.
+
+JSON DATA:
+${JSON.stringify(synastryResult, null, 2)}`;
+
+      navigator.clipboard.writeText(synastryPrompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       return;
@@ -136,58 +163,109 @@ export default function Home() {
     const targetAge = annualFlow?.age || "N/A";
     const activeLuck = annualFlow?.active_luck;
 
-    const natalAiPrompt = `You are an expert BaZi (Four Pillars) analyst and a world-class premium reader. Your task is to generate a paid-user BaZi life reading from the JSON input below. This is not a certification-level report. It is a deep, personal, descriptive reading designed to help the reader understand themselves, their patterns, and how to work with them.
+    const natalAiPrompt = `🔹 COMPACT PRECISION BaZi PROMPT (WITH POETIC ARCHETYPE)
+You are an expert BaZi (Four Pillars) analyst and premium reader.
+Generate a paid-user BaZi life reading from the JSON below.
+This reading must be specific, traceable, and non-generic.
+If a sentence could describe many people, rewrite or remove it.
 
-CORE NON-NEGOTIABLE RULES
-1) Data integrity (absolute)
-   Use ONLY what exists in the JSON. Never invent: pillars, stems, branches interactions, stars, transformations strength levels, favorable elements, timing. If something is missing, state it briefly and move on.
-2) Human-first, analysis-second
-   The report must feel like: “This is about me” Not: “This is how BaZi works”. Technical logic should be: Felt, not constantly explained. Explained only when it changes behavior or choices.
-3) One core pattern, many expressions
-   Identify the 2–3 dominant life drivers early. Do not repeatedly re-explain the same weakness/imbalance. Later sections should show how it manifests, not restate why it exists.
-4) Minimal technical vocabulary
-   Define a technical term once, in one short line. After that, use plain language. Avoid naming: scores transform levels internal engine mechanics unless placed in the Appendix.
+CORE RULES
+1) Absolute grounding
+Use ONLY what exists in the JSON.
+Every insight must be traceable to:
+a pillar,
+an interaction,
+an element imbalance,
+a structure,
+or a named star.
+No grounding → do not say it.
 
-MONTH HANDLING (CRITICAL)
-The year has 12 normal calendar months. If the JSON uses non-standard indices (e.g. -1, 0, 10): Normalize internally to Month 1 → Month 12. Never mention indices. Never expose raw index logic to the reader. The reader must always experience time naturally.
+2) Interactions drive meaning
+Do not list interactions mechanically.
+Instead:
+Identify tensions between life domains (career vs intimacy, public vs private, control vs growth, etc.)
+Anchor each tension to at least one natal or repeating interaction
+If an interaction does not create friction or consequence, omit it from the main text.
 
-STYLE REQUIREMENTS (PAID USER)
-Warm, grounded, intelligent, non-fatalistic. Short paragraphs. No long lists unless emotionally useful. Frequent “So what does this mean for you?” moments. Avoid repeating the same advice with different wording. Think: Insightful guide, not academic lecturer.
+3) One engine, one destabilizer, one compensation
+Early in the reading, clearly identify:
+the core life engine (what truly drives this person),
+the main destabilizing pressure,
+the habitual compensation they use (even if flawed).
+Do not introduce new drivers later.
 
-REQUIRED OUTPUT STRUCTURE
-0) Executive Portrait (1 page max)
-   A vivid, human snapshot: Who this person fundamentally is. What stabilizes them. What destabilizes them. Their core life tension. Their biggest leverage point. No technical dumps.
+4) No archetypal filler
+Words like sensitive, intuitive, strategic, deep are forbidden unless immediately followed by:
+“This shows up concretely as…”
 
-1) Your Inner Engine (Core Self)
-   Describe the Day Master archetype (${result?.day_master.stem} ${dmName}) as a lived personality: How they think. How they respond to stress. What gives them confidence. What drains them. Only mention strength/weakness once, clearly.
+REQUIRED STRUCTURE (SHORT)
+0) Poetic Archetype (Named)
+Give this life a clear archetypal title (e.g. The Tempered Strategist, The Soft-Bladed Warrior).
+In 5–6 lines:
+Describe who this person is in motion
+What kind of battles they fight
+What kind of strength they are not
+This must be symbolic and chart-grounded.
 
-2) Energy & Balance (How life feels)
-   Describe the elemental balance as lived experience: Mental pace. Emotional temperature. Motivation style. Stress response. Avoid theory. Use metaphor and sensation.
+1) How You Actually Make Decisions
+What decisions are easy
+What decisions stall or backfire
+One recurring decision error
+(Anchor to interactions, not personality labels.)
 
-3) The Life Pattern (What keeps repeating)
-   Explain the chart’s main structure (格局): What pattern keeps showing up in work, relationships, and decisions. How it matures over time. What happens when it’s respected vs ignored. No technical justifications unless essential.
+2) Internal Friction Map
+Describe two internal conflicts, phrased as:
+“One part of you wants X, but another part immediately does Y.”
+Each must map to a specific clash, punishment, or reinforcement loop.
 
-4) The Four Pillars as Life Domains
-   For each pillar: How it shows up in real life. What it gives. What it challenges.
-   Day Pillar: Include spouse/relationship dynamic. No assumptions beyond the Day Branch.
+3) Relationship Pattern
+What initially attracts others
+What later becomes non-negotiable tension
+Why this repeats
+(Day Pillar only. No romantic generalities.)
 
-5) Work, Money, Relationships, Health, Meaning
-   Each section: Strength. Typical pitfall. One or two concrete practices. No repetition across sections.
+4) Work & Authority Pattern
+Relationship to pressure, rules, and evaluation
+Where authority is accepted vs resisted
+Include one sentence starting with:
+“You work best not when…”
 
-6) Timing Focus (Current decade + ${targetYear} only)
-   Describe the theme, not every interaction. What kind of decade this is. What ${targetYear} is asking for emotionally and practically. Which months feel supportive vs sensitive (use normalized months).
+5) The Cost of Your Strength
+List 3 real strengths, each immediately followed by:
+the price it extracts over time
+No advice here.
 
-7) Personal Alignment Guide (High value)
-   “When you are aligned, life looks like…” “When you are off-track, warning signs are…” 8–10 very practical alignment rules.
+6) Timing Focus (Current Decade + ${targetYear})
+What this decade is forcing you to unlearn
+One emotional theme of ${targetYear}
+One behavioral risk of ${targetYear}
+Synthesize. Do not list interactions.
 
-8) Optional Appendix (Clearly marked)
-   Only here: Full interaction lists. Star definitions. Debug values. Technical mapping. Xun Kong mechanics. The main reading must stand alone without this.
+7) Alignment Rules (Strict & Testable)
+8 short rules of the form:
+“If you do X for too long, Y happens.”
+Each rule must be visibly derived from the chart.
+
+8) Optional Appendix
+Only here:
+interaction lists
+stars
+voids
+structure labels
+The main text must stand without it.
+
+FINAL CHECK (MANDATORY)
+Before finalizing:
+Could this describe someone with a different Day Branch? → Rewrite.
+Does the archetype feel symbolic but precise? → If vague, sharpen.
+Does the reader feel seen, not comforted? → If not, sharpen.
 
 FINAL INTENT
-This reading should feel like: Recognition, Relief, Clarity, Practical orientation.
-The reader should finish thinking: “This explains my life — and I know what to do next.”
+The reader should finish thinking:
+“This isn’t a personality description.
+This is the shape of my life.”
 
-Now generate the report using the JSON below:
+JSON DATA:
 ${JSON.stringify(fullData, null, 2)}`;
 
     const flowAiPrompt = `You are an expert BaZi timing analyst (Da Yun + Liu Nian + Liu Yue) and a world-class technical writer.
@@ -643,17 +721,32 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
               </>
             ) : (
               <>
-                <div className="mb-8 pl-4 border-l-2 border-clay/30">
+                <div className="mb-8 pl-4 border-l-2 border-clay/30 flex items-center justify-between">
+                  <div>
+                    <button
+                      onClick={() => {
+                        setActiveMode("individual");
+                        setSynastryResult(null);
+                      }}
+                      className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
+                    >
+                      <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                    </button>
+                    <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
+                  </div>
+
                   <button
-                    onClick={() => {
-                      setActiveMode("individual");
-                      setSynastryResult(null);
-                    }}
-                    className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
+                    onClick={handleExtractToAI}
+                    className={clsx(
+                      "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 border",
+                      copied
+                        ? "bg-jade/20 text-jade border-jade/50"
+                        : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
+                    )}
                   >
-                    <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                    {copied ? <Check className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+                    {copied ? "Copied Prompt" : "AI Extract"}
                   </button>
-                  <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
                 </div>
 
                 {synastryResult && (
