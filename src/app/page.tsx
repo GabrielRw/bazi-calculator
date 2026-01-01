@@ -11,6 +11,8 @@ import FlowSection from "@/components/FlowSection";
 import SynastryResultView from "@/components/SynastryResult";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import logo from "./logo.png";
 import clsx from "clsx";
 
 interface BirthData {
@@ -520,12 +522,26 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
       {/* Hero Section */}
       <div className="relative pt-20 pb-12 px-6 z-10">
         <div className="max-w-4xl mx-auto text-center space-y-4">
+
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-jade mb-4"
+            className="flex flex-col items-center gap-6 mb-8"
           >
-            <Sparkles className="w-3 h-3" /> Modern 2026 Engine
+            <div className="relative w-24 h-24 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+              <Image
+                src={logo}
+                alt="True Bazi Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-jade">
+              <Sparkles className="w-3 h-3" /> Modern 2026 Engine
+            </div>
           </motion.div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-gray-600">
