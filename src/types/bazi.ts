@@ -163,3 +163,59 @@ export interface BaziResult {
         solar_terms: Record<string, string>;
     };
 }
+
+export interface SynastryResult {
+    score: number;
+    score_breakdown: {
+        day_master: number;
+        spouse_palace: number;
+        pillars: number;
+        elements: number;
+        hidden_bonus: number;
+    };
+    overall_compatibility: string;
+    day_master_analysis: {
+        dm_a: string;
+        dm_b: string;
+        relation: string;
+        score: number;
+        description: string;
+        dynamic: string;
+    };
+    spouse_palace_analysis: {
+        branch_a: string;
+        branch_b: string;
+        interaction: string;
+        score: number;
+        description: string;
+        type: string;
+    };
+    element_analysis: {
+        score: number;
+        details: string[];
+        a_needs: string;
+        b_needs: string;
+    };
+    pillar_interactions: Array<{
+        pillar: string;
+        weight: number;
+        branch_interaction: {
+            type: string;
+            label: string;
+            score_modifier: number;
+        };
+        stem_interaction: string;
+        net_score: number;
+    }>;
+    hidden_interactions: {
+        connections: string[];
+        count: number;
+    };
+    conflict_scan: {
+        clashes: number;
+        harms: number;
+        punishments: number;
+        destructions: number;
+    };
+    conflict_summary: string;
+}

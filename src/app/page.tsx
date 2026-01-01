@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BaziResult, BaziFlowResult } from "@/types/bazi";
+import { BaziResult, BaziFlowResult, SynastryResult } from "@/types/bazi";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
+import SynastryResultView from "@/components/SynastryResult";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check } from "lucide-react";
+import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft } from "lucide-react";
 import clsx from "clsx";
 
 interface BirthData {
@@ -26,10 +27,14 @@ interface BirthData {
 export default function Home() {
   const [result, setResult] = useState<BaziResult | null>(null);
   const [flowResult, setFlowResult] = useState<BaziFlowResult | null>(null);
+  const [synastryResult, setSynastryResult] = useState<SynastryResult | null>(null);
+  const [synastryNames, setSynastryNames] = useState<{ a: string; b: string } | null>(null);
+
   const [birthData, setBirthData] = useState<BirthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"natal" | "flow">("natal");
+  const [activeMode, setActiveMode] = useState<"individual" | "synastry">("individual");
   const [copied, setCopied] = useState(false);
 
   // History State
@@ -99,11 +104,21 @@ export default function Home() {
         timeStandard: item.timeStandard
       });
       setActiveTab("natal");
+      setActiveMode("individual");
+      setSynastryResult(null);
       setError(null);
     }
   };
 
   const handleExtractToAI = () => {
+    if (activeMode === "synastry") {
+      const prompt = `Analyze this BaZi Synastry: ${JSON.stringify(synastryResult, null, 2)}`;
+      navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      return;
+    }
+
     const fullData = {
       natal_chart: result,
       flow_data: flowResult,
@@ -317,80 +332,97 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleCalculate = async (data: any) => {
+  const handleCalculate = async (data: any, mode: "individual" | "synastry" = "individual") => {
     setLoading(true);
     setError(null);
+    setActiveMode(mode);
+    setSynastryResult(null);
+    setSynastryNames(null);
+
     try {
-      const headers = {
-        "Content-Type": "application/json"
-      };
+      const headers = { "Content-Type": "application/json" };
 
-      const payload = {
-        year: data.year,
-        month: data.month,
-        day: data.day,
-        hour: data.hour,
-        minute: data.minute,
-        city: data.city,
-        sex: data.gender === "male" ? "M" : "M", // Keeping original logic, assuming simplified check or pass through
-        time_standard: data.timeStandard,
-        include_ten_gods: true,
-        include_pinyin: true,
-        include_stars: true,
-        include_interactions: true,
-        include_professional: true,
-        include_debug: true
-      };
+      if (mode === "synastry") {
+        const normalizeData = (d: any) => ({
+          year: d.year,
+          month: d.month,
+          day: d.day,
+          hour: d.hour,
+          minute: d.minute,
+          city: d.city,
+          sex: d.gender === "male" ? "M" : "F",
+          time_standard: d.timeStandard
+        });
 
-      // Fix Gender passing (frontend uses 'gender', payload uses 'sex')
-      // Note: BaziForm passes data.gender as "male"|"female"
-      const apiPayload = {
-        ...payload,
-        sex: data.gender === "male" ? "M" : "F"
-      };
+        const personA = normalizeData(data.person_a);
+        const personB = normalizeData(data.person_b);
 
-      // Perform parallel fetches for Natal and Flow
-      const [baziRes, flowRes] = await Promise.all([
-        fetch("/api/bazi/natal", {
+        setSynastryNames({
+          a: data.person_a.name || "Person A",
+          b: data.person_b.name || "Person B"
+        });
+
+        const response = await fetch("/api/bazi/synastry", {
           method: "POST",
           headers,
-          body: JSON.stringify(apiPayload),
-        }),
-        fetch("/api/bazi/flow", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            ...apiPayload,
-            target_year: new Date().getFullYear(), // Default to current year for flow
-          }),
-        })
-      ]);
+          body: JSON.stringify({ person_a: personA, person_b: personB })
+        });
 
-      if (!baziRes.ok || !flowRes.ok) {
-        throw new Error("Failed to calculate destiny and flow. Please check your inputs.");
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || "Failed to analyze compatibility.");
+        }
+
+        const result = await response.json();
+        setSynastryResult(result);
+
+      } else {
+        const payload = {
+          year: data.year,
+          month: data.month,
+          day: data.day,
+          hour: data.hour,
+          minute: data.minute,
+          city: data.city,
+          sex: data.gender === "male" ? "M" : "F",
+          time_standard: data.timeStandard,
+          include_ten_gods: true,
+          include_pinyin: true,
+          include_stars: true,
+          include_interactions: true,
+          include_professional: true,
+          include_debug: true
+        };
+
+        const [baziRes, flowRes] = await Promise.all([
+          fetch("/api/bazi/natal", { method: "POST", headers, body: JSON.stringify(payload) }),
+          fetch("/api/bazi/flow", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ ...payload, target_year: new Date().getFullYear() })
+          })
+        ]);
+
+        if (!baziRes.ok || !flowRes.ok) throw new Error("Failed to calculate destiny and flow.");
+
+        const [baziJson, flowJson] = await Promise.all([baziRes.json(), flowRes.json()]);
+
+        setResult(baziJson);
+        setFlowResult(flowJson);
+        setBirthData({
+          year: data.year,
+          month: data.month,
+          day: data.day,
+          hour: data.hour,
+          minute: data.minute,
+          city: data.city,
+          gender: data.gender,
+          timeStandard: data.timeStandard
+        });
+        setActiveTab("natal");
+
+        saveToHistory(data, baziJson, flowJson);
       }
-
-      const [baziJson, flowJson] = await Promise.all([
-        baziRes.json(),
-        flowRes.json()
-      ]);
-
-      setResult(baziJson);
-      setFlowResult(flowJson);
-      setBirthData({
-        year: data.year,
-        month: data.month,
-        day: data.day,
-        hour: data.hour,
-        minute: data.minute,
-        city: data.city,
-        gender: data.gender,
-        timeStandard: data.timeStandard
-      });
-      setActiveTab("natal");
-
-      // Save full result to history
-      saveToHistory(data, baziJson, flowJson);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -441,170 +473,197 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
       {/* Main Analysis Area */}
       <AnimatePresence mode="wait">
-        {result && (
+        {(result || synastryResult) && (
           <motion.div
-            key="results"
+            key={activeMode === "synastry" ? "synastry-results" : "individual-results"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="max-w-6xl mx-auto px-6 space-y-8 relative z-10"
           >
-            {/* Tabs Navigation */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-10 no-print">
-              <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-2xl w-fit">
-                <button
-                  onClick={() => setActiveTab("natal")}
-                  className={clsx(
-                    "px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                    activeTab === "natal" ? "bg-clay text-void shadow-lg shadow-clay/20" : "text-gray-400 hover:text-white"
-                  )}
-                >
-                  <Moon className="w-4 h-4" /> Natal Chart
-                </button>
-                <button
-                  onClick={() => setActiveTab("flow")}
-                  className={clsx(
-                    "px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
-                    activeTab === "flow" ? "bg-jade text-void shadow-lg shadow-jade/20" : "text-gray-400 hover:text-white"
-                  )}
-                >
-                  <Activity className="w-4 h-4" /> Destiny Flow
-                </button>
-              </div>
-
-              <button
-                onClick={() => window.print()}
-                className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
-              >
-                <Clock className="w-4 h-4" /> Print Full Report
-              </button>
-
-              <button
-                onClick={handleExtractToAI}
-                className={clsx(
-                  "px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border",
-                  copied
-                    ? "bg-jade/20 text-jade border-jade/50"
-                    : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
-                )}
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                {copied ? "Copied! Paste into AI tool" : "Extract to AI"}
-              </button>
-            </div>
-
-            {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 mb-8 max-w-md mx-auto">
-                {error}
-              </div>
-            )}
-
-            {/* Content Rendering */}
-            {activeTab === "natal" ? (
-              <div className="space-y-12">
-                {/* 1. Four Pillars (Centerpiece) */}
-                <section>
-                  <FourPillars pillars={result.pillars} />
-                </section>
-
-                {/* 2. Charts Row */}
-                <section className="grid lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2">
-                    <ElementChart data={result.elements} />
+            {activeMode === "individual" && result ? (
+              <>
+                {/* Tabs Navigation */}
+                <div className="flex flex-wrap items-center justify-center gap-4 mb-10 no-print">
+                  <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-2xl w-fit">
+                    <button
+                      onClick={() => setActiveTab("natal")}
+                      className={clsx(
+                        "px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
+                        activeTab === "natal" ? "bg-clay text-void shadow-lg shadow-clay/20" : "text-gray-400 hover:text-white"
+                      )}
+                    >
+                      <Moon className="w-4 h-4" /> Natal Chart
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("flow")}
+                      className={clsx(
+                        "px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2",
+                        activeTab === "flow" ? "bg-jade text-void shadow-lg shadow-jade/20" : "text-gray-400 hover:text-white"
+                      )}
+                    >
+                      <Activity className="w-4 h-4" /> Destiny Flow
+                    </button>
                   </div>
-                  <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                      <Sparkles className="w-20 h-20 text-clay" />
-                    </div>
-                    <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-8">
-                      Day Master Energy
-                    </h3>
-                    <div className="space-y-6">
-                      <div className="text-8xl font-serif text-white hover:scale-110 transition-transform cursor-default select-none">{result.day_master.stem}</div>
-                      <div>
-                        <div className="text-2xl font-bold text-clay mb-1">{result.day_master.info.name}</div>
-                        <div className="text-xs text-spirit uppercase tracking-widest">{result.day_master.info.polarity} {result.day_master.info.element}</div>
-                      </div>
-                      <div className="pt-6 border-t border-white/5">
-                        <p className="text-gray-400 text-sm italic leading-relaxed">
-                          "{result.professional.interpretation.split('.')[0]}."
-                        </p>
-                      </div>
-                    </div>
+
+                  <button
+                    onClick={() => window.print()}
+                    className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
+                  >
+                    <Clock className="w-4 h-4" /> Print Full Report
+                  </button>
+
+                  <button
+                    onClick={handleExtractToAI}
+                    className={clsx(
+                      "px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border",
+                      copied
+                        ? "bg-jade/20 text-jade border-jade/50"
+                        : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
+                    )}
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    {copied ? "Copied! Paste into AI tool" : "Extract to AI"}
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 mb-8 max-w-md mx-auto">
+                    {error}
                   </div>
-                </section>
-
-                {/* 3. Luck Pillars */}
-                <section>
-                  <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 mb-6 px-2 flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-clay" /> Luck Cycles
-                  </h3>
-                  <LuckPillars luck={result.luck_cycle} />
-                </section>
-
-                {/* 4. Deep Analysis */}
-                <section>
-                  <AnalysisSection result={result} />
-                </section>
-
-                {/* 5. Precise Technical Data (The Debug/Astro Info User Asked For) */}
-                {result.astro_debug && (
-                  <section className="pt-12 border-t border-white/5 max-w-4xl mx-auto">
-                    <div className="flex items-center gap-3 mb-6 opacity-30">
-                      <div className="h-px bg-white/20 flex-1" />
-                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-gray-400">
-                        <Info className="w-3 h-3" /> Technical Engine Specs
-                      </div>
-                      <div className="h-px bg-white/20 flex-1" />
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-x-12 gap-y-4">
-                      {/* Safe Date Formatter Helper */}
-                      {(() => {
-                        const formatDate = (dateStr: string | undefined, mode: "full" | "time") => {
-                          if (!dateStr) return "--:--";
-                          const d = new Date(dateStr.replace(" ", "T"));
-                          if (isNaN(d.getTime())) return dateStr;
-                          return mode === "full" ? d.toLocaleString() : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                        };
-
-                        return (
-                          <>
-                            <div className="flex justify-between items-center text-xs">
-                              <span className="text-gray-500 flex items-center gap-2"><Clock className="w-3 h-3" /> Input Local</span>
-                              <span className="text-spirit font-mono">{formatDate(result.astro_debug!.input_local_time, "full")}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-xs">
-                              <span className="text-gray-500 flex items-center gap-2"><Sparkles className="w-3 h-3" /> Effective Solar</span>
-                              <span className="text-jade font-bold font-mono">{formatDate(result.astro_debug!.effective_solar_time, "time")}</span>
-                            </div>
-                          </>
-                        );
-                      })()}
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-500 flex items-center gap-2"><Map className="w-3 h-3" /> Time Method</span>
-                        <span className="text-clay uppercase font-bold tracking-tight">
-                          {result.astro_debug.time_standard?.replace(/_/g, " ").replace("true", "Precise") || "Standard"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-500 flex items-center gap-2"><Info className="w-3 h-3" /> Engine Status</span>
-                        <span className="text-jade flex items-center gap-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-jade animate-pulse" />
-                          SYNCCED ({result.summary.zodiac})
-                        </span>
-                      </div>
-                    </div>
-                  </section>
                 )}
-              </div>
+
+                {/* Content Rendering */}
+                {activeTab === "natal" ? (
+                  <div className="space-y-12">
+                    {/* 1. Four Pillars (Centerpiece) */}
+                    <section>
+                      <FourPillars pillars={result.pillars} />
+                    </section>
+
+                    {/* 2. Charts Row */}
+                    <section className="grid lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2">
+                        <ElementChart data={result.elements} />
+                      </div>
+                      <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                          <Sparkles className="w-20 h-20 text-clay" />
+                        </div>
+                        <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-8">
+                          Day Master Energy
+                        </h3>
+                        <div className="space-y-6">
+                          <div className="text-8xl font-serif text-white hover:scale-110 transition-transform cursor-default select-none">{result.day_master.stem}</div>
+                          <div>
+                            <div className="text-2xl font-bold text-clay mb-1">{result.day_master.info.name}</div>
+                            <div className="text-xs text-spirit uppercase tracking-widest">{result.day_master.info.polarity} {result.day_master.info.element}</div>
+                          </div>
+                          <div className="pt-6 border-t border-white/5">
+                            <p className="text-gray-400 text-sm italic leading-relaxed">
+                              "{result.professional.interpretation.split('.')[0]}."
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* 3. Luck Pillars */}
+                    <section>
+                      <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 mb-6 px-2 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-clay" /> Luck Cycles
+                      </h3>
+                      <LuckPillars luck={result.luck_cycle} />
+                    </section>
+
+                    {/* 4. Deep Analysis */}
+                    <section>
+                      <AnalysisSection result={result} />
+                    </section>
+
+                    {/* 5. Precise Technical Data (The Debug/Astro Info User Asked For) */}
+                    {result.astro_debug && (
+                      <section className="pt-12 border-t border-white/5 max-w-4xl mx-auto">
+                        <div className="flex items-center gap-3 mb-6 opacity-30">
+                          <div className="h-px bg-white/20 flex-1" />
+                          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-gray-400">
+                            <Info className="w-3 h-3" /> Technical Engine Specs
+                          </div>
+                          <div className="h-px bg-white/20 flex-1" />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-x-12 gap-y-4">
+                          {/* Safe Date Formatter Helper */}
+                          {(() => {
+                            const formatDate = (dateStr: string | undefined, mode: "full" | "time") => {
+                              if (!dateStr) return "--:--";
+                              const d = new Date(dateStr.replace(" ", "T"));
+                              if (isNaN(d.getTime())) return dateStr;
+                              return mode === "full" ? d.toLocaleString() : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            };
+
+                            return (
+                              <>
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="text-gray-500 flex items-center gap-2"><Clock className="w-3 h-3" /> Input Local</span>
+                                  <span className="text-spirit font-mono">{formatDate(result.astro_debug!.input_local_time, "full")}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                  <span className="text-gray-500 flex items-center gap-2"><Sparkles className="w-3 h-3" /> Effective Solar</span>
+                                  <span className="text-jade font-bold font-mono">{formatDate(result.astro_debug!.effective_solar_time, "time")}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-500 flex items-center gap-2"><Map className="w-3 h-3" /> Time Method</span>
+                            <span className="text-clay uppercase font-bold tracking-tight">
+                              {result.astro_debug.time_standard?.replace(/_/g, " ").replace("true", "Precise") || "Standard"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-500 flex items-center gap-2"><Info className="w-3 h-3" /> Engine Status</span>
+                            <span className="text-jade flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-jade animate-pulse" />
+                              SYNCCED ({result.summary.zodiac})
+                            </span>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                    {flowResult && birthData && (
+                      <FlowSection initialFlow={flowResult} birthData={birthData} />
+                    )}
+                    {(!flowResult || !birthData) && (
+                      <div className="text-center py-20 text-gray-500">Generating future flow cycles...</div>
+                    )}
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="space-y-12">
-                {flowResult && birthData && (
-                  <FlowSection initialFlow={flowResult} birthData={birthData} />
+              <>
+                <div className="mb-8 pl-4 border-l-2 border-clay/30">
+                  <button
+                    onClick={() => {
+                      setActiveMode("individual");
+                      setSynastryResult(null);
+                    }}
+                    className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                  </button>
+                  <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
+                </div>
+
+                {synastryResult && (
+                  <SynastryResultView
+                    result={synastryResult}
+                    personAName={synastryNames?.a || "Person A"}
+                    personBName={synastryNames?.b || "Person B"}
+                  />
                 )}
-                {(!flowResult || !birthData) && (
-                  <div className="text-center py-20 text-gray-500">Generating future flow cycles...</div>
-                )}
-              </div>
+              </>
             )}
           </motion.div>
         )}
