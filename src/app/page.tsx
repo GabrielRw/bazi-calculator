@@ -535,7 +535,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
             animate={{ opacity: 1, scale: 1 }}
             className="flex flex-col items-center gap-6 mb-8"
           >
-            <div className="relative w-24 h-24 md:w-32 md:h-32 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+            <div className="relative w-24 h-24 md:w-32 md:h-32">
               <Image
                 src={logo}
                 alt="True Bazi Logo"
