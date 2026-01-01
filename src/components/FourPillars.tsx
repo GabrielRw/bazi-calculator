@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pillar } from "@/types/bazi";
 import { cn, getElementColor } from "@/lib/utils";
-import { Info, X, Zap, Sparkles, User, Target } from "lucide-react";
+import { Info, X, Zap, Sparkles, User } from "lucide-react";
 
 interface FourPillarsProps {
     pillars: Pillar[];
@@ -36,6 +36,7 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
@@ -211,7 +212,7 @@ function PillarDetailView({ pillar, onClose }: { pillar: Pillar; onClose: () => 
                         </div>
                         {archetype && (
                             <div className="mt-2 text-clay font-bold text-sm flex items-center justify-center gap-1.5 direction-col">
-                                <User className="w-3 h-3" /> "The {archetype.split(' ')[1]}"
+                                <User className="w-3 h-3" /> &quot;The {archetype.split(' ')[1]}&quot;
                             </div>
                         )}
                         <p className="text-xs text-gray-400 mt-3 leading-relaxed">
@@ -246,7 +247,7 @@ function PillarDetailView({ pillar, onClose }: { pillar: Pillar; onClose: () => 
                         <Zap className="w-4 h-4 text-clay" /> Core Insight
                     </h3>
                     <p className="text-sm text-gray-300 leading-relaxed italic">
-                        "{pillar.interpretation || "This pillar represents a fundamental aspect of your life structure. Its interactions define your potential."}"
+                        &quot;{pillar.interpretation || "This pillar represents a fundamental aspect of your life structure. Its interactions define your potential."}&quot;
                     </p>
                 </div>
 

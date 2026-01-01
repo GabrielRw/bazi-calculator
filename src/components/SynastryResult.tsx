@@ -1,6 +1,6 @@
 import { SynastryResult } from "@/types/bazi";
 import { motion } from "framer-motion";
-import { Heart, Sparkles, Scale, Info, BookOpen } from "lucide-react";
+import { Heart, Sparkles, Scale, BookOpen } from "lucide-react";
 import { clsx } from "clsx";
 
 interface SynastryResultProps {
@@ -72,7 +72,7 @@ export default function SynastryResultView({ result, personAName = "Person A", p
                         {result.overall_compatibility}
                     </div>
                     <p className="text-gray-400 max-w-xl mx-auto italic">
-                        "{result.conflict_summary}"
+                        &quot;{result.conflict_summary}&quot;
                     </p>
                 </div>
             </div>
@@ -130,7 +130,7 @@ export default function SynastryResultView({ result, personAName = "Person A", p
 
                     <div className="flex justify-between items-center bg-black/30 p-4 rounded-xl mb-4">
                         <div className="text-center">
-                            <div className="text-xs text-gray-500 mb-2">{personAName}'s Palace</div>
+                            <div className="text-xs text-gray-500 mb-2">{personAName}&apos;s Palace</div>
                             {getWithPinyin(result.spouse_palace_analysis.branch_a)}
                         </div>
                         <div className="text-center px-4">
@@ -141,7 +141,7 @@ export default function SynastryResultView({ result, personAName = "Person A", p
                             </div>
                         </div>
                         <div className="text-center">
-                            <div className="text-xs text-gray-500 mb-2">{personBName}'s Palace</div>
+                            <div className="text-xs text-gray-500 mb-2">{personBName}&apos;s Palace</div>
                             {getWithPinyin(result.spouse_palace_analysis.branch_b)}
                         </div>
                     </div>

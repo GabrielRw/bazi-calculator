@@ -3,13 +3,14 @@
 import { BaziResult } from "@/types/bazi";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Zap, Briefcase, Info, Activity, Sparkles } from "lucide-react";
-import { getBranchData, getGanzhiPinyin, getGanzhiTranslation } from "@/lib/ganzhi";
+import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
 import { useState } from "react";
 
 interface AnalysisSectionProps {
     result: BaziResult;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function StarCard({ star, index }: { star: any, index: number }) {
     const [showInfo, setShowInfo] = useState(false);
 
@@ -100,7 +101,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                             })}
                         </div>
                         <div className="flex-1 text-xs text-gray-400">
-                            These branches represent "emptiness" or "delays" in your natal chart.
+                            These branches represent &quot;emptiness&quot; or &quot;delays&quot; in your natal chart.
                             {result.xun_kong.applies_to && (
                                 <>
                                     <br />
@@ -162,6 +163,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                                             )}
                                         </div>
                                         <div className="text-[10px] text-gray-500 mb-2 uppercase tracking-wide font-mono flex items-center gap-1">
+                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                             Affects: {(interaction.pillars || []).map(p => <span key={p} className="text-gray-300 font-bold">{p}</span>).reduce((prev, curr) => [prev, ' + ', curr] as any, [])}
                                         </div>
                                         <p className="text-xs text-gray-300 leading-relaxed font-light">
@@ -231,7 +233,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
 
                     <div className="p-4 bg-clay/5 rounded-xl border border-clay/10">
                         <p className="text-xs text-spirit leading-relaxed italic">
-                            "{result.professional.interpretation}"
+                            &quot;{result.professional.interpretation}&quot;
                         </p>
                     </div>
 

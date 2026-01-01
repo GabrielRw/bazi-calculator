@@ -40,7 +40,9 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
 
   // History State
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [history, setHistory] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [loadedData, setLoadedData] = useState<any | null>(null);
 
   // Load history on mount
@@ -55,6 +57,7 @@ export default function Home() {
     }
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saveToHistory = (formData: any, resultData: BaziResult, flowData: BaziFlowResult) => {
     const label = formData.name
       ? formData.name
@@ -88,6 +91,7 @@ export default function Home() {
     localStorage.setItem("bazi_history", JSON.stringify(updated));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSelectHistory = (item: any) => {
     setLoadedData(item); // triggers form update
 
@@ -412,6 +416,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCalculate = async (data: any, mode: "individual" | "synastry" = "individual") => {
     setLoading(true);
     setError(null);
@@ -423,6 +428,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
       const headers = { "Content-Type": "application/json" };
 
       if (mode === "synastry") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const normalizeData = (d: any) => ({
           year: d.year,
           month: d.month,
@@ -654,7 +660,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                           </div>
                           <div className="pt-6 border-t border-white/5">
                             <p className="text-gray-400 text-sm italic leading-relaxed">
-                              "{result.professional.interpretation.split('.')[0]}."
+                              &quot;{result.professional.interpretation.split('.')[0]}.&quot;
                             </p>
                           </div>
                         </div>
