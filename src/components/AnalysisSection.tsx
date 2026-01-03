@@ -134,7 +134,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                                 ) : (
                                     <div className="mt-2 text-jade text-[11px] flex items-center gap-2 bg-jade/5 p-2 rounded-lg border border-jade/10">
                                         <Sparkles className="w-3.5 h-3.5" />
-                                        <span>Good news! These void branches do not appear in your chart structure.</span>
+                                        <span>Your void branches are not present in the natal chart structure. Their effects are conditional and timing-based.</span>
                                     </div>
                                 )}
                             </div>
