@@ -138,12 +138,12 @@ export default function BaziReport({ result, birthData }: BaziReportProps) {
             <div className="mb-12 break-inside-avoid">
                 <h2 className="text-xl font-bold uppercase tracking-widest mb-6 border-b border-gray-300 pb-2">Luck Cycles (10-Year Pillars)</h2>
                 <div className="grid grid-cols-5 gap-2 md:grid-cols-10">
-                    {result.luck_cycle.map((luck, idx) => (
+                    {result.luck_cycle.pillars.map((luck, idx) => (
                         <div key={idx} className="text-center p-2 border border-gray-200 rounded bg-gray-50">
                             <div className="text-xs font-bold text-gray-500 mb-1">{luck.start_year}</div>
                             <div className="text-xl font-serif font-bold">{luck.gan}</div>
                             <div className="text-xl font-serif font-bold mb-1">{luck.zhi}</div>
-                            <div className="text-[10px] text-gray-400 uppercase">{luck.start_age}-{luck.end_age}</div>
+                            <div className="text-[10px] text-gray-400 uppercase">{luck.start_age}-{luck.start_age + 9}</div>
                         </div>
                     ))}
                 </div>
