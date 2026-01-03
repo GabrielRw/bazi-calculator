@@ -530,7 +530,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
       </div>
 
       {/* Hero Section */}
-      <div className="relative pt-20 pb-12 px-6 z-10">
+      <div className="relative pt-20 pb-12 px-6 z-10 print:hidden">
         <div className="max-w-4xl mx-auto text-center space-y-4">
 
 
@@ -580,7 +580,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
             key={activeMode === "synastry" ? "synastry-results" : "individual-results"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="max-w-6xl mx-auto px-6 space-y-8 relative z-10"
+            className="max-w-6xl mx-auto px-6 space-y-8 relative z-10 print:hidden"
           >
             {activeMode === "individual" && result ? (
               <>
