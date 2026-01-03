@@ -295,7 +295,7 @@ export default function BaziForm({
         setLoading(true);
         try {
             const response = await fetch(
-                `https://astro-api-1qnc.onrender.com/api/v1/geo/search?q=${encodeURIComponent(query)}&limit=5`
+                `/api/geo/search?q=${encodeURIComponent(query)}&limit=5`
             );
             if (response.ok) {
                 const data = await response.json();
