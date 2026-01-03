@@ -6,6 +6,70 @@ import { Star, Zap, Briefcase, Info, Activity, Sparkles } from "lucide-react";
 import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
 import { useState } from "react";
 
+
+const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activated: string }> = {
+    "子": {
+        themes: "movement, communication, circulation, connection",
+        void: "Efforts don’t immediately circulate. Communication is delayed or indirect. Mobility is mental more than physical.",
+        activated: "Messages land. Connections form. Movement resumes with clarity."
+    },
+    "丑": {
+        themes: "accumulation, security, resources, patience",
+        void: "Stability feels provisional. Resources exist but feel inaccessible. Long-term security is postponed.",
+        activated: "Foundations solidify. Savings, assets, or commitments become real."
+    },
+    "寅": {
+        themes: "initiative, courage, leadership, starting force",
+        void: "Hesitation before action. Strong intent without immediate execution. Leadership expressed indirectly.",
+        activated: "Decisive action. Clear starts. Assertive movement forward."
+    },
+    "卯": {
+        themes: "growth, refinement, social harmony",
+        void: "Relationships feel undefined. Growth is internal before visible. Refinement without recognition.",
+        activated: "Social ease improves. Growth becomes observable. Creative output gains form."
+    },
+    "辰": {
+        themes: "foundations, destiny, long-term structure",
+        void: "Life direction feels non-linear. Foundations require revision. Strategy precedes construction.",
+        activated: "Structural decisions are made. Long plans crystallize. Foundations stabilize."
+    },
+    "巳": {
+        themes: "desire, ambition, strategy, charisma",
+        void: "Motivation is intermittent. Desire is intellectualized. Action waits for meaning.",
+        activated: "Focused ambition. Strategic execution. Fire applied precisely."
+    },
+    "午": {
+        themes: "visibility, momentum, recognition",
+        void: "Effort without spotlight. Energy expended quietly. Momentum stalls despite activity.",
+        activated: "Recognition appears. Momentum accelerates. Presence becomes visible."
+    },
+    "未": {
+        themes: "belonging, nourishment, emotional grounding",
+        void: "Emotional support feels diffuse. Belonging is conceptual rather than felt. Care without reciprocity.",
+        activated: "Emotional anchoring. Support structures become tangible. Community solidifies."
+    },
+    "申": {
+        themes: "skill application, adaptability, tactics",
+        void: "Skills underused. Intelligence unnoticed. Adaptation without payoff.",
+        activated: "Competence recognized. Tactical advantage emerges. Skills convert into results."
+    },
+    "酉": {
+        themes: "standards, detail, value judgment",
+        void: "High standards without reward. Precision overlooked. Self-critique dominates.",
+        activated: "Value becomes measurable. Standards rewarded. Precision appreciated."
+    },
+    "戌": {
+        themes: "responsibility, boundaries, duty",
+        void: "Roles unclear. Responsibility postponed. Endings unresolved.",
+        activated: "Commitments formalized. Boundaries clarified. Matters closed properly."
+    },
+    "亥": {
+        themes: "intuition, rest, inner depth",
+        void: "Inner richness without expression. Withdrawal without renewal. Insight without outlet.",
+        activated: "Intuition expressed. Emotional depth shared. Recovery and renewal occur."
+    }
+};
+
 interface AnalysisSectionProps {
     result: BaziResult;
 }
@@ -149,15 +213,34 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                                 <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
                                     When a void branch appears through time (Annual Year, Month, or Luck Pillar), its latent influence becomes expressed. Themes that were abstract, delayed, or hard to grasp may move into concrete form, bringing clarity, decision, or consequence.
                                 </p>
-                                <div className="flex gap-2 flex-wrap">
+                                <div className="grid grid-cols-1 gap-3">
                                     {(result.xun_kong.void_branches || []).map(branch => {
                                         const data = getBranchData(branch);
+                                        const details = VOID_BRANCH_DETAILS[branch] || {
+                                            themes: "Unknown",
+                                            void: "Unknown",
+                                            activated: "Unknown"
+                                        };
+
                                         return (
-                                            <div key={branch} className="flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded border border-white/10">
-                                                <span className="text-white font-serif">{branch}</span>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-bold text-gray-300 uppercase">{data?.translation} Year</span>
-                                                    <span className="text-[8px] text-gray-600 uppercase">Activates {data?.pinyin}</span>
+                                            <div key={branch} className="bg-white/5 p-3 rounded-lg border border-white/10">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-lg font-serif text-white bg-black/20 w-8 h-8 flex items-center justify-center rounded border border-white/10">{branch}</span>
+                                                    <div>
+                                                        <div className="text-xs font-bold text-spirit uppercase">{data?.translation} ({data?.pinyin})</div>
+                                                        <div className="text-[9px] text-gray-500 uppercase">Abstracted: {details.themes}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-3 mt-2">
+                                                    <div className="bg-black/20 p-2 rounded border border-white/5">
+                                                        <div className="text-[8px] text-gray-600 uppercase font-bold mb-1">When Void</div>
+                                                        <p className="text-[10px] text-gray-400 leading-snug">{details.void}</p>
+                                                    </div>
+                                                    <div className="bg-jade/5 p-2 rounded border border-jade/10">
+                                                        <div className="text-[8px] text-jade uppercase font-bold mb-1">When Activated</div>
+                                                        <p className="text-[10px] text-gray-300 leading-snug">{details.activated}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         );
