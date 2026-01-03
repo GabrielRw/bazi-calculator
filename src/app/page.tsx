@@ -470,6 +470,8 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           hour: data.hour,
           minute: data.minute,
           city: data.city,
+          ...(data.lat !== undefined && { lat: data.lat }),
+          ...(data.lng !== undefined && { lng: data.lng }),
           sex: data.gender === "male" ? "M" : "F",
           time_standard: data.timeStandard,
           include_ten_gods: true,

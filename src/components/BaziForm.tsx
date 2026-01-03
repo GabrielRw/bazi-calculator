@@ -32,6 +32,8 @@ export interface FormData {
     hour: number;
     minute: number;
     city: string;
+    lat?: number;
+    lng?: number;
     gender: "male" | "female";
     timeStandard: string;
     calendar: string;
@@ -66,6 +68,8 @@ const DEFAULT_FORM_DATA = {
     hour: "",
     minute: "",
     city: "",
+    lat: "",
+    lng: "",
     gender: "male",
     timeStandard: "true_solar_absolute",
     calendar: "gregorian",
@@ -435,6 +439,8 @@ export default function BaziForm({
         hour: parseInt(raw.hour) || 0,
         minute: parseInt(raw.minute) || 0,
         city: raw.city,
+        lat: raw.lat ? parseFloat(raw.lat) : undefined,
+        lng: raw.lng ? parseFloat(raw.lng) : undefined,
         gender: raw.gender,
         timeStandard: raw.timeStandard,
         calendar: raw.calendar
@@ -798,6 +804,38 @@ export default function BaziForm({
                                             <option value="true_solar_relative">True Solar Relative</option>
                                             <option value="civil">Civil Time</option>
                                         </select>
+                                    </div>
+
+                                    {/* Manual Coordinates */}
+                                    <div>
+                                        <label className="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-1.5 block">Manual Coordinates (optional)</label>
+                                        <p className="text-[10px] text-gray-600 mb-2">Override city lookup with exact coordinates</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    value={personA.lat}
+                                                    onChange={(e) => {
+                                                        setPersonA({ ...personA, lat: e.target.value });
+                                                    }}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-200 focus:border-jade focus:outline-none placeholder-gray-600"
+                                                    placeholder="Latitude (e.g. 48.8566)"
+                                                />
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    value={personA.lng}
+                                                    onChange={(e) => {
+                                                        setPersonA({ ...personA, lng: e.target.value });
+                                                    }}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-200 focus:border-jade focus:outline-none placeholder-gray-600"
+                                                    placeholder="Longitude (e.g. 2.3522)"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
