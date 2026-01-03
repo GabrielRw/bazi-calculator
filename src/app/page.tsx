@@ -726,6 +726,14 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                               SYNCCED ({result.summary.zodiac})
                             </span>
                           </div>
+                          {result.astro_debug.latitude !== undefined && result.astro_debug.longitude !== undefined && (
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-gray-500 flex items-center gap-2"><Map className="w-3 h-3" /> Coordinates</span>
+                              <span className="text-spirit font-mono">
+                                {result.astro_debug.latitude.toFixed(4)}°, {result.astro_debug.longitude.toFixed(4)}°
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </section>
                     )}

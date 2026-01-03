@@ -154,7 +154,7 @@ const searchPopularCities = (query: string): CityResult[] => {
 };
 
 // Validation helper functions
-const validateFormData = (data: { year: string; month: string; day: string; hour: string; minute: string; city: string }): ValidationErrors => {
+const validateFormData = (data: { year: string; month: string; day: string; hour: string; minute: string; city: string; lat?: string; lng?: string }): ValidationErrors => {
     const errors: ValidationErrors = {};
 
     const year = parseInt(data.year);
@@ -200,8 +200,10 @@ const validateFormData = (data: { year: string; month: string; day: string; hour
         errors.minute = "Minute must be 0-59";
     }
 
-    if (!data.city || data.city.trim() === "") {
-        errors.city = "City is required";
+    // City is only required if lat/lng are not both provided
+    const hasCoordinates = data.lat && data.lng && !isNaN(parseFloat(data.lat)) && !isNaN(parseFloat(data.lng));
+    if (!hasCoordinates && (!data.city || data.city.trim() === "")) {
+        errors.city = "City or coordinates required";
     }
 
     return errors;

@@ -161,6 +161,8 @@ export interface BaziResult {
         resolved_timezone: string;
         time_standard: string;
         solar_terms: Record<string, string>;
+        latitude?: number;
+        longitude?: number;
     };
 }
 
