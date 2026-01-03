@@ -436,13 +436,24 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
 
                                             let balanceText = "Balanced";
                                             let balanceDesc = "Your chart shows a harmonious mix of action and reflection.";
+                                            let balanceColor = "text-jade";
 
-                                            if (yangPercent > 65) {
+                                            if (yangPercent === 100) {
+                                                balanceText = "Pure Yang Structure";
+                                                balanceDesc = "A rare 'Pure Yang' chart. You are naturally open, direct, and action-oriented. Your life is dynamic and transparent, but you may struggle with secrets or rest.";
+                                                balanceColor = "text-red-400";
+                                            } else if (yinPercent === 100) {
+                                                balanceText = "Pure Yin Structure";
+                                                balanceDesc = "A rare 'Pure Yin' chart. You are deeply intuitive, strategic, and self-contained. You excel at planning and discretion but may need to push yourself to take visible action.";
+                                                balanceColor = "text-blue-400";
+                                            } else if (yangPercent > 65) {
                                                 balanceText = "Yang Dominant";
                                                 balanceDesc = "You are action-oriented, expressive, and influential. You likely prefer leading and initiating over waiting.";
+                                                balanceColor = "text-red-300";
                                             } else if (yinPercent > 65) {
                                                 balanceText = "Yin Dominant";
-                                                balanceDesc = "You are reflective, strategic, and nurturing. You likely strength lies in sustaining, planning, and supporting.";
+                                                balanceDesc = "You are reflective, strategic, and nurturing. Your strength likely lies in sustaining, planning, and supporting.";
+                                                balanceColor = "text-blue-300";
                                             }
 
                                             return (
@@ -460,12 +471,12 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
 
                                                     {/* Balance Bar */}
                                                     <div className="h-2 bg-gray-800 rounded-full overflow-hidden flex mb-6">
-                                                        <div style={{ width: `${yangPercent}%` }} className="h-full bg-white opacity-90" />
-                                                        <div style={{ width: `${yinPercent}%` }} className="h-full bg-black border border-white/20" />
+                                                        <div style={{ width: `${yangPercent}%` }} className={`h-full bg-white opacity-90 transition-all duration-1000 ${yangPercent === 100 ? 'bg-red-500' : ''}`} />
+                                                        <div style={{ width: `${yinPercent}%` }} className={`h-full bg-black border border-white/20 transition-all duration-1000 ${yinPercent === 100 ? 'bg-blue-900 border-none' : ''}`} />
                                                     </div>
 
                                                     <div className="text-center">
-                                                        <div className="text-sm font-bold text-jade mb-2">{balanceText}</div>
+                                                        <div className={`text-sm font-bold mb-2 ${balanceColor}`}>{balanceText}</div>
                                                         <p className="text-xs text-gray-500 leading-relaxed">
                                                             {balanceDesc}
                                                         </p>
