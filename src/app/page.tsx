@@ -15,6 +15,7 @@ import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft } fro
 import Image from "next/image";
 import logo from "./logo.png";
 import clsx from "clsx";
+import BaziReport from "@/components/BaziReport";
 
 interface BirthData {
   year: number;
@@ -797,6 +798,21 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Dedicated Print Report */}
+      {(result && (birthData || loadedData)) && (
+        <BaziReport
+          result={result}
+          birthData={birthData || (loadedData ? {
+            year: loadedData.year,
+            month: loadedData.month,
+            day: loadedData.day,
+            hour: loadedData.hour,
+            city: loadedData.city,
+            gender: loadedData.gender
+          } : null)}
+        />
+      )}
     </main>
   );
 }

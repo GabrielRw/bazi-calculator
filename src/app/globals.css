@@ -87,12 +87,20 @@ body {
   .tabs-nav,
   .scroll-btn,
   nav,
-  footer {
+  footer,
+  #main-app-container {
     display: none !important;
   }
 
   /* Ensure report visibility & Page Breaks */
-  .glass-card, 
+  #bazi-report {
+    display: block !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .glass-card,
   .print-card {
     background: white !important;
     border: 1px solid #ddd !important;
@@ -102,15 +110,17 @@ body {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     margin-bottom: 1.5rem;
-    display: block; /* Ensure block layout for breaking */
+    display: block;
+    /* Ensure block layout for breaking */
   }
-  
+
   /* Specific fix for Pillars Grid */
   .grid {
-    display: block !important; /* Flatten grids to blocks to avoid cutting */
+    display: block !important;
+    /* Flatten grids to blocks to avoid cutting */
   }
-  
-  .grid > * {
+
+  .grid>* {
     margin-bottom: 1rem;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
@@ -120,9 +130,9 @@ body {
   }
 
   /* Enforce text visibility */
-  .text-white, 
-  .text-gray-200, 
-  .text-gray-300, 
+  .text-white,
+  .text-gray-200,
+  .text-gray-300,
   .text-gray-400,
   .text-gray-500,
   .text-spirit {
@@ -130,25 +140,52 @@ body {
   }
 
   /* Keep semantic colors but ensure contrast */
-  .text-jade { color: #008060 !important; }
-  .text-clay { color: #C05030 !important; }
-  .text-peach { color: #D08040 !important; }
-  .text-gold { color: #B09000 !important; }
-  
+  .text-jade {
+    color: #008060 !important;
+  }
+
+  .text-clay {
+    color: #C05030 !important;
+  }
+
+  .text-peach {
+    color: #D08040 !important;
+  }
+
+  .text-gold {
+    color: #B09000 !important;
+  }
+
   /* Remove backgrounds that might hide text */
-  .bg-black\/20, 
+  .bg-black\/20,
   .bg-white\/5,
   .bg-white\/10 {
     background-color: transparent !important;
     border: 1px solid #eee !important;
   }
-  
+
   /* Keep colored badges readable */
-  .bg-jade\/10 { background-color: #e6fffa !important; border-color: #008060 !important; }
-  .bg-clay\/10 { background-color: #fff5f2 !important; border-color: #C05030 !important; }
-  .bg-spirit\/10 { background-color: #f0f2f5 !important; border-color: #888 !important; }
+  .bg-jade\/10 {
+    background-color: #e6fffa !important;
+    border-color: #008060 !important;
+  }
+
+  .bg-clay\/10 {
+    background-color: #fff5f2 !important;
+    border-color: #C05030 !important;
+  }
+
+  .bg-spirit\/10 {
+    background-color: #f0f2f5 !important;
+    border-color: #888 !important;
+  }
 
   /* Utilities */
-  .min-height-screen { min-height: 0 !important; }
-  .padding-bottom-20 { padding-bottom: 0 !important; }
+  .min-height-screen {
+    min-height: 0 !important;
+  }
+
+  .padding-bottom-20 {
+    padding-bottom: 0 !important;
+  }
 }
