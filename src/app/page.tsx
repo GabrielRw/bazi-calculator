@@ -670,7 +670,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 2.5 Wuxing Five Phases Chart */}
                     <section>
-                      <WuxingChart data={result.elements} />
+                      <WuxingChart data={result.elements} pillars={result.pillars} />
                     </section>
 
                     {/* 3. Luck Pillars */}
