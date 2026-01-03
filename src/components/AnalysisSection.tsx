@@ -102,11 +102,27 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                         </div>
                         <div className="flex-1 text-xs text-gray-400">
                             These branches represent &quot;emptiness&quot; or &quot;delays&quot; in your natal chart.
-                            {result.xun_kong.applies_to && (
-                                <>
-                                    <br />
-                                    Applies to: <span className="text-spirit uppercase font-bold">{result.xun_kong.applies_to.join(', ')}</span> cycles.
-                                </>
+                            {result.xun_kong.applies_to && result.xun_kong.applies_to.length > 0 && (
+                                <div className="mt-3 space-y-2 pt-3 border-t border-white/5">
+                                    {result.xun_kong.applies_to.map(pillar => {
+                                        const p = pillar.toLowerCase();
+                                        let insight = "";
+
+                                        if (p.includes("year")) insight = "You may feel disconnected from ancestors or early social networks. Success comes from forging your own unique path away from tradition.";
+                                        else if (p.includes("month")) insight = "Career direction may feel uncertain or shift frequently. You thrive in unconventional roles where you defines the rules.";
+                                        else if (p.includes("day")) insight = "Intimate relationships may feel 'empty' or lacking spiritual depth. You need a partner who understands your need for space.";
+                                        else if (p.includes("hour")) insight = "Projects specifically related to children or subordinates may face delays. Focus on the process rather than the outcome.";
+
+                                        return (
+                                            <div key={pillar} className="flex gap-2 items-start">
+                                                <span className="text-[10px] font-bold text-spirit uppercase bg-spirit/10 px-1.5 py-0.5 rounded border border-spirit/20 mt-0.5 whitespace-nowrap">
+                                                    {pillar}
+                                                </span>
+                                                <span className="text-gray-400">{insight}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             )}
                         </div>
                     </div>

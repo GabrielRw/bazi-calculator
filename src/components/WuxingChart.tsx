@@ -8,13 +8,6 @@ import { ChevronDown, ChevronUp, Droplets, Flame, Mountain, Hammer, Waves, Shiel
 interface WuxingChartProps {
     data: ElementData;
     pillars?: Pillar[];
-    voidInfo?: {
-        void_branches: string[];
-        xun_name: string;
-        xun_index: number;
-        day_pillar: string;
-        applies_to?: string[];
-    };
 }
 
 // Element positions in a pentagon (clockwise from top: Fire, Earth, Metal, Water, Wood)
@@ -100,7 +93,7 @@ const ELEMENT_REMEDIES: Record<string, { nourish: string; express: string; contr
     },
 };
 
-export default function WuxingChart({ data, pillars, voidInfo }: WuxingChartProps) {
+export default function WuxingChart({ data, pillars }: WuxingChartProps) {
     const [showInsights, setShowInsights] = useState(false);
     const centerX = 150;
     const centerY = 150;
@@ -413,40 +406,7 @@ export default function WuxingChart({ data, pillars, voidInfo }: WuxingChartProp
                                         return null;
                                     })()}
 
-                                    {/* Void Branch Analysis */}
-                                    {voidInfo && voidInfo.applies_to && voidInfo.applies_to.length > 0 && (
-                                        <div className="space-y-6 pt-2 border-t border-white/5">
-                                            <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                                <Zap className="w-4 h-4 text-spirit" /> Void Branch (De Kong)
-                                            </h4>
-
-                                            <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-4">
-                                                <p className="text-xs text-gray-400 italic">
-                                                    You have <b>{voidInfo.void_branches.join(" & ")}</b> as Void branches.
-                                                    When these appear in your chart, they create "emptiness" or "spiritual potential".
-                                                </p>
-
-                                                <div className="space-y-3">
-                                                    {voidInfo.applies_to.map(pillar => {
-                                                        const p = pillar.toLowerCase();
-                                                        let insight = "";
-
-                                                        if (p.includes("year")) insight = "You may feel disconnected from ancestors or early social networks. Success comes from forging your own unique path away from tradition.";
-                                                        else if (p.includes("month")) insight = "Career direction may feel uncertain or shift frequently. You thrive in unconventional roles where you defines the rules.";
-                                                        else if (p.includes("day")) insight = "Intimate relationships may feel 'empty' or lacking spiritual depth. You need a partner who understands your need for space.";
-                                                        else if (p.includes("hour")) insight = "Projects specifically related to children or subordinates may face delays. Focus on the process rather than the outcome.";
-
-                                                        return (
-                                                            <div key={pillar}>
-                                                                <span className="text-xs font-bold text-spirit block mb-1 uppercase tracking-wide">{pillar} Pillar Effect</span>
-                                                                <p className="text-xs text-gray-500 leading-relaxed text-justify">{insight}</p>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {/* Void Branch Analysis Removed */}
                                 </div>
 
                                 {/* Yin/Yang Analysis */}
