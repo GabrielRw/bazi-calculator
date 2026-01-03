@@ -350,7 +350,7 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
                     className="w-full flex items-center justify-between group"
                 >
                     <span className="text-xs uppercase tracking-widest font-bold text-gray-500 group-hover:text-white transition-colors flex items-center gap-2">
-                        <Zap className="w-3 h-3" /> Professional Strategic Insights
+                        <Zap className="w-3 h-3" /> Strategic Insights
                     </span>
                     {showInsights ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
                 </button>
@@ -410,9 +410,12 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
                                 {/* Yin/Yang Analysis */}
                                 {pillars && (
                                     <div className="space-y-6">
-                                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                            <span className="text-lg leading-none">☯</span> Yin Yang Dynamics
-                                        </h4>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                                <span className="text-lg leading-none">☯</span> Yin Yang Dynamics
+                                            </h4>
+                                            <p className="text-[10px] text-gray-500 mt-1">Calculated from the 8 characters of your 4 Pillars</p>
+                                        </div>
 
                                         {(() => {
                                             // Calculate Yin/Yang balance
