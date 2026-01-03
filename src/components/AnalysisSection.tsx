@@ -101,27 +101,39 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                             })}
                         </div>
                         <div className="flex-1 text-xs text-gray-400">
-                            These branches represent &quot;emptiness&quot; or &quot;delays&quot; in your natal chart.
-                            {result.xun_kong.applies_to && result.xun_kong.applies_to.length > 0 && (
+                            <p className="mb-2">
+                                Derived from your Day Pillar, these branches represent "emptiness" (De Kong).
+                                When they appear in your chart, they can indicate areas where energy is disconnected, spiritual, or hard to grasp.
+                            </p>
+
+                            {result.xun_kong.applies_to && result.xun_kong.applies_to.length > 0 ? (
                                 <div className="mt-3 space-y-2 pt-3 border-t border-white/5">
+                                    <div className="text-[10px] text-spirit font-bold uppercase tracking-widest mb-1">Impact Analysis</div>
                                     {result.xun_kong.applies_to.map(pillar => {
                                         const p = pillar.toLowerCase();
                                         let insight = "";
 
-                                        if (p.includes("year")) insight = "You may feel disconnected from ancestors or early social networks. Success comes from forging your own unique path away from tradition.";
-                                        else if (p.includes("month")) insight = "Career direction may feel uncertain or shift frequently. You thrive in unconventional roles where you defines the rules.";
-                                        else if (p.includes("day")) insight = "Intimate relationships may feel 'empty' or lacking spiritual depth. You need a partner who understands your need for space.";
-                                        else if (p.includes("hour")) insight = "Projects specifically related to children or subordinates may face delays. Focus on the process rather than the outcome.";
+                                        if (p.includes("year")) insight = "Disconnected from ancestral support. You are a self-made pioneer.";
+                                        else if (p.includes("month")) insight = "Career path is non-linear. You thrive in independent or unconventional roles.";
+                                        else if (p.includes("day")) insight = "Relationship dynamics are spiritual or distant. You need a partner who respects your space.";
+                                        else if (p.includes("hour")) insight = "Unconventional approach to projects/children. You focus on the journey, not the legacy.";
 
                                         return (
-                                            <div key={pillar} className="flex gap-2 items-start">
-                                                <span className="text-[10px] font-bold text-spirit uppercase bg-spirit/10 px-1.5 py-0.5 rounded border border-spirit/20 mt-0.5 whitespace-nowrap">
-                                                    {pillar}
-                                                </span>
-                                                <span className="text-gray-400">{insight}</span>
+                                            <div key={pillar} className="bg-white/5 p-2 rounded-lg border border-white/5">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-[10px] font-bold text-spirit uppercase bg-spirit/10 px-1.5 py-0.5 rounded border border-spirit/20">
+                                                        {pillar} Pillar
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-gray-400 leading-snug">{insight}</p>
                                             </div>
                                         );
                                     })}
+                                </div>
+                            ) : (
+                                <div className="mt-2 text-jade text-[11px] flex items-center gap-2 bg-jade/5 p-2 rounded-lg border border-jade/10">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Good news! These void branches do not appear in your chart structure.</span>
                                 </div>
                             )}
                         </div>
