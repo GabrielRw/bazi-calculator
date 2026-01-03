@@ -607,12 +607,14 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                     </button>
                   </div>
 
+                  {/* 
                   <button
                     onClick={() => window.print()}
                     className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
                   >
                     <Clock className="w-4 h-4" /> Print Full Report
-                  </button>
+                  </button> 
+                  */}
 
                   <button
                     onClick={handleExtractToAI}
