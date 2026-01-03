@@ -5,6 +5,7 @@ import { BaziResult, BaziFlowResult, SynastryResult } from "@/types/bazi";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
+import WuxingChart from "@/components/WuxingChart";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -665,6 +666,11 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                           </div>
                         </div>
                       </div>
+                    </section>
+
+                    {/* 2.5 Wuxing Five Phases Chart */}
+                    <section>
+                      <WuxingChart data={result.elements} />
                     </section>
 
                     {/* 3. Luck Pillars */}
