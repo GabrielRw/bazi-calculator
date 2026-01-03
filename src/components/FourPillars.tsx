@@ -179,112 +179,107 @@ function PillarDetailView({ pillar, onClose }: { pillar: Pillar; onClose: () => 
             className="bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden w-full max-w-lg pointer-events-auto max-h-[90vh] overflow-y-auto"
         >
 
-            return (
-            // @ts-ignore
-            <Container {...containerProps}>
-                <div className={`relative ${isPrint ? '' : 'p-6 md:p-8'}`}>
-                    {!isPrint && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onClose(); }}
-                            className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors z-20"
-                        >
-                            <X className="w-5 h-5 text-gray-400" />
-                        </button>
-                    )}
+            <div className="relative p-6 md:p-8">
+                <button
+                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                    className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors z-20"
+                >
+                    <X className="w-5 h-5 text-gray-400" />
+                </button>
 
-                    {/* Header Section */}
-                    <div className="text-center mb-8">
-                        <div className="text-xs font-bold text-jade uppercase tracking-[0.3em] mb-2 print:text-teal-700">
-                            {pillar.label} Pillar Analysis
-                        </div>
-                        <h2 className="text-2xl font-serif text-white mb-1 print:text-black">
-                            {pillarDomains[pillar.label]}
-                        </h2>
-                        <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-                            Meaning & Influence
-                        </div>
+                {/* Header Section */}
+                <div className="text-center mb-8">
+                    <div className="text-xs font-bold text-jade uppercase tracking-[0.3em] mb-2 print:text-teal-700">
+                        {pillar.label} Pillar Analysis
                     </div>
-
-                    <div className="grid grid-cols-2 gap-8 mb-8 relative">
-                        {/* Vertical Divider */}
-                        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/5 print:bg-gray-200" />
-
-                        {/* Stem Analysis */}
-                        <div className="text-center">
-                            <div className="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Heaven</div>
-                            <div className={cn("text-6xl font-serif font-bold mb-3", ganColor.text)}>
-                                {pillar.gan}
-                            </div>
-                            <div className="inline-block bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-white mb-2 border border-white/10 print:text-black print:border-gray-200">
-                                {pillar.gan_info.element}
-                            </div>
-                            {archetype && (
-                                <div className="mt-2 text-clay font-bold text-sm flex items-center justify-center gap-1.5 direction-col print:text-orange-700">
-                                    <User className="w-3 h-3" /> &quot;The {archetype.split(' ')[1]}&quot;
-                                </div>
-                            )}
-                            <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-                                Points to your outer world expression and surface relationships.
-                            </p>
-                        </div>
-
-                        {/* Branch Analysis */}
-                        <div className="text-center">
-                            <div className="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Earth</div>
-                            <div className={cn("text-6xl font-serif font-bold mb-3", zhiColor.text)}>
-                                {pillar.zhi}
-                            </div>
-                            <div className="inline-block bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-white mb-2 border border-white/10 print:text-black print:border-gray-200">
-                                {pillar.zhi_info.zodiac}
-                            </div>
-                            <div className="mt-2 text-jade font-bold text-xs print:text-teal-700">
-                                {pillar.life_stage?.name || 'Cycle'} Phase
-                            </div>
-                            <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-                                Determines your inner reality, feelings, and domestic life.
-                            </p>
-                        </div>
+                    <h2 className="text-2xl font-serif text-white mb-1 print:text-black">
+                        {pillarDomains[pillar.label]}
+                    </h2>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+                        Meaning & Influence
                     </div>
+                </div>
 
-                    {/* Interpretation Content */}
-                    <div className="bg-white/5 rounded-xl p-6 border border-white/5 relative overflow-hidden print:bg-white print:border-gray-200">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 print:hidden">
-                            <Sparkles className="w-24 h-24" />
+                <div className="grid grid-cols-2 gap-8 mb-8 relative">
+                    {/* Vertical Divider */}
+                    <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/5 print:bg-gray-200" />
+
+                    {/* Stem Analysis */}
+                    <div className="text-center">
+                        <div className="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Heaven</div>
+                        <div className={cn("text-6xl font-serif font-bold mb-3", ganColor.text)}>
+                            {pillar.gan}
                         </div>
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2 print:text-black">
-                            <Zap className="w-4 h-4 text-clay print:text-orange-600" /> Core Insight
-                        </h3>
-                        <p className="text-sm text-gray-300 leading-relaxed italic print:text-gray-700">
-                            &quot;{pillar.interpretation || "This pillar represents a fundamental aspect of your life structure. Its interactions define your potential."}&quot;
+                        <div className="inline-block bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-white mb-2 border border-white/10 print:text-black print:border-gray-200">
+                            {pillar.gan_info.element}
+                        </div>
+                        {archetype && (
+                            <div className="mt-2 text-clay font-bold text-sm flex items-center justify-center gap-1.5 direction-col print:text-orange-700">
+                                <User className="w-3 h-3" /> &quot;The {archetype.split(' ')[1]}&quot;
+                            </div>
+                        )}
+                        <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+                            Points to your outer world expression and surface relationships.
                         </p>
                     </div>
 
-                    {/* Hidden Stems Detail */}
-                    {pillar.ten_gods?.hidden && (
-                        <div className="mt-6">
-                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">
-                                Hidden Potential (Roots)
-                            </h3>
-                            <div className="grid gap-2">
-                                {pillar.ten_gods.hidden.map((hidden, i) => (
-                                    <div key={i} className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/5 print:bg-gray-50 print:border-gray-200">
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn("text-xl font-serif w-8 text-center", getElementColor(hidden.info.element).text)}>
-                                                {hidden.gan}
-                                            </div>
-                                            <div className="text-xs text-gray-400 print:text-gray-600">
-                                                {hidden.info.element}
-                                            </div>
+                    {/* Branch Analysis */}
+                    <div className="text-center">
+                        <div className="text-[10px] uppercase font-bold text-gray-500 mb-4 tracking-widest">Earth</div>
+                        <div className={cn("text-6xl font-serif font-bold mb-3", zhiColor.text)}>
+                            {pillar.zhi}
+                        </div>
+                        <div className="inline-block bg-white/5 px-3 py-1 rounded-full text-xs font-bold text-white mb-2 border border-white/10 print:text-black print:border-gray-200">
+                            {pillar.zhi_info.zodiac}
+                        </div>
+                        <div className="mt-2 text-jade font-bold text-xs print:text-teal-700">
+                            {pillar.life_stage?.name || 'Cycle'} Phase
+                        </div>
+                        <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+                            Determines your inner reality, feelings, and domestic life.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Interpretation Content */}
+                <div className="bg-white/5 rounded-xl p-6 border border-white/5 relative overflow-hidden print:bg-white print:border-gray-200">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 print:hidden">
+                        <Sparkles className="w-24 h-24" />
+                    </div>
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2 print:text-black">
+                        <Zap className="w-4 h-4 text-clay print:text-orange-600" /> Core Insight
+                    </h3>
+                    <p className="text-sm text-gray-300 leading-relaxed italic print:text-gray-700">
+                        &quot;{pillar.interpretation || "This pillar represents a fundamental aspect of your life structure. Its interactions define your potential."}&quot;
+                    </p>
+                </div>
+
+                {/* Hidden Stems Detail */}
+                {pillar.ten_gods?.hidden && (
+                    <div className="mt-6">
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">
+                            Hidden Potential (Roots)
+                        </h3>
+                        <div className="grid gap-2">
+                            {pillar.ten_gods.hidden.map((hidden, i) => (
+                                <div key={i} className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/5 print:bg-gray-50 print:border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className={cn("text-xl font-serif w-8 text-center", getElementColor(hidden.info.element).text)}>
+                                            {hidden.gan}
                                         </div>
-                                        <div className="text-xs font-bold text-spirit text-right print:text-gray-700">
-                                            {hidden.ten_god}
+                                        <div className="text-xs text-gray-400 print:text-gray-600">
+                                            {hidden.info.element}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="text-xs font-bold text-spirit text-right print:text-gray-700">
+                                        {hidden.ten_god}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    )}
-                </div>
-            </Container>
-            );
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
 }
