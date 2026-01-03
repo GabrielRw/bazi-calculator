@@ -167,7 +167,7 @@ export default function WuxingChart({ data }: WuxingChartProps) {
                             const colors = ELEMENT_COLORS[el.name];
                             const percentage = data.percentages[el.name] || 0;
                             const isDominant = data.dominant === el.name;
-                            const scaleFactor = 0.8 + (percentage / 100) * 0.4; // Scale based on percentage
+                            const scaleFactor = 0.4 + (percentage / 100) * 0.8; // Scale: 0% = 0.4x, 50% = 0.8x, 100% = 1.2x
 
                             return (
                                 <motion.g
