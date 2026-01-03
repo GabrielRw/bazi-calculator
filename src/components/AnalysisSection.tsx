@@ -85,57 +85,86 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                     <h3 className="flex items-center gap-2 text-spirit text-sm font-bold uppercase tracking-widest mb-4">
                         <Zap className="w-4 h-4" /> Void Branches (Xun Kong)
                     </h3>
-                    <div className="flex gap-4 items-center flex-wrap">
-                        <div className="flex gap-2">
-                            {(result.xun_kong.void_branches || []).map((v, i) => {
-                                const data = getBranchData(v);
-                                return (
-                                    <div key={i} className="flex flex-col items-center gap-1">
-                                        <div className="text-2xl font-serif text-white bg-white/5 w-12 h-12 flex items-center justify-center rounded-xl border border-white/10">
-                                            {v}
+                    <div className="flex flex-col gap-4">
+                        <div className="flex gap-4 items-start flex-wrap">
+                            <div className="flex gap-2">
+                                {(result.xun_kong.void_branches || []).map((v, i) => {
+                                    const data = getBranchData(v);
+                                    return (
+                                        <div key={i} className="flex flex-col items-center gap-1">
+                                            <div className="text-2xl font-serif text-white bg-white/5 w-12 h-12 flex items-center justify-center rounded-xl border border-white/10">
+                                                {v}
+                                            </div>
+                                            <div className="text-[9px] text-gray-500 uppercase font-bold">{data?.pinyin}</div>
+                                            <div className="text-[9px] text-spirit font-bold uppercase">{data?.translation}</div>
                                         </div>
-                                        <div className="text-[9px] text-gray-500 uppercase font-bold">{data?.pinyin}</div>
-                                        <div className="text-[9px] text-spirit font-bold uppercase">{data?.translation}</div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="flex-1 text-xs text-gray-400">
-                            <p className="mb-2">
-                                Derived from your Day Pillar, these branches represent "emptiness" (De Kong).
-                                When they appear in your chart, they can indicate areas where energy is disconnected, spiritual, or hard to grasp.
-                            </p>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex-1 text-xs text-gray-400">
+                                <p className="mb-2">
+                                    Derived from your Day Pillar, these branches represent "emptiness" (De Kong).
+                                    When they appear in your chart, they can indicate areas where energy is disconnected, spiritual, or hard to grasp.
+                                </p>
 
-                            {result.xun_kong.applies_to && result.xun_kong.applies_to.length > 0 ? (
-                                <div className="mt-3 space-y-2 pt-3 border-t border-white/5">
-                                    <div className="text-[10px] text-spirit font-bold uppercase tracking-widest mb-1">Impact Analysis</div>
-                                    {result.xun_kong.applies_to.map(pillar => {
-                                        const p = pillar.toLowerCase();
-                                        let insight = "";
+                                {result.xun_kong.applies_to && result.xun_kong.applies_to.length > 0 ? (
+                                    <div className="mt-3 space-y-2 pt-3 border-t border-white/5">
+                                        <div className="text-[10px] text-spirit font-bold uppercase tracking-widest mb-1">Impact Analysis</div>
+                                        {result.xun_kong.applies_to.map(pillar => {
+                                            const p = pillar.toLowerCase();
+                                            let insight = "";
 
-                                        if (p.includes("year")) insight = "Disconnected from ancestral support. You are a self-made pioneer.";
-                                        else if (p.includes("month")) insight = "Career path is non-linear. You thrive in independent or unconventional roles.";
-                                        else if (p.includes("day")) insight = "Relationship dynamics are spiritual or distant. You need a partner who respects your space.";
-                                        else if (p.includes("hour")) insight = "Unconventional approach to projects/children. You focus on the journey, not the legacy.";
+                                            if (p.includes("year")) insight = "Disconnected from ancestral support. You are a self-made pioneer.";
+                                            else if (p.includes("month")) insight = "Career path is non-linear. You thrive in independent or unconventional roles.";
+                                            else if (p.includes("day")) insight = "Relationship dynamics are spiritual or distant. You need a partner who respects your space.";
+                                            else if (p.includes("hour")) insight = "Unconventional approach to projects/children. You focus on the journey, not the legacy.";
 
-                                        return (
-                                            <div key={pillar} className="bg-white/5 p-2 rounded-lg border border-white/5">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-[10px] font-bold text-spirit uppercase bg-spirit/10 px-1.5 py-0.5 rounded border border-spirit/20">
-                                                        {pillar} Pillar
-                                                    </span>
+                                            return (
+                                                <div key={pillar} className="bg-white/5 p-2 rounded-lg border border-white/5">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] font-bold text-spirit uppercase bg-spirit/10 px-1.5 py-0.5 rounded border border-spirit/20">
+                                                            {pillar} Pillar
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[11px] text-gray-400 leading-snug">{insight}</p>
                                                 </div>
-                                                <p className="text-[11px] text-gray-400 leading-snug">{insight}</p>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="mt-2 text-jade text-[11px] flex items-center gap-2 bg-jade/5 p-2 rounded-lg border border-jade/10">
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                        <span>Good news! These void branches do not appear in your chart structure.</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Activation & Effect */}
+                        <div className="pt-4 border-t border-white/5">
+                            <div className="bg-black/20 rounded-lg p-3">
+                                <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2 flex items-center gap-2">
+                                    <Activity className="w-3 h-3 text-spirit" /> Activation (Filling the Void)
+                                </div>
+                                <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+                                    When these branches arrive in time (Annual Year or Luck Pillar), they "Fill the Void".
+                                    Stagnant matters may suddenly progress, and spiritual concepts can materialize into reality.
+                                </p>
+                                <div className="flex gap-2 flex-wrap">
+                                    {(result.xun_kong.void_branches || []).map(branch => {
+                                        const data = getBranchData(branch);
+                                        return (
+                                            <div key={branch} className="flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded border border-white/10">
+                                                <span className="text-white font-serif">{branch}</span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-bold text-gray-300 uppercase">{data?.translation} Year</span>
+                                                    <span className="text-[8px] text-gray-600 uppercase">Activates {data?.pinyin}</span>
+                                                </div>
                                             </div>
                                         );
                                     })}
                                 </div>
-                            ) : (
-                                <div className="mt-2 text-jade text-[11px] flex items-center gap-2 bg-jade/5 p-2 rounded-lg border border-jade/10">
-                                    <Sparkles className="w-3.5 h-3.5" />
-                                    <span>Good news! These void branches do not appear in your chart structure.</span>
-                                </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -297,6 +326,6 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
