@@ -147,8 +147,7 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                                     <Activity className="w-3 h-3 text-spirit" /> Activation (Filling the Void)
                                 </div>
                                 <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
-                                    When these branches arrive in time (Annual Year or Luck Pillar), they "Fill the Void".
-                                    Stagnant matters may suddenly progress, and spiritual concepts can materialize into reality.
+                                    When a void branch appears through time (Annual Year, Month, or Luck Pillar), its latent influence becomes expressed. Themes that were abstract, delayed, or hard to grasp may move into concrete form, bringing clarity, decision, or consequence.
                                 </p>
                                 <div className="flex gap-2 flex-wrap">
                                     {(result.xun_kong.void_branches || []).map(branch => {
