@@ -63,14 +63,16 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
                                 onClick={() => setActivePillarIndex(null)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all"
+                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                             />
                             <motion.div
                                 key="modal"
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                transition={{ duration: 0.2, delay: 0.05 }}
                                 className="relative z-[101] w-full max-w-lg pointer-events-none flex justify-center"
                             >
                                 <PillarDetailView
