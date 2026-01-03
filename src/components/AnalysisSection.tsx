@@ -316,10 +316,10 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                 </div>
             </div>
 
-            {/* Professional Analysis */}
-            <div className="glass-card rounded-2xl p-6 border-l-4 border-l-clay">
+            {/* Deep Structural Analysis */}
+            <div className="glass-card rounded-2xl p-6 border-l-4 border-l-clay print:break-inside-avoid">
                 <h3 className="flex items-center gap-2 text-clay text-sm font-bold uppercase tracking-widest mb-4">
-                    <Briefcase className="w-4 h-4" /> Professional Insight
+                    <Briefcase className="w-4 h-4" /> Deep Structural Analysis
                 </h3>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

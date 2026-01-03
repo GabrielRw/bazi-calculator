@@ -69,12 +69,14 @@ body {
 
 @media print {
   @page {
-    margin: 20mm;
+    margin: 15mm;
   }
 
   body {
     background: white !important;
     color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Hide non-report elements */
@@ -83,49 +85,70 @@ body {
   .hero-decoration,
   form,
   .tabs-nav,
-  .scroll-btn {
+  .scroll-btn,
+  nav,
+  footer {
     display: none !important;
   }
 
-  /* Ensure report visibility */
-  .glass-card {
+  /* Ensure report visibility & Page Breaks */
+  .glass-card, 
+  .print-card {
     background: white !important;
-    border: 1px solid #eee !important;
+    border: 1px solid #ddd !important;
     color: black !important;
     box-shadow: none !important;
     backdrop-filter: none !important;
-    break-inside: avoid;
-    margin-bottom: 2rem;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 1.5rem;
+    display: block; /* Ensure block layout for breaking */
+  }
+  
+  /* Specific fix for Pillars Grid */
+  .grid {
+    display: block !important; /* Flatten grids to blocks to avoid cutting */
+  }
+  
+  .grid > * {
+    margin-bottom: 1rem;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    border: 1px solid #eee;
+    padding: 1rem;
+    border-radius: 8px;
   }
 
-  .text-white {
+  /* Enforce text visibility */
+  .text-white, 
+  .text-gray-200, 
+  .text-gray-300, 
+  .text-gray-400,
+  .text-gray-500,
+  .text-spirit {
     color: black !important;
   }
 
-  .text-spirit {
-    color: #666 !important;
+  /* Keep semantic colors but ensure contrast */
+  .text-jade { color: #008060 !important; }
+  .text-clay { color: #C05030 !important; }
+  .text-peach { color: #D08040 !important; }
+  .text-gold { color: #B09000 !important; }
+  
+  /* Remove backgrounds that might hide text */
+  .bg-black\/20, 
+  .bg-white\/5,
+  .bg-white\/10 {
+    background-color: transparent !important;
+    border: 1px solid #eee !important;
   }
+  
+  /* Keep colored badges readable */
+  .bg-jade\/10 { background-color: #e6fffa !important; border-color: #008060 !important; }
+  .bg-clay\/10 { background-color: #fff5f2 !important; border-color: #C05030 !important; }
+  .bg-spirit\/10 { background-color: #f0f2f5 !important; border-color: #888 !important; }
 
-  .text-gray-400,
-  .text-gray-500 {
-    color: #888 !important;
-  }
-
-  /* Preserve element colors if possible, but black is safer for text */
-  [class*="text-emerald"],
-  [class*="text-red"],
-  [class*="text-amber"],
-  [class*="text-blue"],
-  [class*="text-gray-300"] {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .min-height-screen {
-    min-height: 0 !important;
-  }
-
-  .padding-bottom-20 {
-    padding-bottom: 0 !important;
-  }
+  /* Utilities */
+  .min-height-screen { min-height: 0 !important; }
+  .padding-bottom-20 { padding-bottom: 0 !important; }
 }
