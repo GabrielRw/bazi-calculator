@@ -2,7 +2,7 @@
 
 import { ElementData, Pillar } from "@/types/bazi";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Droplets, Flame, Mountain, Hammer, Waves, Shield, Activity, Zap, Scale } from "lucide-react";
 
 interface WuxingChartProps {
@@ -99,6 +99,37 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
     const centerY = 150;
     const radius = 100;
     const nodeRadius = 28;
+
+    // Calculate Yin/Yang breakdown for each element
+    const elementBreakdown = useMemo(() => {
+        if (!pillars) return {};
+
+        // Define explicit type for accumulator
+        const breakdown: Record<string, { yin: number; yang: number; total: number }> = {};
+
+        ELEMENTS.forEach(el => {
+            breakdown[el.name] = { yin: 0, yang: 0, total: 0 };
+        });
+
+        const addScore = (element: string, polarity: string, weight: number) => {
+            if (breakdown[element]) {
+                if (polarity === "Yin") breakdown[element].yin += weight;
+                else breakdown[element].yang += weight;
+                breakdown[element].total += weight;
+            }
+        };
+
+        pillars.forEach(p => {
+            // Stem
+            addScore(p.gan_info.element, p.gan_info.polarity, 1);
+            // Branch
+            if (p.zhi_info) {
+                addScore(p.zhi_info.element, p.zhi_info.polarity, 1);
+            }
+        });
+
+        return breakdown;
+    }, [pillars]);
 
     // Calculate position for each element
     const getPosition = (angle: number) => {

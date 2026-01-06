@@ -132,6 +132,14 @@ export default function JingQiShenChart({ data }: JingQiShenChartProps) {
                 </div>
             </div>
 
+            {/* Experimental Disclaimer */}
+            <div className="mb-4 flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                <div className="text-yellow-500 mt-0.5"><Zap className="w-3 h-3" /></div>
+                <div className="text-[10px] text-yellow-200/80 leading-relaxed">
+                    <strong className="text-yellow-500">Experimental Feature:</strong> This life curve projection is currently in beta. The algorithm is highly sensitive and results should be treated as interpretative explorations rather than definitive lifespan predictions. Do not rely on this for medical or critical life planning.
+                </div>
+            </div>
+
             <div className="relative w-full aspect-[2.6/1]">
                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
                     {/* Grid Lines */}
