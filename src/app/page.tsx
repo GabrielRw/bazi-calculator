@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BaziResult, BaziFlowResult, SynastryResult } from "@/types/bazi";
+import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult } from "@/types/bazi";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
 import WuxingChart from "@/components/WuxingChart";
+import JingQiShenChart from "@/components/JingQiShenChart";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -31,6 +32,7 @@ interface BirthData {
 export default function Home() {
   const [result, setResult] = useState<BaziResult | null>(null);
   const [flowResult, setFlowResult] = useState<BaziFlowResult | null>(null);
+  const [lifespanResult, setLifespanResult] = useState<LifespanResult | null>(null);
   const [synastryResult, setSynastryResult] = useState<SynastryResult | null>(null);
   const [synastryNames, setSynastryNames] = useState<{ a: string; b: string } | null>(null);
 
@@ -476,29 +478,37 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           ...(data.lng !== undefined && { lng: data.lng }),
           sex: data.gender === "male" ? "M" : "F",
           time_standard: data.timeStandard,
-          include_ten_gods: true,
           include_pinyin: true,
           include_stars: true,
           include_interactions: true,
           include_professional: true,
-          include_debug: true
+          include_debug: true,
+          max_age: 120
         };
 
-        const [baziRes, flowRes] = await Promise.all([
+        const [baziRes, flowRes, lifespanRes] = await Promise.all([
           fetch("/api/bazi/natal", { method: "POST", headers, body: JSON.stringify(payload) }),
           fetch("/api/bazi/flow", {
             method: "POST",
             headers,
             body: JSON.stringify({ ...payload, target_year: new Date().getFullYear() })
-          })
+          }),
+          fetch("/api/bazi/lifespan", { method: "POST", headers, body: JSON.stringify(payload) })
         ]);
 
         if (!baziRes.ok || !flowRes.ok) throw new Error("Failed to calculate destiny and flow.");
 
         const [baziJson, flowJson] = await Promise.all([baziRes.json(), flowRes.json()]);
 
+        // Lifespan is optional, don't fail if it errors (or handle gracefully)
+        let lifespanJson = null;
+        if (lifespanRes.ok) {
+          lifespanJson = await lifespanRes.json();
+        }
+
         setResult(baziJson);
         setFlowResult(flowJson);
+        setLifespanResult(lifespanJson);
         setBirthData({
           year: data.year,
           month: data.month,
@@ -646,8 +656,11 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 2. Charts Row */}
                     <section className="grid lg:grid-cols-3 gap-8">
-                      <div className="lg:col-span-2">
+                      <div className="lg:col-span-2 space-y-8">
                         <ElementChart data={result.elements} />
+                        {lifespanResult && (
+                          <JingQiShenChart data={lifespanResult.curve} />
+                        )}
                       </div>
                       <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

@@ -221,3 +221,26 @@ export interface SynastryResult {
     };
     conflict_summary: string;
 }
+
+export interface LifespanCurvePoint {
+    age: number;
+    year: number;
+    j0: number;      // Baseline Jing
+    j_final: number; // Modified Jing (Blue)
+    qi: number;      // Usable Energy (Green)
+    shen: number;    // Spirit/Coherence (Gold)
+    S: number;       // Support Index
+    D: number;       // Drain Index
+    V: number;       // Volatility Index
+    H: number;       // Harmony Index
+    explain: string; // Explanation text
+}
+
+export interface LifespanResult {
+    metadata: {
+        max_age: number;
+        sex: string;
+        algorithm: string;
+    };
+    curve: LifespanCurvePoint[];
+}
