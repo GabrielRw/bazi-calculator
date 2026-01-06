@@ -128,8 +128,8 @@ export default function YongShenSection({ result }: YongShenSectionProps) {
                                             key={el}
                                             onClick={() => setActiveIndex(i)}
                                             className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all ${activeIndex === i
-                                                    ? "bg-jade text-black shadow-[0_0_10px_rgba(34,197,94,0.4)]"
-                                                    : "bg-white/5 text-gray-500 hover:bg-white/10"
+                                                ? "bg-jade text-black shadow-[0_0_10px_rgba(34,197,94,0.4)]"
+                                                : "bg-white/5 text-gray-500 hover:bg-white/10"
                                                 }`}
                                         >
                                             {el}
@@ -141,12 +141,14 @@ export default function YongShenSection({ result }: YongShenSectionProps) {
                             {/* Content */}
                             <AnimatePresence mode="wait">
                                 {(() => {
-                                    const element = usefulElements[activeIndex];
-                                    const data = YONG_SHEN_SUGGESTIONS[element] || YONG_SHEN_SUGGESTIONS["Wood"]; // Fallback
+                                    const rawElement = usefulElements[activeIndex];
+                                    // Robust lookup: match "Yang Earth" to "Earth"
+                                    const elementKey = Object.keys(YONG_SHEN_SUGGESTIONS).find(k => rawElement.toLowerCase().includes(k.toLowerCase())) || "Wood";
+                                    const data = YONG_SHEN_SUGGESTIONS[elementKey];
 
                                     return (
                                         <motion.div
-                                            key={element}
+                                            key={rawElement}
                                             initial={{ opacity: 0, x: 10 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -10 }}
@@ -154,7 +156,7 @@ export default function YongShenSection({ result }: YongShenSectionProps) {
                                         >
                                             <div>
                                                 <div className="text-[10px] text-jade font-bold uppercase tracking-widest mb-1">
-                                                    Strengthening {element}
+                                                    Strengthening {rawElement}
                                                 </div>
                                                 <h4 className="text-xl font-serif text-white">
                                                     {data.title}
