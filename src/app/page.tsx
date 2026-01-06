@@ -486,29 +486,22 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           max_age: 120
         };
 
-        const [baziRes, flowRes, lifespanRes] = await Promise.all([
+        // 1. Fetch Core Data (Blocking)
+        const [baziRes, flowRes] = await Promise.all([
           fetch("/api/bazi/natal", { method: "POST", headers, body: JSON.stringify(payload) }),
           fetch("/api/bazi/flow", {
             method: "POST",
             headers,
             body: JSON.stringify({ ...payload, target_year: new Date().getFullYear() })
-          }),
-          fetch("/api/bazi/lifespan", { method: "POST", headers, body: JSON.stringify(payload) })
+          })
         ]);
 
         if (!baziRes.ok || !flowRes.ok) throw new Error("Failed to calculate destiny and flow.");
 
         const [baziJson, flowJson] = await Promise.all([baziRes.json(), flowRes.json()]);
 
-        // Lifespan is optional, don't fail if it errors (or handle gracefully)
-        let lifespanJson = null;
-        if (lifespanRes.ok) {
-          lifespanJson = await lifespanRes.json();
-        }
-
         setResult(baziJson);
         setFlowResult(flowJson);
-        setLifespanResult(lifespanJson);
         setBirthData({
           year: data.year,
           month: data.month,
@@ -522,13 +515,33 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         setActiveTab("natal");
 
         saveToHistory(data, baziJson, flowJson);
+
+        // Critical data loaded, unblock UI
+        setLoading(false);
+
+        // Fetch Lifespan Data Asynchronously (Non-blocking)
+        // Note: Lifespan algorithm requires true_solar_absolute
+        fetch("/api/bazi/lifespan", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ ...payload, time_standard: "true_solar_absolute" })
+        })
+          .then(res => {
+            if (res.ok) return res.json();
+            return null;
+          })
+          .then(data => {
+            if (data) setLifespanResult(data);
+          })
+          .catch(err => console.error("Lifespan fetch error:", err));
+
       }
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
-    } finally {
       setLoading(false);
     }
+    // removed finally block to manually control loading timing
   };
 
   return (
