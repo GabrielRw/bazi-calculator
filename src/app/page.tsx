@@ -7,6 +7,7 @@ import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
 import WuxingChart from "@/components/WuxingChart";
 import JingQiShenChart from "@/components/JingQiShenChart";
+import YongShenSection from "@/components/YongShenSection";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -710,8 +711,9 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                       <LuckPillars luck={result.luck_cycle} />
                     </section>
 
-                    {/* 4. Deep Analysis */}
-                    <section>
+                    {/* 3. Deep Analysis & Yong Shen */}
+                    <section className="space-y-8">
+                      <YongShenSection result={result} />
                       <AnalysisSection result={result} />
                     </section>
 
