@@ -1,10 +1,11 @@
 "use client";
 
-import { BaziResult } from "@/types/bazi";
+import { BaziResult, Star as StarType } from "@/types/bazi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Zap, Briefcase, Info, Activity, Sparkles } from "lucide-react";
+import { Star, Zap, Briefcase, Info, Activity, Sparkles, BookOpen } from "lucide-react";
 import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
 import { useState } from "react";
+import StarDetailModal from "./StarDetailModal";
 
 
 const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activated: string }> = {
@@ -75,7 +76,7 @@ interface AnalysisSectionProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StarCard({ star, index }: { star: any, index: number }) {
+function StarCard({ star, index, onShowDetail }: { star: any, index: number, onShowDetail: (star: StarType) => void }) {
     const [showInfo, setShowInfo] = useState(false);
 
     return (
@@ -105,6 +106,15 @@ function StarCard({ star, index }: { star: any, index: number }) {
                         <p className="text-xs text-gray-400 leading-relaxed pt-2 border-t border-white/5 text-justify">
                             {star.desc}
                         </p>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onShowDetail(star);
+                            }}
+                            className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase text-jade hover:text-white transition-colors border border-jade/20 hover:border-white/20 bg-jade/10 hover:bg-white/5 px-3 py-1.5 rounded-lg w-full justify-center"
+                        >
+                            <BookOpen className="w-3 h-3" /> Read Deep Analysis
+                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -129,8 +139,16 @@ function StarCard({ star, index }: { star: any, index: number }) {
 }
 
 export default function AnalysisSection({ result }: AnalysisSectionProps) {
+    const [selectedStar, setSelectedStar] = useState<StarType | null>(null);
+
     return (
         <div className="space-y-6 w-full">
+            <StarDetailModal
+                star={selectedStar}
+                isOpen={!!selectedStar}
+                onClose={() => setSelectedStar(null)}
+            />
+
             {/* Symbolic Stars */}
             <div className="glass-card rounded-2xl p-6">
                 <h3 className="flex items-center gap-2 text-spirit text-sm font-bold uppercase tracking-widest mb-4">
@@ -138,7 +156,12 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                     {(result.stars || []).map((star, i) => (
-                        <StarCard key={i} star={star} index={i} />
+                        <StarCard
+                            key={i}
+                            star={star}
+                            index={i}
+                            onShowDetail={(s) => setSelectedStar(s)}
+                        />
                     ))}
                 </div>
             </div>
