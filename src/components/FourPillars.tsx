@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pillar } from "@/types/bazi";
+import { ChartContext } from "@/types/ai";
 import { cn, getElementColor } from "@/lib/utils";
 import { Info, X, Zap, Sparkles, User } from "lucide-react";
+import AskAIButton from "./AskAIButton";
+import AIExplanationModal from "./AIExplanationModal";
 
 interface FourPillarsProps {
     pillars: Pillar[];
+    chartContext?: ChartContext;
 }
 
 const pillarDomains: Record<string, string> = {
@@ -31,14 +35,23 @@ const tenGodArchetypes: Record<string, string> = {
     "Indirect Resource": "The Seeker"
 };
 
-export default function FourPillars({ pillars }: FourPillarsProps) {
+export default function FourPillars({ pillars, chartContext }: FourPillarsProps) {
     const [activePillarIndex, setActivePillarIndex] = useState<number | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [aiExplanation, setAiExplanation] = useState<string>("");
+    const [aiModalOpen, setAiModalOpen] = useState(false);
+    const [aiCardTitle, setAiCardTitle] = useState<string>("");
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
+
+    const handleAIExplanation = (explanation: string, cardTitle: string) => {
+        setAiExplanation(explanation);
+        setAiCardTitle(cardTitle);
+        setAiModalOpen(true);
+    };
 
     return (
         <>
@@ -52,6 +65,14 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
                     />
                 ))}
             </div>
+
+            {/* AI Explanation Modal */}
+            <AIExplanationModal
+                isOpen={aiModalOpen}
+                onClose={() => setAiModalOpen(false)}
+                explanation={aiExplanation}
+                cardTitle={aiCardTitle}
+            />
 
             {/* Detailed Overlay View (Portaled to Body) */}
             {mounted && createPortal(
@@ -78,6 +99,8 @@ export default function FourPillars({ pillars }: FourPillarsProps) {
                                 <PillarDetailView
                                     pillar={pillars[activePillarIndex]}
                                     onClose={() => setActivePillarIndex(null)}
+                                    chartContext={chartContext}
+                                    onAIExplanation={handleAIExplanation}
                                 />
                             </motion.div>
                         </div>
@@ -166,10 +189,21 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
     );
 }
 
-function PillarDetailView({ pillar, onClose }: { pillar: Pillar; onClose: () => void }) {
+function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation }: {
+    pillar: Pillar;
+    onClose: () => void;
+    chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+}) {
     const ganColor = getElementColor(pillar.gan_info.element);
     const zhiColor = getElementColor(pillar.zhi_info.element);
     const archetype = pillar.ten_gods?.stem ? tenGodArchetypes[pillar.ten_gods.stem] : null;
+
+    const handleAskAI = (explanation: string) => {
+        if (onAIExplanation) {
+            onAIExplanation(explanation, `${pillar.label} Pillar`);
+        }
+    };
 
     return (
         <motion.div
@@ -252,6 +286,20 @@ function PillarDetailView({ pillar, onClose }: { pillar: Pillar; onClose: () => 
                     <p className="text-sm text-gray-300 leading-relaxed italic print:text-gray-700">
                         &quot;{pillar.interpretation || "This pillar represents a fundamental aspect of your life structure. Its interactions define your potential."}&quot;
                     </p>
+
+                    {/* Ask AI Button */}
+                    {chartContext && (
+                        <div className="mt-4 pt-4 border-t border-white/5 flex justify-end print:hidden">
+                            <AskAIButton
+                                cardType="pillar"
+                                cardData={pillar as unknown as Record<string, unknown>}
+                                chartContext={chartContext}
+                                onExplanation={handleAskAI}
+                                onError={(error) => console.error('AI Error:', error)}
+                                size="md"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Hidden Stems Detail */}

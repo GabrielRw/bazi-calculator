@@ -1,17 +1,20 @@
 "use client";
 
 import { BaziResult, Star as StarType } from "@/types/bazi";
+import { ChartContext } from "@/types/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Zap, Briefcase, Info, Activity, Sparkles, BookOpen } from "lucide-react";
 import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
 import { useState } from "react";
 import StarDetailModal from "./StarDetailModal";
+import AskAIButton from "./AskAIButton";
+import AIExplanationModal from "./AIExplanationModal";
 
 
 const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activated: string }> = {
     "子": {
         themes: "movement, communication, circulation, connection",
-        void: "Efforts don’t immediately circulate. Communication is delayed or indirect. Mobility is mental more than physical.",
+        void: "Efforts don't immediately circulate. Communication is delayed or indirect. Mobility is mental more than physical.",
         activated: "Messages land. Connections form. Movement resumes with clarity."
     },
     "丑": {
@@ -73,11 +76,24 @@ const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activa
 
 interface AnalysisSectionProps {
     result: BaziResult;
+    chartContext?: ChartContext;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StarCard({ star, index, onShowDetail }: { star: any, index: number, onShowDetail: (star: StarType) => void }) {
+function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation }: {
+    star: any,
+    index: number,
+    onShowDetail: (star: StarType) => void,
+    chartContext?: ChartContext,
+    onAIExplanation?: (explanation: string, cardTitle: string) => void
+}) {
     const [showInfo, setShowInfo] = useState(false);
+
+    const handleAskAI = (explanation: string) => {
+        if (onAIExplanation) {
+            onAIExplanation(explanation, `Star: ${star.name}`);
+        }
+    };
 
     return (
         <motion.div
@@ -106,15 +122,27 @@ function StarCard({ star, index, onShowDetail }: { star: any, index: number, onS
                         <p className="text-xs text-gray-400 leading-relaxed pt-2 border-t border-white/5 text-justify">
                             {star.desc}
                         </p>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onShowDetail(star);
-                            }}
-                            className="mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase text-jade hover:text-white transition-colors border border-jade/20 hover:border-white/20 bg-jade/10 hover:bg-white/5 px-3 py-1.5 rounded-lg w-full justify-center"
-                        >
-                            <BookOpen className="w-3 h-3" /> Read Deep Analysis
-                        </button>
+                        <div className="flex gap-2 mt-3">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShowDetail(star);
+                                }}
+                                className="flex-1 flex items-center gap-1.5 text-[10px] font-bold uppercase text-jade hover:text-white transition-colors border border-jade/20 hover:border-white/20 bg-jade/10 hover:bg-white/5 px-3 py-1.5 rounded-lg justify-center"
+                            >
+                                <BookOpen className="w-3 h-3" /> Deep Analysis
+                            </button>
+                            {chartContext && (
+                                <AskAIButton
+                                    cardType="star"
+                                    cardData={star as Record<string, unknown>}
+                                    chartContext={chartContext}
+                                    onExplanation={handleAskAI}
+                                    onError={(error) => console.error('AI Error:', error)}
+                                    size="sm"
+                                />
+                            )}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -138,8 +166,17 @@ function StarCard({ star, index, onShowDetail }: { star: any, index: number, onS
     );
 }
 
-export default function AnalysisSection({ result }: AnalysisSectionProps) {
+export default function AnalysisSection({ result, chartContext }: AnalysisSectionProps) {
     const [selectedStar, setSelectedStar] = useState<StarType | null>(null);
+    const [aiExplanation, setAiExplanation] = useState<string>("");
+    const [aiModalOpen, setAiModalOpen] = useState(false);
+    const [aiCardTitle, setAiCardTitle] = useState<string>("");
+
+    const handleAIExplanation = (explanation: string, cardTitle: string) => {
+        setAiExplanation(explanation);
+        setAiCardTitle(cardTitle);
+        setAiModalOpen(true);
+    };
 
     return (
         <div className="space-y-6 w-full">
@@ -147,6 +184,14 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                 star={selectedStar}
                 isOpen={!!selectedStar}
                 onClose={() => setSelectedStar(null)}
+            />
+
+            {/* AI Explanation Modal */}
+            <AIExplanationModal
+                isOpen={aiModalOpen}
+                onClose={() => setAiModalOpen(false)}
+                explanation={aiExplanation}
+                cardTitle={aiCardTitle}
             />
 
             {/* Symbolic Stars */}
@@ -161,6 +206,8 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                             star={star}
                             index={i}
                             onShowDetail={(s) => setSelectedStar(s)}
+                            chartContext={chartContext}
+                            onAIExplanation={handleAIExplanation}
                         />
                     ))}
                 </div>
@@ -331,6 +378,19 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                                         <p className="text-xs text-gray-300 leading-relaxed font-light">
                                             {interaction.interpretation || "This interaction creates a specific energy dynamic between the pillars, influencing your life stability and potential changes."}
                                         </p>
+                                        {/* Ask AI Button */}
+                                        {chartContext && (
+                                            <div className="mt-3 flex justify-end print:hidden">
+                                                <AskAIButton
+                                                    cardType="interaction"
+                                                    cardData={interaction as unknown as Record<string, unknown>}
+                                                    chartContext={chartContext}
+                                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Interaction: ${interaction.id?.replace(/_/g, ' ') || interaction.type}`)}
+                                                    onError={(error) => console.error('AI Error:', error)}
+                                                    size="sm"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>
@@ -397,6 +457,19 @@ export default function AnalysisSection({ result }: AnalysisSectionProps) {
                         <p className="text-xs text-spirit leading-relaxed italic">
                             &quot;{result.professional.interpretation}&quot;
                         </p>
+                        {/* Ask AI Button */}
+                        {chartContext && (
+                            <div className="mt-4 pt-3 border-t border-clay/10 flex justify-end print:hidden">
+                                <AskAIButton
+                                    cardType="structure"
+                                    cardData={result.professional as unknown as Record<string, unknown>}
+                                    chartContext={chartContext}
+                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Structure: ${result.professional.structure}`)}
+                                    onError={(error) => console.error('AI Error:', error)}
+                                    size="md"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Technical Rationale (Debug Info) */}

@@ -1,13 +1,17 @@
 "use client";
 
 import { ElementData, Pillar } from "@/types/bazi";
+import { ChartContext } from "@/types/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Droplets, Flame, Mountain, Hammer, Waves, Shield, Activity, Zap, Scale } from "lucide-react";
+import AskAIButton from "./AskAIButton";
+import AIExplanationModal from "./AIExplanationModal";
 
 interface WuxingChartProps {
     data: ElementData;
     pillars?: Pillar[];
+    chartContext?: ChartContext;
 }
 
 // Element positions in a pentagon (clockwise from top: Fire, Earth, Metal, Water, Wood)
@@ -93,8 +97,10 @@ const ELEMENT_REMEDIES: Record<string, { nourish: string; express: string; contr
     },
 };
 
-export default function WuxingChart({ data, pillars }: WuxingChartProps) {
+export default function WuxingChart({ data, pillars, chartContext }: WuxingChartProps) {
     const [showInsights, setShowInsights] = useState(false);
+    const [aiExplanation, setAiExplanation] = useState<string>("");
+    const [aiModalOpen, setAiModalOpen] = useState(false);
     const centerX = 150;
     const centerY = 150;
     const radius = 100;
@@ -159,394 +165,419 @@ export default function WuxingChart({ data, pillars }: WuxingChartProps) {
     };
 
     return (
-        <div className="glass-card rounded-2xl p-6">
-            <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4 flex items-center gap-2">
-                <span className="text-lg">☯</span> Wu Xing - Five Phases
-            </h3>
+        <>
+            <AIExplanationModal
+                isOpen={aiModalOpen}
+                onClose={() => setAiModalOpen(false)}
+                explanation={aiExplanation}
+                cardTitle="Wu Xing Analysis"
+            />
+            <div className="glass-card rounded-2xl p-6">
+                <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4 flex items-center gap-2">
+                    <span className="text-lg">☯</span> Wu Xing - Five Phases
+                </h3>
 
-            <div className="flex flex-col lg:flex-row items-center gap-6">
-                {/* SVG Chart */}
-                <div className="relative flex-shrink-0">
-                    <svg width="300" height="300" viewBox="0 0 300 300" className="overflow-visible">
-                        <defs>
-                            {/* Glow filters for each element */}
-                            {ELEMENTS.map(el => (
-                                <filter key={`glow-${el.name}`} id={`glow-${el.name}`} x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur" />
-                                        <feMergeNode in="SourceGraphic" />
-                                    </feMerge>
-                                </filter>
-                            ))}
-                            {/* Arrow marker for generating cycle */}
-                            <marker id="arrow-gen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                                <path d="M0,0 L0,6 L8,3 z" fill="#22c55e" opacity="0.7" />
-                            </marker>
-                            {/* Arrow marker for controlling cycle */}
-                            <marker id="arrow-ctrl" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto">
-                                <path d="M0,0 L0,4 L6,2 z" fill="#ef4444" opacity="0.5" />
-                            </marker>
-                        </defs>
+                <div className="flex flex-col lg:flex-row items-center gap-6">
+                    {/* SVG Chart */}
+                    <div className="relative flex-shrink-0">
+                        <svg width="300" height="300" viewBox="0 0 300 300" className="overflow-visible">
+                            <defs>
+                                {/* Glow filters for each element */}
+                                {ELEMENTS.map(el => (
+                                    <filter key={`glow-${el.name}`} id={`glow-${el.name}`} x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                                        <feMerge>
+                                            <feMergeNode in="coloredBlur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                ))}
+                                {/* Arrow marker for generating cycle */}
+                                <marker id="arrow-gen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#22c55e" opacity="0.7" />
+                                </marker>
+                                {/* Arrow marker for controlling cycle */}
+                                <marker id="arrow-ctrl" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto">
+                                    <path d="M0,0 L0,4 L6,2 z" fill="#ef4444" opacity="0.5" />
+                                </marker>
+                            </defs>
 
-                        {/* Outer circle (subtle) */}
-                        <circle cx={centerX} cy={centerY} r={radius + 15} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                            {/* Outer circle (subtle) */}
+                            <circle cx={centerX} cy={centerY} r={radius + 15} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
 
-                        {/* Generating Cycle - Outer pentagon edges */}
-                        {GENERATING_CYCLE.map((cycle, i) => {
-                            const start = elementPositions[cycle.from];
-                            const end = elementPositions[cycle.to];
-                            // Offset slightly to not overlap with nodes
-                            const angle = Math.atan2(end.y - start.y, end.x - start.x);
-                            const offsetStart = {
-                                x: start.x + nodeRadius * Math.cos(angle),
-                                y: start.y + nodeRadius * Math.sin(angle),
-                            };
-                            const offsetEnd = {
-                                x: end.x - (nodeRadius + 8) * Math.cos(angle),
-                                y: end.y - (nodeRadius + 8) * Math.sin(angle),
-                            };
+                            {/* Generating Cycle - Outer pentagon edges */}
+                            {GENERATING_CYCLE.map((cycle, i) => {
+                                const start = elementPositions[cycle.from];
+                                const end = elementPositions[cycle.to];
+                                // Offset slightly to not overlap with nodes
+                                const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                                const offsetStart = {
+                                    x: start.x + nodeRadius * Math.cos(angle),
+                                    y: start.y + nodeRadius * Math.sin(angle),
+                                };
+                                const offsetEnd = {
+                                    x: end.x - (nodeRadius + 8) * Math.cos(angle),
+                                    y: end.y - (nodeRadius + 8) * Math.sin(angle),
+                                };
 
-                            return (
-                                <motion.line
-                                    key={`gen-${i}`}
-                                    x1={offsetStart.x}
-                                    y1={offsetStart.y}
-                                    x2={offsetEnd.x}
-                                    y2={offsetEnd.y}
-                                    stroke="#22c55e"
-                                    strokeWidth="2"
-                                    strokeOpacity="0.4"
-                                    markerEnd="url(#arrow-gen)"
+                                return (
+                                    <motion.line
+                                        key={`gen-${i}`}
+                                        x1={offsetStart.x}
+                                        y1={offsetStart.y}
+                                        x2={offsetEnd.x}
+                                        y2={offsetEnd.y}
+                                        stroke="#22c55e"
+                                        strokeWidth="2"
+                                        strokeOpacity="0.4"
+                                        markerEnd="url(#arrow-gen)"
+                                        initial={{ pathLength: 0, opacity: 0 }}
+                                        animate={{ pathLength: 1, opacity: 1 }}
+                                        transition={{ duration: 0.8, delay: 0.5 + i * 0.15 }}
+                                    />
+                                );
+                            })}
+
+                            {/* Controlling Cycle - Inner star paths */}
+                            {CONTROLLING_CYCLE.map((cycle, i) => (
+                                <motion.path
+                                    key={`ctrl-${i}`}
+                                    d={getControlPath(cycle.from, cycle.to)}
+                                    fill="none"
+                                    stroke="#ef4444"
+                                    strokeWidth="1.5"
+                                    strokeOpacity="0.3"
+                                    strokeDasharray="4 4"
+                                    markerEnd="url(#arrow-ctrl)"
                                     initial={{ pathLength: 0, opacity: 0 }}
                                     animate={{ pathLength: 1, opacity: 1 }}
-                                    transition={{ duration: 0.8, delay: 0.5 + i * 0.15 }}
+                                    transition={{ duration: 0.8, delay: 1.2 + i * 0.1 }}
                                 />
-                            );
-                        })}
+                            ))}
 
-                        {/* Controlling Cycle - Inner star paths */}
-                        {CONTROLLING_CYCLE.map((cycle, i) => (
-                            <motion.path
-                                key={`ctrl-${i}`}
-                                d={getControlPath(cycle.from, cycle.to)}
-                                fill="none"
-                                stroke="#ef4444"
-                                strokeWidth="1.5"
-                                strokeOpacity="0.3"
-                                strokeDasharray="4 4"
-                                markerEnd="url(#arrow-ctrl)"
-                                initial={{ pathLength: 0, opacity: 0 }}
-                                animate={{ pathLength: 1, opacity: 1 }}
-                                transition={{ duration: 0.8, delay: 1.2 + i * 0.1 }}
-                            />
-                        ))}
+                            {/* Element Nodes */}
+                            {ELEMENTS.map((el, i) => {
+                                const pos = elementPositions[el.name];
+                                const colors = ELEMENT_COLORS[el.name];
+                                const percentage = data.percentages[el.name] || 0;
+                                const isDominant = data.dominant === el.name;
+                                const scaleFactor = 0.4 + (percentage / 100) * 1.1; // Scale: 0% = 0.4x, 50% = 0.95x, 100% = 1.5x
 
-                        {/* Element Nodes */}
-                        {ELEMENTS.map((el, i) => {
-                            const pos = elementPositions[el.name];
-                            const colors = ELEMENT_COLORS[el.name];
-                            const percentage = data.percentages[el.name] || 0;
-                            const isDominant = data.dominant === el.name;
-                            const scaleFactor = 0.4 + (percentage / 100) * 1.1; // Scale: 0% = 0.4x, 50% = 0.95x, 100% = 1.5x
+                                return (
+                                    <motion.g
+                                        key={el.name}
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                                        style={{ transformOrigin: `${pos.x}px ${pos.y}px` }}
+                                    >
+                                        {/* Glow effect for dominant element */}
+                                        {isDominant && (
+                                            <circle
+                                                cx={pos.x}
+                                                cy={pos.y}
+                                                r={nodeRadius + 8}
+                                                fill={colors.glow}
+                                                opacity="0.3"
+                                            />
+                                        )}
 
-                            return (
-                                <motion.g
-                                    key={el.name}
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                                    style={{ transformOrigin: `${pos.x}px ${pos.y}px` }}
-                                >
-                                    {/* Glow effect for dominant element */}
-                                    {isDominant && (
+                                        {/* Main circle */}
                                         <circle
                                             cx={pos.x}
                                             cy={pos.y}
-                                            r={nodeRadius + 8}
-                                            fill={colors.glow}
-                                            opacity="0.3"
+                                            r={nodeRadius * scaleFactor}
+                                            fill="rgba(10,10,10,0.9)"
+                                            stroke={colors.fill}
+                                            strokeWidth={isDominant ? 3 : 2}
+                                            filter={isDominant ? `url(#glow-${el.name})` : undefined}
                                         />
-                                    )}
 
-                                    {/* Main circle */}
-                                    <circle
-                                        cx={pos.x}
-                                        cy={pos.y}
-                                        r={nodeRadius * scaleFactor}
-                                        fill="rgba(10,10,10,0.9)"
-                                        stroke={colors.fill}
-                                        strokeWidth={isDominant ? 3 : 2}
-                                        filter={isDominant ? `url(#glow-${el.name})` : undefined}
-                                    />
+                                        {/* Chinese character */}
+                                        <text
+                                            x={pos.x}
+                                            y={pos.y + 2}
+                                            textAnchor="middle"
+                                            dominantBaseline="middle"
+                                            fill={colors.fill}
+                                            fontSize={isDominant ? "20" : "16"}
+                                            fontWeight="bold"
+                                            fontFamily="serif"
+                                        >
+                                            {el.chinese}
+                                        </text>
 
-                                    {/* Chinese character */}
-                                    <text
-                                        x={pos.x}
-                                        y={pos.y + 2}
-                                        textAnchor="middle"
-                                        dominantBaseline="middle"
-                                        fill={colors.fill}
-                                        fontSize={isDominant ? "20" : "16"}
-                                        fontWeight="bold"
-                                        fontFamily="serif"
-                                    >
-                                        {el.chinese}
-                                    </text>
+                                        {/* Percentage label */}
+                                        <text
+                                            x={pos.x}
+                                            y={pos.y + nodeRadius + 14}
+                                            textAnchor="middle"
+                                            fill="rgba(255,255,255,0.6)"
+                                            fontSize="10"
+                                            fontWeight="500"
+                                        >
+                                            {percentage}%
+                                        </text>
 
-                                    {/* Percentage label */}
-                                    <text
-                                        x={pos.x}
-                                        y={pos.y + nodeRadius + 14}
-                                        textAnchor="middle"
-                                        fill="rgba(255,255,255,0.6)"
-                                        fontSize="10"
-                                        fontWeight="500"
-                                    >
-                                        {percentage}%
-                                    </text>
+                                        {/* Element name */}
+                                        <text
+                                            x={pos.x}
+                                            y={pos.y - nodeRadius - 8}
+                                            textAnchor="middle"
+                                            fill="rgba(255,255,255,0.4)"
+                                            fontSize="9"
+                                            letterSpacing="0.1em"
+                                            style={{ textTransform: 'uppercase' }}
+                                        >
+                                            {el.name.toUpperCase()}
+                                        </text>
+                                    </motion.g>
+                                );
+                            })}
 
-                                    {/* Element name */}
-                                    <text
-                                        x={pos.x}
-                                        y={pos.y - nodeRadius - 8}
-                                        textAnchor="middle"
-                                        fill="rgba(255,255,255,0.4)"
-                                        fontSize="9"
-                                        letterSpacing="0.1em"
-                                        style={{ textTransform: 'uppercase' }}
-                                    >
-                                        {el.name.toUpperCase()}
-                                    </text>
-                                </motion.g>
-                            );
-                        })}
-
-                        {/* Center Yin-Yang Symbol */}
-                        <motion.g
-                            initial={{ rotate: 0, opacity: 0 }}
-                            animate={{ rotate: 360, opacity: 1 }}
-                            transition={{ rotate: { duration: 60, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.5 } }}
-                            style={{ transformOrigin: `${centerX}px ${centerY}px` }}
-                        >
-                            <circle cx={centerX} cy={centerY} r="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-                            <text x={centerX} y={centerY + 1} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.15)" fontSize="20">☯</text>
-                        </motion.g>
-                    </svg>
-                </div>
-
-                {/* Legend */}
-                <div className="flex-1 space-y-4 text-sm">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <div className="w-6 h-0.5 bg-green-500/60 rounded"></div>
-                            <span className="text-gray-400">
-                                <span className="text-green-400 font-bold">Shēng</span> 生 - Generating Cycle
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-500 pl-9">
-                            Wood feeds Fire → Fire creates Earth → Earth bears Metal → Metal collects Water → Water nourishes Wood
-                        </p>
+                            {/* Center Yin-Yang Symbol */}
+                            <motion.g
+                                initial={{ rotate: 0, opacity: 0 }}
+                                animate={{ rotate: 360, opacity: 1 }}
+                                transition={{ rotate: { duration: 60, repeat: Infinity, ease: "linear" }, opacity: { duration: 0.5 } }}
+                                style={{ transformOrigin: `${centerX}px ${centerY}px` }}
+                            >
+                                <circle cx={centerX} cy={centerY} r="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                                <text x={centerX} y={centerY + 1} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.15)" fontSize="20">☯</text>
+                            </motion.g>
+                        </svg>
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                            <div className="w-6 h-0.5 bg-red-500/50 rounded" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #ef4444 0, #ef4444 4px, transparent 4px, transparent 8px)' }}></div>
-                            <span className="text-gray-400">
-                                <span className="text-red-400 font-bold">Kè</span> 克 - Controlling Cycle
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-500 pl-9">
-                            Wood parts Earth → Earth absorbs Water → Water quenches Fire → Fire melts Metal → Metal chops Wood
-                        </p>
-                    </div>
-
-                    <div className="pt-3 border-t border-white/5">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: ELEMENT_COLORS[data.dominant].fill, boxShadow: `0 0 8px ${ELEMENT_COLORS[data.dominant].glow}` }}></div>
-                            <span className="text-white font-bold">{data.dominant}</span>
-                            <span className="text-gray-500">is your dominant element</span>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                            Node size reflects element strength in your chart.
-                        </p>
-                    </div>
-
-                    {/* Detailed Element Breakdown (Yin/Yang) */}
-                    <div className="pt-3 border-t border-white/5 space-y-2">
-                        {Object.entries(elementBreakdown).map(([el, bd]) => {
-                            if (bd.total === 0) return null;
-                            const yinPct = Math.round((bd.yin / bd.total) * 100);
-                            const yangPct = 100 - yinPct;
-
-                            return (
-                                <div key={el} className="flex items-center justify-between text-[10px]">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ELEMENT_COLORS[el].fill }}></div>
-                                        <span className="text-gray-300 w-10">{el}</span>
-                                    </div>
-                                    <div className="flex gap-3 text-gray-500 font-mono">
-                                        <span className={yinPct > yangPct ? "text-gray-300" : ""}>Yin {yinPct}%</span>
-                                        <span className="opacity-30">|</span>
-                                        <span className={yangPct > yinPct ? "text-gray-300" : ""}>Yang {yangPct}%</span>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </div>
-
-            {/* Professional Insights Panel */}
-            <div className="mt-8 pt-4 border-t border-white/5">
-                <button
-                    onClick={() => setShowInsights(!showInsights)}
-                    className="w-full flex items-center justify-between group"
-                >
-                    <span className="text-xs uppercase tracking-widest font-bold text-gray-500 group-hover:text-white transition-colors flex items-center gap-2">
-                        <Zap className="w-3 h-3" /> Strategic Insights
-                    </span>
-                    {showInsights ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
-                </button>
-
-                <AnimatePresence>
-                    {showInsights && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
-                        >
-                            <div className="pt-6 grid md:grid-cols-2 gap-8">
-                                {/* Strategic Balance */}
-                                <div className="space-y-6">
-                                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                        <Scale className="w-4 h-4 text-jade" /> Strategic Balance
-                                    </h4>
-
-                                    {/* Dominant Element Strategy */}
-                                    <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                                        <div className="text-xs text-jade uppercase tracking-wider font-bold mb-2">
-                                            Managing Excess {data.dominant}
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div>
-                                                <span className="text-xs font-bold text-gray-300 block mb-1">How to Express (Healthy Outlet)</span>
-                                                <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[data.dominant].express}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-xs font-bold text-gray-300 block mb-1">How to Control (Balance)</span>
-                                                <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[data.dominant].control}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Weakest Element Strategy */}
-                                    {(() => {
-                                        const weakest = Object.entries(data.percentages).sort(([, a], [, b]) => a - b)[0];
-                                        if (weakest && weakest[1] < 20) {
-                                            return (
-                                                <div className="bg-white/5 rounded-xl p-4 border border-white/5">
-                                                    <div className="text-xs text-spirit uppercase tracking-wider font-bold mb-2">
-                                                        Nourishing Weak {weakest[0]}
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-xs font-bold text-gray-300 block mb-1">How to Strengthen</span>
-                                                        <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[weakest[0]].nourish}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        }
-                                        return null;
-                                    })()}
-
-                                    {/* Void Branch Analysis Removed */}
-                                </div>
-
-                                {/* Yin/Yang Analysis */}
-                                {pillars && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                                <span className="text-lg leading-none">☯</span> Yin Yang Dynamics
-                                            </h4>
-                                            <p className="text-[10px] text-gray-500 mt-1">Calculated from the 8 characters of your 4 Pillars</p>
-                                        </div>
-
-                                        {(() => {
-                                            // Calculate Yin/Yang balance
-                                            let yinCount = 0;
-                                            let yangCount = 0;
-                                            const total = 8; // 4 pillars * 2 (stem + branch)
-
-                                            pillars.forEach(p => {
-                                                if (p.gan_info.polarity === "Yin") yinCount++;
-                                                else yangCount++;
-
-                                                if (p.zhi_info.polarity === "Yin") yinCount++;
-                                                else yangCount++;
-                                            });
-
-                                            const yangPercent = Math.round((yangCount / total) * 100);
-                                            const yinPercent = 100 - yangPercent;
-
-                                            let balanceText = "Balanced";
-                                            let balanceDesc = "Your chart shows a harmonious mix of action and reflection.";
-                                            let balanceColor = "text-jade";
-
-                                            if (yangPercent === 100) {
-                                                balanceText = "Pure Yang Structure";
-                                                balanceDesc = "A rare 'Pure Yang' chart. You are naturally open, direct, and action-oriented. Your life is dynamic and transparent, but you may struggle with secrets or rest.";
-                                                balanceColor = "text-red-400";
-                                            } else if (yinPercent === 100) {
-                                                balanceText = "Pure Yin Structure";
-                                                balanceDesc = "A rare 'Pure Yin' chart. You are deeply intuitive, strategic, and self-contained. You excel at planning and discretion but may need to push yourself to take visible action.";
-                                                balanceColor = "text-blue-400";
-                                            } else if (yangPercent > 65) {
-                                                balanceText = "Yang Dominant";
-                                                balanceDesc = "You are action-oriented, expressive, and influential. You likely prefer leading and initiating over waiting.";
-                                                balanceColor = "text-red-300";
-                                            } else if (yinPercent > 65) {
-                                                balanceText = "Yin Dominant";
-                                                balanceDesc = "You are reflective, strategic, and nurturing. Your strength likely lies in sustaining, planning, and supporting.";
-                                                balanceColor = "text-blue-300";
-                                            }
-
-                                            return (
-                                                <div className="bg-white/5 rounded-xl p-6 border border-white/5">
-                                                    <div className="flex items-end justify-between mb-4">
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-bold text-white mb-1">{yangPercent}%</div>
-                                                            <div className="text-[10px] uppercase tracking-widest text-gray-500">Yang</div>
-                                                        </div>
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-bold text-white mb-1">{yinPercent}%</div>
-                                                            <div className="text-[10px] uppercase tracking-widest text-gray-500">Yin</div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Balance Bar */}
-                                                    <div className="h-2 bg-gray-800 rounded-full overflow-hidden flex mb-6">
-                                                        <div style={{ width: `${yangPercent}%` }} className={`h-full bg-white opacity-90 transition-all duration-1000 ${yangPercent === 100 ? 'bg-red-500' : ''}`} />
-                                                        <div style={{ width: `${yinPercent}%` }} className={`h-full bg-black border border-white/20 transition-all duration-1000 ${yinPercent === 100 ? 'bg-blue-900 border-none' : ''}`} />
-                                                    </div>
-
-                                                    <div className="text-center">
-                                                        <div className={`text-sm font-bold mb-2 ${balanceColor}`}>{balanceText}</div>
-                                                        <p className="text-xs text-gray-500 leading-relaxed">
-                                                            {balanceDesc}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-                                )}
+                    {/* Legend */}
+                    <div className="flex-1 space-y-4 text-sm">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <div className="w-6 h-0.5 bg-green-500/60 rounded"></div>
+                                <span className="text-gray-400">
+                                    <span className="text-green-400 font-bold">Shēng</span> 生 - Generating Cycle
+                                </span>
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            <p className="text-xs text-gray-500 pl-9">
+                                Wood feeds Fire → Fire creates Earth → Earth bears Metal → Metal collects Water → Water nourishes Wood
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <div className="w-6 h-0.5 bg-red-500/50 rounded" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #ef4444 0, #ef4444 4px, transparent 4px, transparent 8px)' }}></div>
+                                <span className="text-gray-400">
+                                    <span className="text-red-400 font-bold">Kè</span> 克 - Controlling Cycle
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 pl-9">
+                                Wood parts Earth → Earth absorbs Water → Water quenches Fire → Fire melts Metal → Metal chops Wood
+                            </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-white/5">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: ELEMENT_COLORS[data.dominant].fill, boxShadow: `0 0 8px ${ELEMENT_COLORS[data.dominant].glow}` }}></div>
+                                <span className="text-white font-bold">{data.dominant}</span>
+                                <span className="text-gray-500">is your dominant element</span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Node size reflects element strength in your chart.
+                            </p>
+                        </div>
+
+                        {/* Detailed Element Breakdown (Yin/Yang) */}
+                        <div className="pt-3 border-t border-white/5 space-y-2">
+                            {Object.entries(elementBreakdown).map(([el, bd]) => {
+                                if (bd.total === 0) return null;
+                                const yinPct = Math.round((bd.yin / bd.total) * 100);
+                                const yangPct = 100 - yinPct;
+
+                                return (
+                                    <div key={el} className="flex items-center justify-between text-[10px]">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ELEMENT_COLORS[el].fill }}></div>
+                                            <span className="text-gray-300 w-10">{el}</span>
+                                        </div>
+                                        <div className="flex gap-3 text-gray-500 font-mono">
+                                            <span className={yinPct > yangPct ? "text-gray-300" : ""}>Yin {yinPct}%</span>
+                                            <span className="opacity-30">|</span>
+                                            <span className={yangPct > yinPct ? "text-gray-300" : ""}>Yang {yangPct}%</span>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Professional Insights Panel */}
+                <div className="mt-8 pt-4 border-t border-white/5">
+                    <button
+                        onClick={() => setShowInsights(!showInsights)}
+                        className="w-full flex items-center justify-between group"
+                    >
+                        <span className="text-xs uppercase tracking-widest font-bold text-gray-500 group-hover:text-white transition-colors flex items-center gap-2">
+                            <Zap className="w-3 h-3" /> Strategic Insights
+                        </span>
+                        {showInsights ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                    </button>
+
+                    <AnimatePresence>
+                        {showInsights && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="pt-6 grid md:grid-cols-2 gap-8">
+                                    {/* Strategic Balance */}
+                                    <div className="space-y-6">
+                                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                            <Scale className="w-4 h-4 text-jade" /> Strategic Balance
+                                        </h4>
+
+                                        {/* Dominant Element Strategy */}
+                                        <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                                            <div className="text-xs text-jade uppercase tracking-wider font-bold mb-2">
+                                                Managing Excess {data.dominant}
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <span className="text-xs font-bold text-gray-300 block mb-1">How to Express (Healthy Outlet)</span>
+                                                    <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[data.dominant].express}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs font-bold text-gray-300 block mb-1">How to Control (Balance)</span>
+                                                    <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[data.dominant].control}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Weakest Element Strategy */}
+                                        {(() => {
+                                            const weakest = Object.entries(data.percentages).sort(([, a], [, b]) => a - b)[0];
+                                            if (weakest && weakest[1] < 20) {
+                                                return (
+                                                    <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                                                        <div className="text-xs text-spirit uppercase tracking-wider font-bold mb-2">
+                                                            Nourishing Weak {weakest[0]}
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-xs font-bold text-gray-300 block mb-1">How to Strengthen</span>
+                                                            <p className="text-xs text-gray-500 leading-relaxed">{ELEMENT_REMEDIES[weakest[0]].nourish}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+
+                                        {/* Void Branch Analysis Removed */}
+
+                                        {/* Ask AI Button */}
+                                        {chartContext && (
+                                            <div className="mt-6 pt-4 border-t border-white/5 flex justify-end print:hidden">
+                                                <AskAIButton
+                                                    cardType="wuxing"
+                                                    cardData={data as unknown as Record<string, unknown>}
+                                                    chartContext={chartContext}
+                                                    onExplanation={(explanation) => {
+                                                        setAiExplanation(explanation);
+                                                        setAiModalOpen(true);
+                                                    }}
+                                                    onError={(error) => console.error('AI Error:', error)}
+                                                    size="md"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Yin/Yang Analysis */}
+                                    {pillars && (
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                                    <span className="text-lg leading-none">☯</span> Yin Yang Dynamics
+                                                </h4>
+                                                <p className="text-[10px] text-gray-500 mt-1">Calculated from the 8 characters of your 4 Pillars</p>
+                                            </div>
+
+                                            {(() => {
+                                                // Calculate Yin/Yang balance
+                                                let yinCount = 0;
+                                                let yangCount = 0;
+                                                const total = 8; // 4 pillars * 2 (stem + branch)
+
+                                                pillars.forEach(p => {
+                                                    if (p.gan_info.polarity === "Yin") yinCount++;
+                                                    else yangCount++;
+
+                                                    if (p.zhi_info.polarity === "Yin") yinCount++;
+                                                    else yangCount++;
+                                                });
+
+                                                const yangPercent = Math.round((yangCount / total) * 100);
+                                                const yinPercent = 100 - yangPercent;
+
+                                                let balanceText = "Balanced";
+                                                let balanceDesc = "Your chart shows a harmonious mix of action and reflection.";
+                                                let balanceColor = "text-jade";
+
+                                                if (yangPercent === 100) {
+                                                    balanceText = "Pure Yang Structure";
+                                                    balanceDesc = "A rare 'Pure Yang' chart. You are naturally open, direct, and action-oriented. Your life is dynamic and transparent, but you may struggle with secrets or rest.";
+                                                    balanceColor = "text-red-400";
+                                                } else if (yinPercent === 100) {
+                                                    balanceText = "Pure Yin Structure";
+                                                    balanceDesc = "A rare 'Pure Yin' chart. You are deeply intuitive, strategic, and self-contained. You excel at planning and discretion but may need to push yourself to take visible action.";
+                                                    balanceColor = "text-blue-400";
+                                                } else if (yangPercent > 65) {
+                                                    balanceText = "Yang Dominant";
+                                                    balanceDesc = "You are action-oriented, expressive, and influential. You likely prefer leading and initiating over waiting.";
+                                                    balanceColor = "text-red-300";
+                                                } else if (yinPercent > 65) {
+                                                    balanceText = "Yin Dominant";
+                                                    balanceDesc = "You are reflective, strategic, and nurturing. Your strength likely lies in sustaining, planning, and supporting.";
+                                                    balanceColor = "text-blue-300";
+                                                }
+
+                                                return (
+                                                    <div className="bg-white/5 rounded-xl p-6 border border-white/5">
+                                                        <div className="flex items-end justify-between mb-4">
+                                                            <div className="text-center">
+                                                                <div className="text-2xl font-bold text-white mb-1">{yangPercent}%</div>
+                                                                <div className="text-[10px] uppercase tracking-widest text-gray-500">Yang</div>
+                                                            </div>
+                                                            <div className="text-center">
+                                                                <div className="text-2xl font-bold text-white mb-1">{yinPercent}%</div>
+                                                                <div className="text-[10px] uppercase tracking-widest text-gray-500">Yin</div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Balance Bar */}
+                                                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden flex mb-6">
+                                                            <div style={{ width: `${yangPercent}%` }} className={`h-full bg-white opacity-90 transition-all duration-1000 ${yangPercent === 100 ? 'bg-red-500' : ''}`} />
+                                                            <div style={{ width: `${yinPercent}%` }} className={`h-full bg-black border border-white/20 transition-all duration-1000 ${yinPercent === 100 ? 'bg-blue-900 border-none' : ''}`} />
+                                                        </div>
+
+                                                        <div className="text-center">
+                                                            <div className={`text-sm font-bold mb-2 ${balanceColor}`}>{balanceText}</div>
+                                                            <p className="text-xs text-gray-500 leading-relaxed">
+                                                                {balanceDesc}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
-        </div>
+        </>
     );
 }

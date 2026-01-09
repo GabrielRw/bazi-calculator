@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult } from "@/types/bazi";
+import { ChartContext } from "@/types/ai";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
@@ -49,6 +50,18 @@ export default function Home() {
   const [history, setHistory] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [loadedData, setLoadedData] = useState<any | null>(null);
+
+  // Create chart context for AI explanations
+  const chartContext: ChartContext | undefined = useMemo(() => {
+    if (!result) return undefined;
+    return {
+      dayMaster: result.day_master,
+      elements: result.elements,
+      structure: result.professional.structure,
+      dmStrength: result.professional.dm_strength,
+      pillars: result.pillars,
+    };
+  }, [result]);
 
   // Load history on mount
   useEffect(() => {
@@ -665,7 +678,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                   <div className="space-y-12">
                     {/* 1. Four Pillars (Centerpiece) */}
                     <section>
-                      <FourPillars pillars={result.pillars} />
+                      <FourPillars pillars={result.pillars} chartContext={chartContext} />
                     </section>
 
                     {/* 2. Charts Row */}
@@ -700,7 +713,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 2.5 Wuxing Five Phases Chart */}
                     <section>
-                      <WuxingChart data={result.elements} pillars={result.pillars} />
+                      <WuxingChart data={result.elements} pillars={result.pillars} chartContext={chartContext} />
                     </section>
 
                     {/* 3. Luck Pillars */}
@@ -713,8 +726,8 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 3. Deep Analysis & Yong Shen */}
                     <section className="space-y-8">
-                      <YongShenSection result={result} />
-                      <AnalysisSection result={result} />
+                      <YongShenSection result={result} chartContext={chartContext} />
+                      <AnalysisSection result={result} chartContext={chartContext} />
                     </section>
 
                     {/* 5. Precise Technical Data (The Debug/Astro Info User Asked For) */}
