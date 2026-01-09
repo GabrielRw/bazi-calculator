@@ -69,10 +69,9 @@ export default function AskAIButton({
             disabled={loading}
             className={`
                 flex items-center gap-1.5 
-                bg-gradient-to-r from-purple-500/20 to-pink-500/20 
-                hover:from-purple-500/30 hover:to-pink-500/30
-                border border-purple-500/30 hover:border-purple-400/50
-                text-purple-300 hover:text-purple-200
+                bg-jade/10 hover:bg-jade/20
+                border border-jade/30 hover:border-jade/50
+                text-jade hover:text-white
                 rounded-lg font-bold uppercase tracking-wider
                 transition-all duration-300
                 disabled:opacity-50 disabled:cursor-not-allowed
