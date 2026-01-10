@@ -840,7 +840,13 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                       <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 mb-6 px-2 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-clay" /> Luck Cycles
                       </h3>
-                      <LuckPillars luck={result.luck_cycle} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                      <LuckPillars
+                        luck={result.luck_cycle}
+                        chartContext={chartContext}
+                        onAIExplanation={handleAIExplanation}
+                        onAIRequest={handleAIRequest}
+                        aiHistory={aiHistory}
+                      />
                     </section>
 
                     {/* 3. Deep Analysis & Yong Shen */}

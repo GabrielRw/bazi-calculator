@@ -225,6 +225,22 @@ RULES:
 3. Explain how they provide a "foundation" or "hidden resource" for the ${data.pillar_name} life domain.
 4. Keep it focused on "hidden potential" and "latent talents".
 5. Maximum 180 words.`;
+    },
+    element_balance: (cardData) => {
+        const data = cardData as { element: string; yin: number; yang: number; total: number };
+        const yinPct = Math.round((data.yin / (data.total || 1)) * 100);
+        const yangPct = 100 - yinPct;
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst. Explain the Yin-Yang balance of a SPECIFIC element in this chart.
+
+ELEMENT: ${data.element}
+BALANCE: Yin ${yinPct}% | Yang ${yangPct}%
+
+RULES:
+1. Explain what this specific Yin-Yang distribution of ${data.element} means for the person.
+2. Focus on how the "quality" of ${data.element} (Internal/Passive Yin vs External/Active Yang) affects its expression in their chart.
+3. Provide practical insight into how they experience this specific elemental energy.
+4. Keep it focused ONLY on this element's balance.
+5. Maximum 150 words.`;
     }
 };
 

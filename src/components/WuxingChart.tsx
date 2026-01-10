@@ -405,15 +405,31 @@ export default function WuxingChart({ data, pillars, chartContext, onAIExplanati
                                 const yangPct = 100 - yinPct;
 
                                 return (
-                                    <div key={el} className="flex items-center justify-between text-[10px]">
+                                    <div key={el} className="flex items-center justify-between text-[10px] group/item hover:bg-white/5 p-1 rounded transition-colors">
                                         <div className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ELEMENT_COLORS[el].fill }}></div>
                                             <span className="text-gray-300 w-10">{el}</span>
                                         </div>
-                                        <div className="flex gap-3 text-gray-500 font-mono">
-                                            <span className={yinPct > yangPct ? "text-gray-300" : ""}>Yin {yinPct}%</span>
-                                            <span className="opacity-30">|</span>
-                                            <span className={yangPct > yinPct ? "text-gray-300" : ""}>Yang {yangPct}%</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex gap-2 text-gray-500 font-mono">
+                                                <span className={yinPct > yangPct ? "text-gray-300" : ""}>Yin {yinPct}%</span>
+                                                <span className="opacity-30">|</span>
+                                                <span className={yangPct > yinPct ? "text-gray-300" : ""}>Yang {yangPct}%</span>
+                                            </div>
+                                            {chartContext && (
+                                                <AskAIButton
+                                                    cardType="element_balance"
+                                                    cardData={{ element: el, yin: bd.yin, yang: bd.yang, total: bd.total }}
+                                                    chartContext={chartContext}
+                                                    onExplanation={(exp) => onAIExplanation?.(exp, `${el} Yin-Yang Balance`, "element_balance")}
+                                                    onError={(err) => console.error(err)}
+                                                    onRequestStart={onAIRequest}
+                                                    cardTitle={`${el} Yin-Yang Balance`}
+                                                    history={aiHistory}
+                                                    size="xs"
+                                                    className="opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                 )

@@ -11,7 +11,8 @@ export type AICardType =
     | 'luck'
     | 'lifespan'
     | 'daymaster'
-    | 'roots';
+    | 'roots'
+    | 'element_balance';
 
 export interface AIHistoryItem {
     id: string;

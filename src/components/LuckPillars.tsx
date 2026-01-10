@@ -1,47 +1,28 @@
 "use client";
 
 import { LuckCycle } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { ChartContext, AIHistoryItem, AICardType } from "@/types/ai";
 import { getElementColor } from "@/lib/utils";
 import { useRef } from "react";
-import { ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 import { getStemData, getBranchData } from "@/lib/ganzhi";
+import AskAIButton from "./AskAIButton";
 
 interface LuckPillarsProps {
     luck: LuckCycle;
     currentAge?: number;
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
-export default function LuckPillars({ luck, currentAge = 30, chartContext, onAIExplanation }: LuckPillarsProps) {
+export default function LuckPillars({ luck, currentAge = 30, chartContext, onAIExplanation, onAIRequest, aiHistory }: LuckPillarsProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const scroll = (offset: number) => {
         if (scrollRef.current) {
             scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
-        }
-    };
-
-    const handleAskAI = async (pillar: { gan: string; zhi: string; start_age: number; start_year: number; end_year: number }) => {
-        if (!chartContext || !onAIExplanation) return;
-
-        try {
-            const response = await fetch('/api/bazi/explain', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cardType: 'luck',
-                    cardData: pillar,
-                    chartContext
-                }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                onAIExplanation(data.explanation, `Luck Cycle (Age ${pillar.start_age})`);
-            }
-        } catch (err) {
-            console.error('AI Error:', err);
         }
     };
 
@@ -74,6 +55,8 @@ export default function LuckPillars({ luck, currentAge = 30, chartContext, onAIE
                     const ganColors = getElementColor(stemData?.element || 'Metal');
                     const zhiColors = getElementColor(branchData?.element || 'Metal');
 
+                    const cardTitle = `Luck Cycle (Age ${pillar.start_age})`;
+
                     return (
                         <div
                             key={pillar.start_age}
@@ -101,13 +84,20 @@ export default function LuckPillars({ luck, currentAge = 30, chartContext, onAIE
                             </div>
 
                             {/* AI Button */}
-                            {chartContext && onAIExplanation && (
-                                <button
-                                    onClick={() => handleAskAI(pillar)}
-                                    className="mt-auto p-1.5 text-[10px] flex items-center gap-1 bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300 print:hidden"
-                                >
-                                    <Sparkles className="w-3 h-3" />
-                                </button>
+                            {chartContext && (
+                                <div className="mt-auto flex justify-center w-full print:hidden">
+                                    <AskAIButton
+                                        cardType="luck"
+                                        cardData={pillar as unknown as Record<string, unknown>}
+                                        chartContext={chartContext}
+                                        onExplanation={(exp) => onAIExplanation?.(exp, cardTitle, "luck")}
+                                        onError={(err) => console.error(err)}
+                                        onRequestStart={onAIRequest}
+                                        cardTitle={cardTitle}
+                                        history={aiHistory}
+                                        size="xs"
+                                    />
+                                </div>
                             )}
                         </div>
                     );

@@ -42,10 +42,10 @@ export default function AskAIButton({
     };
 
     const iconSizes = {
-        xs: 10,
-        sm: 12,
-        md: 14,
-        lg: 16
+        xs: 12,
+        sm: 14,
+        md: 16,
+        lg: 18
     };
 
     const handleClick = async (e: React.MouseEvent) => {

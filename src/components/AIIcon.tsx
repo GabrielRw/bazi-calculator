@@ -11,7 +11,7 @@ interface AIIconProps {
  * Custom AI Icon component that uses loop.png as a mask.
  * This allows the icon to be colored using CSS background-color (e.g., bg-current or bg-jade).
  */
-export default function AIIcon({ className, size = 20 }: AIIconProps) {
+export default function AIIcon({ className, size = 22 }: AIIconProps) {
     const sizeStyle = typeof size === "number" ? `${size}px` : size;
 
     return (
