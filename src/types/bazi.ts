@@ -164,6 +164,7 @@ export interface BaziResult {
         latitude?: number;
         longitude?: number;
     };
+    current_age?: number;
 }
 
 export interface SynastryResult {

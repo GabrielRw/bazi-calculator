@@ -171,21 +171,38 @@ RULES:
     },
 
     lifespan: (cardData, chartContext) => {
+        const { currentAge, curve } = cardData as { currentAge?: number; curve: any[] };
         const dmInfo = (chartContext.dayMaster as { info?: { element?: string; polarity?: string } })?.info;
-        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in life energy curves (Jing-Qi-Shen).
+
+        // Find current stage data
+        const currentData = currentAge !== undefined ? curve.find((p: any) => p.age === currentAge) : null;
+
+        // Find peak energy
+        const peakQi = [...curve].sort((a, b) => b.qi - a.qi)[0];
+        const peakShen = [...curve].sort((a, b) => b.shen - a.shen)[0];
+
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in life energy curves (Neijing).
+${currentAge !== undefined ? `PERSON'S CURRENT AGE: ${currentAge}` : ''}
+
+CURRENT ENERGY LEVELS (at age ${currentAge}):
+- Jing (Essence): ${currentData?.j_final?.toFixed(1) || 'N/A'}
+- Qi (Vitality): ${currentData?.qi?.toFixed(1) || 'N/A'}
+- Shen (Spirit): ${currentData?.shen?.toFixed(1) || 'N/A'}
+
+LIFESPAN TRENDS:
+- Peak Qi (Vitality) occurs at age ${peakQi?.age} (Value: ${peakQi?.qi?.toFixed(1)})
+- Peak Shen (Spirit) occurs at age ${peakShen?.age} (Value: ${peakShen?.shen?.toFixed(1)})
 
 CHART CONTEXT:
 - Day Master: ${dmInfo?.element} ${dmInfo?.polarity}
-- Structure: ${chartContext.structure}
 - Strength: ${chartContext.dmStrength}
 
 RULES:
-1. Focus ONLY on the Jing (Essence), Qi (Vitality), and Shen (Spirit) energy patterns
-2. DO NOT discuss: specific pillars, stars, or interactions (those have their own explanations)
-3. Explain: how these three treasures (San Bao) flow through life stages
-4. Include: general guidance for maintaining balance between Jing, Qi, and Shen
-5. Keep it philosophical yet practical
-6. Maximum 200 words`;
+1. Explain the current life stage and energy balance based on the provided Jing, Qi, and Shen data.
+2. Analyze the overall trajectory: Is energy rising, peaking, or stabilizing?
+3. Provide practical advice for the current age to preserve Jing and cultivate Shen.
+4. Keep it philosophical yet grounded in the traditional "Three Treasures" concept.
+5. Maximum 220 words.`;
     },
 
     daymaster: (cardData, chartContext) => {

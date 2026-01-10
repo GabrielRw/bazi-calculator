@@ -795,6 +795,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         {lifespanResult && (
                           <JingQiShenChart
                             data={lifespanResult.curve}
+                            currentAge={result.current_age}
                             chartContext={chartContext}
                             onAIExplanation={handleAIExplanation}
                             onAIRequest={handleAIRequest}

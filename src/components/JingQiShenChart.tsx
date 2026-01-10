@@ -9,13 +9,14 @@ import AskAIButton from "./AskAIButton";
 
 interface JingQiShenChartProps {
     data: LifespanCurvePoint[];
+    currentAge?: number;
     chartContext?: ChartContext;
     onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
     onAIRequest?: (cardTitle: string) => void;
     aiHistory?: AIHistoryItem[];
 }
 
-export default function JingQiShenChart({ data, chartContext, onAIExplanation, onAIRequest, aiHistory }: JingQiShenChartProps) {
+export default function JingQiShenChart({ data, currentAge, chartContext, onAIExplanation, onAIRequest, aiHistory }: JingQiShenChartProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +127,7 @@ export default function JingQiShenChart({ data, chartContext, onAIExplanation, o
                     {chartContext && onAIExplanation && (
                         <AskAIButton
                             cardType="lifespan"
-                            cardData={data as unknown as Record<string, unknown>}
+                            cardData={{ currentAge, curve: data }}
                             chartContext={chartContext}
                             onExplanation={(exp) => onAIExplanation(exp, "Life Energy Curves", "lifespan")}
                             onError={(err) => console.error(err)}
