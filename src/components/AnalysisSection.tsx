@@ -8,7 +8,6 @@ import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
 import { useState } from "react";
 import StarDetailModal from "./StarDetailModal";
 import AskAIButton from "./AskAIButton";
-import AIExplanationModal from "./AIExplanationModal";
 
 
 const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activated: string }> = {
@@ -77,6 +76,7 @@ const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activa
 interface AnalysisSectionProps {
     result: BaziResult;
     chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,16 +166,13 @@ function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation }: 
     );
 }
 
-export default function AnalysisSection({ result, chartContext }: AnalysisSectionProps) {
+export default function AnalysisSection({ result, chartContext, onAIExplanation }: AnalysisSectionProps) {
     const [selectedStar, setSelectedStar] = useState<StarType | null>(null);
-    const [aiExplanation, setAiExplanation] = useState<string>("");
-    const [aiModalOpen, setAiModalOpen] = useState(false);
-    const [aiCardTitle, setAiCardTitle] = useState<string>("");
 
     const handleAIExplanation = (explanation: string, cardTitle: string) => {
-        setAiExplanation(explanation);
-        setAiCardTitle(cardTitle);
-        setAiModalOpen(true);
+        if (onAIExplanation) {
+            onAIExplanation(explanation, cardTitle);
+        }
     };
 
     return (
@@ -184,14 +181,6 @@ export default function AnalysisSection({ result, chartContext }: AnalysisSectio
                 star={selectedStar}
                 isOpen={!!selectedStar}
                 onClose={() => setSelectedStar(null)}
-            />
-
-            {/* AI Explanation Modal */}
-            <AIExplanationModal
-                isOpen={aiModalOpen}
-                onClose={() => setAiModalOpen(false)}
-                explanation={aiExplanation}
-                cardTitle={aiCardTitle}
             />
 
             {/* Symbolic Stars */}

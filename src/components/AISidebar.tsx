@@ -3,13 +3,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Copy, Check } from "lucide-react";
+import { X, Sparkles, Copy, Check, ChevronRight } from "lucide-react";
 
-interface AIExplanationModalProps {
+interface AISidebarProps {
     isOpen: boolean;
     onClose: () => void;
     explanation: string;
     cardTitle?: string;
+    isLoading?: boolean;
 }
 
 // Simple markdown parser for common patterns
@@ -45,7 +46,6 @@ function parseMarkdown(text: string): React.ReactNode[] {
     lines.forEach((line, index) => {
         const trimmed = line.trim();
 
-        // Header (## or ###)
         if (trimmed.startsWith('### ')) {
             flushList();
             result.push(
@@ -67,22 +67,14 @@ function parseMarkdown(text: string): React.ReactNode[] {
                     {parseBold(trimmed.slice(2))}
                 </h2>
             );
-        }
-        // List item (- or *)
-        else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
             listItems.push(trimmed.slice(2));
-        }
-        // Horizontal rule
-        else if (trimmed === '---' || trimmed === '***') {
+        } else if (trimmed === '---' || trimmed === '***') {
             flushList();
             result.push(<hr key={index} className="border-white/10 my-4" />);
-        }
-        // Empty line
-        else if (trimmed === '') {
+        } else if (trimmed === '') {
             flushList();
-        }
-        // Regular paragraph
-        else {
+        } else {
             flushList();
             result.push(
                 <p key={index} className="text-gray-300 text-sm leading-relaxed mb-3">
@@ -96,12 +88,13 @@ function parseMarkdown(text: string): React.ReactNode[] {
     return result;
 }
 
-export default function AIExplanationModal({
+export default function AISidebar({
     isOpen,
     onClose,
     explanation,
-    cardTitle
-}: AIExplanationModalProps) {
+    cardTitle,
+    isLoading = false
+}: AISidebarProps) {
     const [mounted, setMounted] = useState(false);
     const [copied, setCopied] = useState(false);
     const [displayedText, setDisplayedText] = useState("");
@@ -125,7 +118,7 @@ export default function AIExplanationModal({
             } else {
                 clearInterval(interval);
             }
-        }, 5); // Slightly faster for better UX
+        }, 5);
 
         return () => clearInterval(interval);
     }, [isOpen, explanation]);
@@ -143,27 +136,27 @@ export default function AIExplanationModal({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
-                    {/* Backdrop */}
+                <>
+                    {/* Backdrop - only on mobile */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[199] lg:hidden"
                     />
 
-                    {/* Modal */}
+                    {/* Sidebar */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        transition={{ duration: 0.2, delay: 0.05 }}
-                        className="relative z-[201] w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl glass-card border border-white/10 shadow-2xl"
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed top-0 right-0 h-full w-full sm:w-96 lg:w-[420px] z-[200] bg-void/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-white/5">
+                        <div className="flex items-center justify-between p-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-jade/10 border border-jade/20">
                                     <Sparkles className="w-4 h-4 text-jade" />
@@ -182,7 +175,8 @@ export default function AIExplanationModal({
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handleCopy}
-                                    className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-jade"
+                                    disabled={!explanation}
+                                    className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-jade disabled:opacity-50"
                                     title="Copy to clipboard"
                                 >
                                     {copied ? (
@@ -193,27 +187,46 @@ export default function AIExplanationModal({
                                 </button>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                                 >
-                                    <X className="w-5 h-5 text-gray-400" />
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
-                            <div className="min-h-[100px]">
-                                {parsedContent}
-                                {displayedText.length < explanation.length && (
-                                    <span className="inline-block w-0.5 h-4 bg-jade animate-pulse ml-0.5" />
-                                )}
-                            </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            {isLoading ? (
+                                <div className="flex flex-col items-center justify-center h-full gap-4">
+                                    <div className="w-8 h-8 border-2 border-jade/30 border-t-jade rounded-full animate-spin" />
+                                    <p className="text-sm text-gray-500">Analyzing...</p>
+                                </div>
+                            ) : explanation ? (
+                                <div className="min-h-[100px]">
+                                    {parsedContent}
+                                    {displayedText.length < explanation.length && (
+                                        <span className="inline-block w-0.5 h-4 bg-jade animate-pulse ml-0.5" />
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                                    <Sparkles className="w-12 h-12 text-jade/20" />
+                                    <div>
+                                        <p className="text-sm text-gray-400">No analysis yet</p>
+                                        <p className="text-xs text-gray-600 mt-1">Click an Ask AI button to get started</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Footer gradient */}
-                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-void to-transparent pointer-events-none" />
+                        {/* Footer */}
+                        <div className="p-4 border-t border-white/5 flex-shrink-0">
+                            <p className="text-[10px] text-gray-600 text-center">
+                                Powered by Mistral AI • Explanations are interpretive, not predictive
+                            </p>
+                        </div>
                     </motion.div>
-                </div>
+                </>
             )}
         </AnimatePresence>,
         document.body

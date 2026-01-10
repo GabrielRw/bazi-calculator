@@ -145,6 +145,70 @@ RULES:
 4. Include: how voids activate through time and what to expect
 5. Keep it personal and specific - avoid generic statements
 6. Maximum 180 words`;
+    },
+
+    luck: (cardData, chartContext) => {
+        const luck = cardData as { gan: string; zhi: string; start_age: number; start_year: number; end_year: number };
+        const dmInfo = (chartContext.dayMaster as { info?: { element?: string; polarity?: string } })?.info;
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in Da Yun (10-Year Luck Pillars).
+
+LUCK PILLAR DATA:
+- Pillar: ${luck.gan}${luck.zhi}
+- Age Range: ${luck.start_age} to ${luck.start_age + 9}
+- Years: ${luck.start_year} to ${luck.end_year || luck.start_year + 9}
+
+CHART CONTEXT:
+- Day Master: ${dmInfo?.element} ${dmInfo?.polarity}
+- Structure: ${chartContext.structure}
+
+RULES:
+1. Focus ONLY on this specific 10-year luck period
+2. DO NOT discuss: natal pillars, stars, or other luck periods (those have their own explanations)
+3. Explain: the themes, opportunities, and challenges of this decade
+4. Include: how this luck pillar interacts with the Day Master
+5. Keep it practical and grounded - avoid vague predictions
+6. Maximum 200 words`;
+    },
+
+    lifespan: (cardData, chartContext) => {
+        const dmInfo = (chartContext.dayMaster as { info?: { element?: string; polarity?: string } })?.info;
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in life energy curves (Jing-Qi-Shen).
+
+CHART CONTEXT:
+- Day Master: ${dmInfo?.element} ${dmInfo?.polarity}
+- Structure: ${chartContext.structure}
+- Strength: ${chartContext.dmStrength}
+
+RULES:
+1. Focus ONLY on the Jing (Essence), Qi (Vitality), and Shen (Spirit) energy patterns
+2. DO NOT discuss: specific pillars, stars, or interactions (those have their own explanations)
+3. Explain: how these three treasures (San Bao) flow through life stages
+4. Include: general guidance for maintaining balance between Jing, Qi, and Shen
+5. Keep it philosophical yet practical
+6. Maximum 200 words`;
+    },
+
+    daymaster: (cardData, chartContext) => {
+        const dayMaster = chartContext.dayMaster as { stem: string; info: { element: string; polarity: string; name: string; pinyin: string } };
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in Day Master analysis.
+
+DAY MASTER DATA:
+- Character: ${dayMaster.stem}
+- Pinyin: ${dayMaster.info?.pinyin}
+- Element: ${dayMaster.info?.element} ${dayMaster.info?.polarity}
+- Name: ${dayMaster.info?.name}
+
+CHART CONTEXT:
+- Structure: ${chartContext.structure}
+- Strength: ${chartContext.dmStrength}
+
+RULES:
+1. Focus ONLY on the Day Master as the core identity
+2. DO NOT discuss: other pillars, stars, specific interactions, or remedies (those have their own explanations)
+3. Explain: the essential nature, decision-making style, and core drives of this Day Master
+4. Include: how ${dayMaster.info?.polarity} ${dayMaster.info?.element} manifests in personality
+5. Keep it personal and insightful - this is about WHO they are
+6. Maximum 200 words`;
     }
 };
 

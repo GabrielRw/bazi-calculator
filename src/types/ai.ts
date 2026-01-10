@@ -7,7 +7,10 @@ export type AICardType =
     | 'structure'
     | 'wuxing'
     | 'yongshen'
-    | 'void';
+    | 'void'
+    | 'luck'
+    | 'lifespan'
+    | 'daymaster';
 
 export interface ChartContext {
     dayMaster: DayMaster;

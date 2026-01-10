@@ -3,13 +3,16 @@
 import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LifespanCurvePoint } from "@/types/bazi";
-import { Activity, Zap, Brain, Droplets } from "lucide-react";
+import { ChartContext } from "@/types/ai";
+import { Activity, Zap, Brain, Droplets, Sparkles } from "lucide-react";
 
 interface JingQiShenChartProps {
     data: LifespanCurvePoint[];
+    chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
 }
 
-export default function JingQiShenChart({ data }: JingQiShenChartProps) {
+export default function JingQiShenChart({ data, chartContext, onAIExplanation }: JingQiShenChartProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +104,28 @@ export default function JingQiShenChart({ data }: JingQiShenChartProps) {
         }
     };
 
+    const handleAskAI = async () => {
+        if (!chartContext || !onAIExplanation) return;
+
+        try {
+            const response = await fetch('/api/bazi/explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cardType: 'lifespan',
+                    cardData: {},
+                    chartContext
+                }),
+            });
+            const responseData = await response.json();
+            if (response.ok) {
+                onAIExplanation(responseData.explanation, "Life Energy Curves");
+            }
+        } catch (err) {
+            console.error('AI Error:', err);
+        }
+    };
+
     const activePoint = hoveredIndex !== null ? data[hoveredIndex] : null;
 
     return (
@@ -115,19 +140,31 @@ export default function JingQiShenChart({ data }: JingQiShenChartProps) {
                     <Activity className="w-4 h-4" /> Neijing Life Curve
                 </h3>
 
-                {/* Legend */}
-                <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                        <span className="text-blue-400">Jing (Essence)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                        <span className="text-green-400">Qi (Energy)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
-                        <span className="text-yellow-400">Shen (Spirit)</span>
+                <div className="flex items-center gap-4">
+                    {/* AI Button */}
+                    {chartContext && onAIExplanation && (
+                        <button
+                            onClick={handleAskAI}
+                            className="p-1.5 text-[10px] flex items-center gap-1 bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300 print:hidden"
+                        >
+                            <Sparkles className="w-3 h-3" />
+                        </button>
+                    )}
+
+                    {/* Legend */}
+                    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+                            <span className="text-blue-400">Jing (Essence)</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                            <span className="text-green-400">Qi (Energy)</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
+                            <span className="text-yellow-400">Shen (Spirit)</span>
+                        </div>
                     </div>
                 </div>
             </div>

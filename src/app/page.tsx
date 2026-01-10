@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult } from "@/types/bazi";
 import { ChartContext } from "@/types/ai";
 import BaziForm from "@/components/BaziForm";
@@ -13,6 +13,7 @@ import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
 import SynastryResultView from "@/components/SynastryResult";
+import AISidebar from "@/components/AISidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -62,6 +63,27 @@ export default function Home() {
       pillars: result.pillars,
     };
   }, [result]);
+
+  // AI Sidebar State
+  const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState("");
+  const [aiCardTitle, setAiCardTitle] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Global AI explanation handler passed to all components
+  const handleAIExplanation = useCallback((explanation: string, cardTitle: string) => {
+    setAiExplanation(explanation);
+    setAiCardTitle(cardTitle);
+    setAiSidebarOpen(true);
+    setAiLoading(false);
+  }, []);
+
+  // Handler for when AI request starts
+  const handleAIRequest = useCallback((cardTitle: string) => {
+    setAiCardTitle(cardTitle);
+    setAiLoading(true);
+    setAiSidebarOpen(true);
+  }, []);
 
   // Load history on mount
   useEffect(() => {
@@ -678,7 +700,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                   <div className="space-y-12">
                     {/* 1. Four Pillars (Centerpiece) */}
                     <section>
-                      <FourPillars pillars={result.pillars} chartContext={chartContext} />
+                      <FourPillars pillars={result.pillars} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
                     </section>
 
                     {/* 2. Charts Row */}
@@ -686,7 +708,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                       <div className="lg:col-span-2 space-y-8">
                         <ElementChart data={result.elements} />
                         {lifespanResult && (
-                          <JingQiShenChart data={lifespanResult.curve} />
+                          <JingQiShenChart data={lifespanResult.curve} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
                         )}
                       </div>
                       <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
@@ -707,13 +729,45 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                               &quot;{result.professional.interpretation.split('.')[0]}.&quot;
                             </p>
                           </div>
+                          {/* Ask AI Button for Day Master */}
+                          {chartContext && (
+                            <div className="pt-4 print:hidden">
+                              <button
+                                onClick={async () => {
+                                  handleAIRequest("Day Master");
+                                  try {
+                                    const response = await fetch('/api/bazi/explain', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        cardType: 'daymaster',
+                                        cardData: result.day_master,
+                                        chartContext
+                                      }),
+                                    });
+                                    const data = await response.json();
+                                    if (response.ok) {
+                                      handleAIExplanation(data.explanation, "Day Master");
+                                    }
+                                  } catch (err) {
+                                    console.error('AI Error:', err);
+                                    setAiLoading(false);
+                                  }
+                                }}
+                                className="flex items-center gap-1.5 mx-auto px-3 py-1.5 text-xs bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300"
+                              >
+                                <Sparkles className="w-3 h-3" />
+                                Ask AI
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </section>
 
                     {/* 2.5 Wuxing Five Phases Chart */}
                     <section>
-                      <WuxingChart data={result.elements} pillars={result.pillars} chartContext={chartContext} />
+                      <WuxingChart data={result.elements} pillars={result.pillars} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
                     </section>
 
                     {/* 3. Luck Pillars */}
@@ -721,7 +775,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                       <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 mb-6 px-2 flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-clay" /> Luck Cycles
                       </h3>
-                      <LuckPillars luck={result.luck_cycle} />
+                      <LuckPillars luck={result.luck_cycle} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
                     </section>
 
                     {/* 3. Deep Analysis & Yong Shen */}
@@ -856,6 +910,15 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           } : null)}
         />
       )}
+
+      {/* AI Sidebar */}
+      <AISidebar
+        isOpen={aiSidebarOpen}
+        onClose={() => setAiSidebarOpen(false)}
+        explanation={aiExplanation}
+        cardTitle={aiCardTitle}
+        isLoading={aiLoading}
+      />
     </main>
   );
 }

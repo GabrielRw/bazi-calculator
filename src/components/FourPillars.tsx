@@ -8,11 +8,11 @@ import { ChartContext } from "@/types/ai";
 import { cn, getElementColor } from "@/lib/utils";
 import { Info, X, Zap, Sparkles, User } from "lucide-react";
 import AskAIButton from "./AskAIButton";
-import AIExplanationModal from "./AIExplanationModal";
 
 interface FourPillarsProps {
     pillars: Pillar[];
     chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
 }
 
 const pillarDomains: Record<string, string> = {
@@ -35,12 +35,9 @@ const tenGodArchetypes: Record<string, string> = {
     "Indirect Resource": "The Seeker"
 };
 
-export default function FourPillars({ pillars, chartContext }: FourPillarsProps) {
+export default function FourPillars({ pillars, chartContext, onAIExplanation }: FourPillarsProps) {
     const [activePillarIndex, setActivePillarIndex] = useState<number | null>(null);
     const [mounted, setMounted] = useState(false);
-    const [aiExplanation, setAiExplanation] = useState<string>("");
-    const [aiModalOpen, setAiModalOpen] = useState(false);
-    const [aiCardTitle, setAiCardTitle] = useState<string>("");
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -48,9 +45,9 @@ export default function FourPillars({ pillars, chartContext }: FourPillarsProps)
     }, []);
 
     const handleAIExplanation = (explanation: string, cardTitle: string) => {
-        setAiExplanation(explanation);
-        setAiCardTitle(cardTitle);
-        setAiModalOpen(true);
+        if (onAIExplanation) {
+            onAIExplanation(explanation, cardTitle);
+        }
     };
 
     return (
@@ -62,17 +59,11 @@ export default function FourPillars({ pillars, chartContext }: FourPillarsProps)
                         pillar={pillar}
                         index={index}
                         onClick={() => setActivePillarIndex(index)}
+                        chartContext={chartContext}
+                        onAIExplanation={handleAIExplanation}
                     />
                 ))}
             </div>
-
-            {/* AI Explanation Modal */}
-            <AIExplanationModal
-                isOpen={aiModalOpen}
-                onClose={() => setAiModalOpen(false)}
-                explanation={aiExplanation}
-                cardTitle={aiCardTitle}
-            />
 
             {/* Detailed Overlay View (Portaled to Body) */}
             {mounted && createPortal(
@@ -112,7 +103,13 @@ export default function FourPillars({ pillars, chartContext }: FourPillarsProps)
     );
 }
 
-function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number; onClick: () => void }) {
+function PillarCard({ pillar, index, onClick, chartContext, onAIExplanation }: {
+    pillar: Pillar;
+    index: number;
+    onClick: () => void;
+    chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+}) {
     const ganColor = getElementColor(pillar.gan_info.element);
     const zhiColor = getElementColor(pillar.zhi_info.element);
     const archetype = pillar.ten_gods?.stem ? tenGodArchetypes[pillar.ten_gods.stem] : null;
@@ -122,14 +119,13 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
-            onClick={onClick}
             className="glass-card rounded-2xl p-6 pb-16 flex flex-col items-center relative overflow-hidden group border border-white/5 hover:border-clay/50 cursor-pointer hover:shadow-2xl hover:shadow-clay/10 transition-all duration-300 print:pb-6 print:min-h-0"
         >
             {/* Hover visual cue - Hide in print */}
             <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-clay/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
 
             {/* Domain Label */}
-            <div className="absolute top-4 left-4">
+            <div className="absolute top-4 left-4" onClick={onClick}>
                 <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 group-hover:text-white transition-colors print:text-black">
                     {pillar.label}
                 </div>
@@ -147,8 +143,8 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
                 )}
             </div>
 
-            {/* Main Grid */}
-            <div className="mt-12 grid grid-cols-1 gap-y-6 w-full text-center print:mt-8 print:gap-y-4">
+            {/* Main Grid - clickable area */}
+            <div className="mt-12 grid grid-cols-1 gap-y-6 w-full text-center print:mt-8 print:gap-y-4" onClick={onClick}>
                 {/* Stem */}
                 <div className="flex flex-col items-center">
                     <div className={cn("text-7xl font-serif font-bold mb-2 transition-transform group-hover:scale-110", ganColor.text)}>
@@ -181,9 +177,21 @@ function PillarCard({ pillar, index, onClick }: { pillar: Pillar; index: number;
                 </div>
             </div>
 
-            {/* Tap to View hint (Absolute Bottom) - Hide in print */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center text-[10px] uppercase tracking-widest text-gray-600 gap-2 opacity-50 group-hover:opacity-100 transition-opacity print:hidden">
-                <Info className="w-3 h-3" /> Tap to Analyze
+            {/* Bottom actions - Info and AI button */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-4 print:hidden">
+                <button onClick={onClick} className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-gray-600 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <Info className="w-3 h-3" /> Details
+                </button>
+                {chartContext && onAIExplanation && (
+                    <AskAIButton
+                        cardType="pillar"
+                        cardData={pillar as unknown as Record<string, unknown>}
+                        chartContext={chartContext}
+                        onExplanation={(exp) => onAIExplanation(exp, `${pillar.label} Pillar`)}
+                        onError={(err) => console.error(err)}
+                        size="sm"
+                    />
+                )}
             </div>
         </motion.div>
     );

@@ -1,22 +1,47 @@
 "use client";
 
 import { LuckCycle } from "@/types/bazi";
+import { ChartContext } from "@/types/ai";
 import { getElementColor } from "@/lib/utils";
 import { useRef } from "react";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import { getStemData, getBranchData } from "@/lib/ganzhi";
 
 interface LuckPillarsProps {
     luck: LuckCycle;
-    currentAge?: number; // to highlight current pillar
+    currentAge?: number;
+    chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
 }
 
-export default function LuckPillars({ luck, currentAge = 30 }: LuckPillarsProps) {
+export default function LuckPillars({ luck, currentAge = 30, chartContext, onAIExplanation }: LuckPillarsProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const scroll = (offset: number) => {
         if (scrollRef.current) {
             scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+        }
+    };
+
+    const handleAskAI = async (pillar: { gan: string; zhi: string; start_age: number; start_year: number; end_year: number }) => {
+        if (!chartContext || !onAIExplanation) return;
+
+        try {
+            const response = await fetch('/api/bazi/explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cardType: 'luck',
+                    cardData: pillar,
+                    chartContext
+                }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                onAIExplanation(data.explanation, `Luck Cycle (Age ${pillar.start_age})`);
+            }
+        } catch (err) {
+            console.error('AI Error:', err);
         }
     };
 
@@ -71,9 +96,19 @@ export default function LuckPillars({ luck, currentAge = 30 }: LuckPillarsProps)
                                 {stemData?.translation.split(' ')[1]} {branchData?.translation}
                             </div>
 
-                            <div className="mt-auto text-[10px] text-gray-400 font-mono text-center">
+                            <div className="text-[10px] text-gray-400 font-mono text-center mb-2">
                                 {pillar.start_year}-{pillar.end_year || '...'}
                             </div>
+
+                            {/* AI Button */}
+                            {chartContext && onAIExplanation && (
+                                <button
+                                    onClick={() => handleAskAI(pillar)}
+                                    className="mt-auto p-1.5 text-[10px] flex items-center gap-1 bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300 print:hidden"
+                                >
+                                    <Sparkles className="w-3 h-3" />
+                                </button>
+                            )}
                         </div>
                     );
                 })}
@@ -81,4 +116,3 @@ export default function LuckPillars({ luck, currentAge = 30 }: LuckPillarsProps)
         </div>
     );
 }
-

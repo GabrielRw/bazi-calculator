@@ -6,12 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Droplets, Flame, Mountain, Hammer, Waves, Shield, Activity, Zap, Scale } from "lucide-react";
 import AskAIButton from "./AskAIButton";
-import AIExplanationModal from "./AIExplanationModal";
 
 interface WuxingChartProps {
     data: ElementData;
     pillars?: Pillar[];
     chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string) => void;
 }
 
 // Element positions in a pentagon (clockwise from top: Fire, Earth, Metal, Water, Wood)
@@ -97,10 +97,8 @@ const ELEMENT_REMEDIES: Record<string, { nourish: string; express: string; contr
     },
 };
 
-export default function WuxingChart({ data, pillars, chartContext }: WuxingChartProps) {
+export default function WuxingChart({ data, pillars, chartContext, onAIExplanation }: WuxingChartProps) {
     const [showInsights, setShowInsights] = useState(false);
-    const [aiExplanation, setAiExplanation] = useState<string>("");
-    const [aiModalOpen, setAiModalOpen] = useState(false);
     const centerX = 150;
     const centerY = 150;
     const radius = 100;
@@ -166,12 +164,6 @@ export default function WuxingChart({ data, pillars, chartContext }: WuxingChart
 
     return (
         <>
-            <AIExplanationModal
-                isOpen={aiModalOpen}
-                onClose={() => setAiModalOpen(false)}
-                explanation={aiExplanation}
-                cardTitle="Wu Xing Analysis"
-            />
             <div className="glass-card rounded-2xl p-6">
                 <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-4 flex items-center gap-2">
                     <span className="text-lg">☯</span> Wu Xing - Five Phases
@@ -483,8 +475,9 @@ export default function WuxingChart({ data, pillars, chartContext }: WuxingChart
                                                     cardData={data as unknown as Record<string, unknown>}
                                                     chartContext={chartContext}
                                                     onExplanation={(explanation) => {
-                                                        setAiExplanation(explanation);
-                                                        setAiModalOpen(true);
+                                                        if (onAIExplanation) {
+                                                            onAIExplanation(explanation, "Wu Xing Analysis");
+                                                        }
                                                     }}
                                                     onError={(error) => console.error('AI Error:', error)}
                                                     size="md"
