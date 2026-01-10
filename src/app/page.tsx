@@ -15,11 +15,12 @@ import FlowSection from "@/components/FlowSection";
 import SynastryResultView from "@/components/SynastryResult";
 import AISidebar from "@/components/AISidebar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft } from "lucide-react";
+import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft, History } from "lucide-react";
 import Image from "next/image";
 import logo from "./logo.png";
 import clsx from "clsx";
 import BaziReport from "@/components/BaziReport";
+import { AIHistoryItem } from "@/types/ai";
 
 interface BirthData {
   year: number;
@@ -52,6 +53,15 @@ export default function Home() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [loadedData, setLoadedData] = useState<any | null>(null);
 
+  // AI History State
+  const [aiHistory, setAiHistory] = useState<AIHistoryItem[]>([]);
+
+  // Unique ID for the current chart to group AI history
+  const chartId = useMemo(() => {
+    if (!birthData) return "";
+    return `${birthData.year}-${birthData.month}-${birthData.day}-${birthData.hour}-${birthData.minute}-${birthData.city}-${birthData.gender}`;
+  }, [birthData]);
+
   // Create chart context for AI explanations
   const chartContext: ChartContext | undefined = useMemo(() => {
     if (!result) return undefined;
@@ -76,7 +86,25 @@ export default function Home() {
     setAiCardTitle(cardTitle);
     setAiSidebarOpen(true);
     setAiLoading(false);
-  }, []);
+
+    // Save to AI History if chart is active
+    if (chartId) {
+      const newItem: AIHistoryItem = {
+        id: Math.random().toString(36).substring(7),
+        timestamp: Date.now(),
+        cardType: 'pillar', // Default or passed type, for now pillar
+        cardTitle,
+        explanation,
+        chartId
+      };
+
+      setAiHistory(prev => {
+        const updated = [newItem, ...prev].slice(0, 50); // Keep last 50
+        localStorage.setItem(`ai_history_${chartId}`, JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [chartId]);
 
   // Handler for when AI request starts
   const handleAIRequest = useCallback((cardTitle: string) => {
@@ -96,6 +124,22 @@ export default function Home() {
       }
     }
   }, []);
+
+  // Load AI history when chart changes
+  useEffect(() => {
+    if (chartId) {
+      const saved = localStorage.getItem(`ai_history_${chartId}`);
+      if (saved) {
+        try {
+          setAiHistory(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to load AI history", e);
+        }
+      } else {
+        setAiHistory([]);
+      }
+    }
+  }, [chartId]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saveToHistory = (formData: any, resultData: BaziResult, flowData: BaziFlowResult) => {
@@ -591,8 +635,6 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
       {/* Hero Section */}
       <div className="relative pt-20 pb-12 px-6 z-10 print:hidden">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-
-
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -607,8 +649,6 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                 priority
               />
             </div>
-
-
           </motion.div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-gray-600">
@@ -620,26 +660,50 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         </div>
       </div>
 
-      {/* Input Form */}
-      <div className="px-6 mb-16 relative z-20 no-print">
-        <BaziForm
-          onSubmit={handleCalculate}
-          isLoading={loading}
-          history={history}
-          onDeleteHistory={handleDeleteHistory}
-          onSelectHistory={handleSelectHistory}
-          loadedData={loadedData}
-        />
-      </div>
+      {/* Floating Reopen Button */}
+      {!aiSidebarOpen && aiHistory.length > 0 && !loading && (
+        <motion.button
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ x: -10 }}
+          onClick={() => setAiSidebarOpen(true)}
+          className="fixed top-1/2 right-0 -translate-y-1/2 z-[190] bg-jade text-void p-3 rounded-l-2xl shadow-[0_0_20px_rgba(34,197,94,0.3)] group transition-all print:hidden"
+        >
+          <div className="flex flex-col items-center gap-1">
+            <Sparkles className="w-5 h-5" />
+            <span className="text-[10px] font-bold uppercase [writing-mode:vertical-lr]">AI</span>
+          </div>
+        </motion.button>
+      )}
 
-      {/* Main Analysis Area */}
+      {/* Main Content Area */}
       <AnimatePresence mode="wait">
-        {(result || synastryResult) && (
+        {(!result && !synastryResult) ? (
           <motion.div
-            key={activeMode === "synastry" ? "synastry-results" : "individual-results"}
+            key="form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="px-6 mb-16 relative z-20 no-print max-w-2xl mx-auto"
+          >
+            <BaziForm
+              onSubmit={handleCalculate}
+              isLoading={loading}
+              history={history}
+              onDeleteHistory={handleDeleteHistory}
+              onSelectHistory={handleSelectHistory}
+              loadedData={loadedData}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="result"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="max-w-6xl mx-auto px-6 space-y-8 relative z-10 print:hidden"
+            className={clsx(
+              "relative z-10 w-full px-4 mx-auto pb-20 transition-all duration-500 ease-in-out",
+              aiSidebarOpen ? "lg:mr-[425px] lg:max-w-[calc(100%-425px)]" : "max-w-6xl"
+            )}
           >
             {activeMode === "individual" && result ? (
               <>
@@ -665,15 +729,6 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                       <Activity className="w-4 h-4" /> Destiny Flow
                     </button>
                   </div>
-
-                  {/* 
-                  <button
-                    onClick={() => window.print()}
-                    className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:bg-white/5 transition-all flex items-center gap-2"
-                  >
-                    <Clock className="w-4 h-4" /> Print Full Report
-                  </button> 
-                  */}
 
                   <button
                     onClick={handleExtractToAI}
@@ -780,11 +835,11 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 3. Deep Analysis & Yong Shen */}
                     <section className="space-y-8">
-                      <YongShenSection result={result} chartContext={chartContext} />
-                      <AnalysisSection result={result} chartContext={chartContext} />
+                      <YongShenSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                      <AnalysisSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
                     </section>
 
-                    {/* 5. Precise Technical Data (The Debug/Astro Info User Asked For) */}
+                    {/* 5. Precise Technical Data */}
                     {result.astro_debug && (
                       <section className="pt-12 border-t border-white/5 max-w-4xl mx-auto">
                         <div className="flex items-center gap-3 mb-6 opacity-30">
@@ -854,43 +909,43 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                 )}
               </>
             ) : (
-              <>
-                <div className="mb-8 pl-4 border-l-2 border-clay/30 flex items-center justify-between">
-                  <div>
+              activeMode === "synastry" && synastryResult && (
+                <>
+                  <div className="mb-8 pl-4 border-l-2 border-clay/30 flex items-center justify-between">
+                    <div>
+                      <button
+                        onClick={() => {
+                          setActiveMode("individual");
+                          setSynastryResult(null);
+                        }}
+                        className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
+                      >
+                        <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                      </button>
+                      <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
+                    </div>
+
                     <button
-                      onClick={() => {
-                        setActiveMode("individual");
-                        setSynastryResult(null);
-                      }}
-                      className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
+                      onClick={handleExtractToAI}
+                      className={clsx(
+                        "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 border",
+                        copied
+                          ? "bg-jade/20 text-jade border-jade/50"
+                          : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
+                      )}
                     >
-                      <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                      {copied ? <Check className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+                      {copied ? "Copied Prompt" : "AI Extract"}
                     </button>
-                    <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
                   </div>
 
-                  <button
-                    onClick={handleExtractToAI}
-                    className={clsx(
-                      "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 border",
-                      copied
-                        ? "bg-jade/20 text-jade border-jade/50"
-                        : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
-                    )}
-                  >
-                    {copied ? <Check className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                    {copied ? "Copied Prompt" : "AI Extract"}
-                  </button>
-                </div>
-
-                {synastryResult && (
                   <SynastryResultView
                     result={synastryResult}
                     personAName={synastryNames?.a || "Person A"}
                     personBName={synastryNames?.b || "Person B"}
                   />
-                )}
-              </>
+                </>
+              )
             )}
           </motion.div>
         )}
@@ -918,6 +973,17 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         explanation={aiExplanation}
         cardTitle={aiCardTitle}
         isLoading={aiLoading}
+        history={aiHistory}
+        onSelectHistory={(item) => {
+          setAiExplanation(item.explanation);
+          setAiCardTitle(item.cardTitle);
+        }}
+        onClearHistory={() => {
+          if (chartId) {
+            setAiHistory([]);
+            localStorage.removeItem(`ai_history_${chartId}`);
+          }
+        }}
       />
     </main>
   );

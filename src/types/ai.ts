@@ -10,7 +10,17 @@ export type AICardType =
     | 'void'
     | 'luck'
     | 'lifespan'
-    | 'daymaster';
+    | 'daymaster'
+    | 'roots';
+
+export interface AIHistoryItem {
+    id: string;
+    timestamp: number;
+    cardType: AICardType;
+    cardTitle: string;
+    explanation: string;
+    chartId: string; // Hash or unique string for the current chart
+}
 
 export interface ChartContext {
     dayMaster: DayMaster;

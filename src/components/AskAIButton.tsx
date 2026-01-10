@@ -11,7 +11,7 @@ interface AskAIButtonProps {
     onExplanation: (explanation: string) => void;
     onError: (error: string) => void;
     className?: string;
-    size?: "sm" | "md";
+    size?: "xs" | "sm" | "md";
 }
 
 export default function AskAIButton({
@@ -59,9 +59,13 @@ export default function AskAIButton({
         }
     };
 
-    const sizeClasses = size === "sm"
-        ? "p-1.5 text-[10px]"
-        : "px-3 py-1.5 text-xs";
+    const sizeClasses = size === "xs"
+        ? "p-1.5"
+        : size === "sm"
+            ? "p-1.5 text-[10px]"
+            : "px-3 py-1.5 text-xs";
+
+    const iconSize = size === "xs" ? "w-2.5 h-2.5" : "w-3 h-3";
 
     return (
         <button
@@ -81,11 +85,11 @@ export default function AskAIButton({
             title="Ask AI to explain this aspect"
         >
             {loading ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className={`${iconSize} animate-spin`} />
             ) : (
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className={iconSize} />
             )}
-            {size === "md" && (loading ? "Thinking..." : "Ask AI")}
+            {size !== "xs" && (size === "md" ? (loading ? "Thinking..." : "Ask AI") : "")}
         </button>
     );
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Copy, Check, ChevronRight } from "lucide-react";
+import { X, Sparkles, Copy, Check, ChevronRight, History, Trash2 } from "lucide-react";
+import { AIHistoryItem } from "@/types/ai";
 
 interface AISidebarProps {
     isOpen: boolean;
@@ -11,6 +12,9 @@ interface AISidebarProps {
     explanation: string;
     cardTitle?: string;
     isLoading?: boolean;
+    history?: AIHistoryItem[];
+    onSelectHistory?: (item: AIHistoryItem) => void;
+    onClearHistory?: () => void;
 }
 
 // Simple markdown parser for common patterns
@@ -93,20 +97,31 @@ export default function AISidebar({
     onClose,
     explanation,
     cardTitle,
-    isLoading = false
+    isLoading = false,
+    history = [],
+    onSelectHistory,
+    onClearHistory
 }: AISidebarProps) {
     const [mounted, setMounted] = useState(false);
     const [copied, setCopied] = useState(false);
     const [displayedText, setDisplayedText] = useState("");
+    const [view, setView] = useState<"current" | "history">("current");
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
+    // Switch to current view when a new explanation arrives or loading starts
+    useEffect(() => {
+        if (explanation || isLoading) {
+            setView("current");
+        }
+    }, [explanation, isLoading]);
+
     // Typewriter effect
     useEffect(() => {
-        if (!isOpen || !explanation) {
-            setDisplayedText("");
+        if (!isOpen || !explanation || view !== "current") {
+            if (view === "current") setDisplayedText("");
             return;
         }
 
@@ -121,9 +136,9 @@ export default function AISidebar({
         }, 5);
 
         return () => clearInterval(interval);
-    }, [isOpen, explanation]);
+    }, [isOpen, explanation, view]);
 
-    const parsedContent = useMemo(() => parseMarkdown(displayedText), [displayedText]);
+    const parsedContent = useMemo(() => parseMarkdown(view === "current" ? displayedText : explanation), [displayedText, explanation, view]);
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(explanation);
@@ -158,33 +173,58 @@ export default function AISidebar({
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-jade/10 border border-jade/20">
-                                    <Sparkles className="w-4 h-4 text-jade" />
-                                </div>
+                                <button
+                                    onClick={() => setView(view === "current" ? "history" : "current")}
+                                    className={clsx(
+                                        "p-2 rounded-lg border transition-all",
+                                        view === "history"
+                                            ? "bg-jade text-black border-jade"
+                                            : "bg-jade/10 border-jade/20 text-jade hover:bg-jade/20"
+                                    )}
+                                    title={view === "current" ? "View History" : "Back to Analysis"}
+                                >
+                                    {view === "current" ? <History className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                                </button>
                                 <div>
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                                        AI Analysis
+                                        {view === "current" ? "AI Analysis" : "History"}
                                     </h3>
-                                    {cardTitle && (
+                                    {view === "current" && cardTitle && (
                                         <p className="text-[10px] text-gray-500 uppercase tracking-wider">
                                             {cardTitle}
+                                        </p>
+                                    )}
+                                    {view === "history" && (
+                                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+                                            Past explanations
                                         </p>
                                     )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
-                                    onClick={handleCopy}
-                                    disabled={!explanation}
-                                    className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-jade disabled:opacity-50"
-                                    title="Copy to clipboard"
-                                >
-                                    {copied ? (
-                                        <Check className="w-4 h-4 text-jade" />
-                                    ) : (
-                                        <Copy className="w-4 h-4" />
-                                    )}
-                                </button>
+                                {view === "current" && (
+                                    <button
+                                        onClick={handleCopy}
+                                        disabled={!explanation}
+                                        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-jade disabled:opacity-50"
+                                        title="Copy to clipboard"
+                                    >
+                                        {copied ? (
+                                            <Check className="w-4 h-4 text-jade" />
+                                        ) : (
+                                            <Copy className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                )}
+                                {view === "history" && onClearHistory && history.length > 0 && (
+                                    <button
+                                        onClick={onClearHistory}
+                                        className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-gray-400 hover:text-red-400"
+                                        title="Clear all history"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
                                 <button
                                     onClick={onClose}
                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -196,25 +236,57 @@ export default function AISidebar({
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6">
-                            {isLoading ? (
-                                <div className="flex flex-col items-center justify-center h-full gap-4">
-                                    <div className="w-8 h-8 border-2 border-jade/30 border-t-jade rounded-full animate-spin" />
-                                    <p className="text-sm text-gray-500">Analyzing...</p>
-                                </div>
-                            ) : explanation ? (
-                                <div className="min-h-[100px]">
-                                    {parsedContent}
-                                    {displayedText.length < explanation.length && (
-                                        <span className="inline-block w-0.5 h-4 bg-jade animate-pulse ml-0.5" />
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                                    <Sparkles className="w-12 h-12 text-jade/20" />
-                                    <div>
-                                        <p className="text-sm text-gray-400">No analysis yet</p>
-                                        <p className="text-xs text-gray-600 mt-1">Click an Ask AI button to get started</p>
+                            {view === "current" ? (
+                                isLoading ? (
+                                    <div className="flex flex-col items-center justify-center h-full gap-4">
+                                        <div className="w-8 h-8 border-2 border-jade/30 border-t-jade rounded-full animate-spin" />
+                                        <p className="text-sm text-gray-500">Analyzing...</p>
                                     </div>
+                                ) : explanation ? (
+                                    <div className="min-h-[100px]">
+                                        {parsedContent}
+                                        {displayedText.length < explanation.length && (
+                                            <span className="inline-block w-0.5 h-4 bg-jade animate-pulse ml-0.5" />
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+                                        <Sparkles className="w-12 h-12 text-jade/20" />
+                                        <div>
+                                            <p className="text-sm text-gray-400">No analysis yet</p>
+                                            <p className="text-xs text-gray-600 mt-1">Click an Ask AI button to get started</p>
+                                        </div>
+                                    </div>
+                                )
+                            ) : (
+                                /* History View */
+                                <div className="space-y-4">
+                                    {history.length > 0 ? (
+                                        history.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => onSelectHistory?.(item)}
+                                                className="w-full text-left p-4 rounded-xl bg-white/5 border border-white/5 hover:border-jade/30 hover:bg-white/10 transition-all group"
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-xs font-bold text-jade group-hover:text-white transition-colors">
+                                                        {item.cardTitle}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-600">
+                                                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">
+                                                    {item.explanation}
+                                                </p>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+                                            <History className="w-12 h-12 text-gray-800" />
+                                            <p className="text-sm text-gray-500">History is empty</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -232,3 +304,5 @@ export default function AISidebar({
         document.body
     );
 }
+
+import clsx from "clsx";

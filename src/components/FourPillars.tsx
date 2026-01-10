@@ -312,10 +312,25 @@ function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation }: {
 
                 {/* Hidden Stems Detail */}
                 {pillar.ten_gods?.hidden && (
-                    <div className="mt-6">
-                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">
-                            Hidden Potential (Roots)
-                        </h3>
+                    <div className="mt-8">
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                Hidden Potential (Roots)
+                            </h3>
+                            {chartContext && (
+                                <AskAIButton
+                                    cardType="roots"
+                                    cardData={{
+                                        pillar_name: pillar.label,
+                                        hidden_stems: pillar.ten_gods.hidden
+                                    }}
+                                    chartContext={chartContext}
+                                    onExplanation={(exp) => onAIExplanation?.(exp, `${pillar.label} Root Potential`)}
+                                    onError={(error) => console.error('AI Error:', error)}
+                                    size="xs"
+                                />
+                            )}
+                        </div>
                         <div className="grid gap-2">
                             {pillar.ten_gods.hidden.map((hidden, i) => (
                                 <div key={i} className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/5 print:bg-gray-50 print:border-gray-200">

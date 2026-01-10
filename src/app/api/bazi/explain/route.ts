@@ -209,6 +209,22 @@ RULES:
 4. Include: how ${dayMaster.info?.polarity} ${dayMaster.info?.element} manifests in personality
 5. Keep it personal and insightful - this is about WHO they are
 6. Maximum 200 words`;
+    },
+
+    roots: (cardData, chartContext) => {
+        const data = cardData as { pillar_name: string; hidden_stems: { gan: string; ten_god: string; info: { element: string } }[] };
+        const stems = data.hidden_stems?.map(s => `${s.gan} (${s.ten_god} - ${s.info?.element})`).join(', ') || 'N/A';
+        return `You are an expert BaZi (Four Pillars of Destiny) analyst specializing in Hidden Stems (Roots).
+
+DESCRIBE THE ROOTS OF THE ${data.pillar_name?.toUpperCase()} PILLAR:
+- Hidden Stems: ${stems}
+
+RULES:
+1. Explain what these "hidden" energies mean for the person's subconscious or potential.
+2. Focus ONLY on the hidden stems provided.
+3. Explain how they provide a "foundation" or "hidden resource" for the ${data.pillar_name} life domain.
+4. Keep it focused on "hidden potential" and "latent talents".
+5. Maximum 180 words.`;
     }
 };
 
