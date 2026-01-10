@@ -16,7 +16,7 @@ import SynastryResultView from "@/components/SynastryResult";
 import AISidebar from "@/components/AISidebar";
 import AskAIButton from "@/components/AskAIButton";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft, History } from "lucide-react";
+import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft, History, Plus } from "lucide-react";
 import Image from "next/image";
 import logo from "./logo.png";
 import clsx from "clsx";
@@ -117,6 +117,18 @@ export default function Home() {
     }
     setAiSidebarOpen(true);
   }, []);
+  // Handler for starting a fresh calculation
+  const handleNewCalculation = useCallback(() => {
+    setResult(null);
+    setSynastryResult(null);
+    setFlowResult(null);
+    setLoadedData(null);
+    setBirthData(null);
+    setError(null);
+    setAiSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
 
   // Load history on mount
   useEffect(() => {
@@ -736,6 +748,13 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                   </div>
 
                   <button
+                    onClick={handleNewCalculation}
+                    className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border border-white/10 text-gray-400 hover:text-white hover:bg-white/5"
+                  >
+                    <Plus className="w-4 h-4" /> New Chart
+                  </button>
+
+                  <button
                     onClick={handleExtractToAI}
                     className={clsx(
                       "px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border",
@@ -929,13 +948,10 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                   <div className="mb-8 pl-4 border-l-2 border-clay/30 flex items-center justify-between">
                     <div>
                       <button
-                        onClick={() => {
-                          setActiveMode("individual");
-                          setSynastryResult(null);
-                        }}
+                        onClick={handleNewCalculation}
                         className="text-xs uppercase tracking-widest text-gray-500 mb-2 hover:text-clay transition-colors flex items-center gap-2"
                       >
-                        <ArrowLeft className="w-3 h-3" /> Back to Calculator
+                        <Plus className="w-3 h-3" /> New Chart
                       </button>
                       <div className="text-2xl text-white font-serif">Compatibility Analysis</div>
                     </div>
