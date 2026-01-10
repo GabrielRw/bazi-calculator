@@ -115,7 +115,7 @@ export default function JingQiShenChart({ data, metadata, currentAge, cultivatio
 
     return (
         <div
-            className="glass-card rounded-2xl p-6 select-none"
+            className="glass-card rounded-2xl p-6 select-none min-w-0"
             ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoveredIndex(null)}

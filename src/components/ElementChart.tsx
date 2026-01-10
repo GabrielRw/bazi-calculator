@@ -13,7 +13,7 @@ export default function ElementChart({ data }: ElementChartProps) {
     const elements = ["Wood", "Fire", "Earth", "Metal", "Water"];
 
     return (
-        <div className="glass-card rounded-2xl p-6">
+        <div className="glass-card rounded-2xl p-6 min-w-0 overflow-hidden">
             <h3 className="text-sm uppercase tracking-widest font-bold text-gray-400 mb-6">
                 Element Strength ({data.dominant} Dominant)
             </h3>

@@ -818,8 +818,8 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                     </section>
 
                     {/* 2. Charts Row */}
-                    <div className="grid lg:grid-cols-3 gap-8">
-                      <div className="lg:col-span-2 space-y-8">
+                    <div className="grid lg:grid-cols-3 gap-8 w-full overflow-hidden">
+                      <div className="lg:col-span-2 space-y-8 min-w-0">
                         <ElementChart data={result.elements} />
                         {lifespanResult && (
                           <JingQiShenChart
@@ -836,7 +836,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         )}
                       </div>
 
-                      <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
+                      <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group min-w-0">
                         <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-8">
                           Day Master Energy
                         </h3>
