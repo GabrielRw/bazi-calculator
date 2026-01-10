@@ -265,7 +265,10 @@ export default function AISidebar({
                                         history.map((item) => (
                                             <button
                                                 key={item.id}
-                                                onClick={() => onSelectHistory?.(item)}
+                                                onClick={() => {
+                                                    onSelectHistory?.(item);
+                                                    setView("current");
+                                                }}
                                                 className="w-full text-left p-4 rounded-xl bg-white/5 border border-white/5 hover:border-jade/30 hover:bg-white/10 transition-all group"
                                             >
                                                 <div className="flex justify-between items-start mb-2">

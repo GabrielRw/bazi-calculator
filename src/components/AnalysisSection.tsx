@@ -205,9 +205,21 @@ export default function AnalysisSection({ result, chartContext, onAIExplanation 
             {/* Xun Kong (Void) */}
             {result.xun_kong && (
                 <div className="glass-card rounded-2xl p-6 border-l-4 border-l-spirit">
-                    <h3 className="flex items-center gap-2 text-spirit text-sm font-bold uppercase tracking-widest mb-4">
-                        <Zap className="w-4 h-4" /> Void Branches (Xun Kong)
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="flex items-center gap-2 text-spirit text-sm font-bold uppercase tracking-widest">
+                            <Zap className="w-4 h-4" /> Void Branches (Xun Kong)
+                        </h3>
+                        {chartContext && (
+                            <AskAIButton
+                                cardType="void"
+                                cardData={result.xun_kong as unknown as Record<string, unknown>}
+                                chartContext={chartContext}
+                                onExplanation={(exp) => handleAIExplanation(exp, "Void Branches (Xun Kong)")}
+                                onError={(error) => console.error('AI Error:', error)}
+                                size="sm"
+                            />
+                        )}
+                    </div>
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4 items-start flex-wrap">
                             <div className="flex gap-2">
