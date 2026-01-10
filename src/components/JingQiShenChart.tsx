@@ -120,42 +120,41 @@ export default function JingQiShenChart({ data, metadata, currentAge, cultivatio
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoveredIndex(null)}
         >
-            <div className="flex items-center justify-between mb-6">
+            {/* Header: Title + AI Button */}
+            <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-gray-500 flex items-center gap-2">
                     <Activity className="w-4 h-4" /> Neijing Life Curve
                 </h3>
 
-                <div className="flex items-center gap-4">
-                    {/* AI Button */}
-                    {chartContext && onAIExplanation && (
-                        <AskAIButton
-                            cardType="lifespan"
-                            cardData={{ currentAge, curve: data }}
-                            chartContext={chartContext}
-                            onExplanation={(exp) => onAIExplanation(exp, "Life Energy Curves", "lifespan")}
-                            onError={(err) => console.error(err)}
-                            onRequestStart={onAIRequest}
-                            cardTitle="Life Energy Curves"
-                            history={aiHistory}
-                            size="md"
-                        />
-                    )}
+                {/* AI Button */}
+                {chartContext && onAIExplanation && (
+                    <AskAIButton
+                        cardType="lifespan"
+                        cardData={{ currentAge, curve: data }}
+                        chartContext={chartContext}
+                        onExplanation={(exp) => onAIExplanation(exp, "Life Energy Curves", "lifespan")}
+                        onError={(err) => console.error(err)}
+                        onRequestStart={onAIRequest}
+                        cardTitle="Life Energy Curves"
+                        history={aiHistory}
+                        size="md"
+                    />
+                )}
+            </div>
 
-                    {/* Legend */}
-                    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                            <span className="text-blue-400">Jing (Essence)</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                            <span className="text-green-400">Qi (Energy)</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
-                            <span className="text-yellow-400">Shen (Spirit)</span>
-                        </div>
-                    </div>
+            {/* Legend - separate row for mobile visibility */}
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4 text-[10px] font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+                    <span className="text-blue-400">Jing (Essence)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                    <span className="text-green-400">Qi (Energy)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
+                    <span className="text-yellow-400">Shen (Spirit)</span>
                 </div>
             </div>
 
