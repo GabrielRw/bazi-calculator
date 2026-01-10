@@ -185,24 +185,29 @@ RULES:
 ${currentAge !== undefined ? `PERSON'S CURRENT AGE: ${currentAge}` : ''}
 
 CURRENT ENERGY LEVELS (at age ${currentAge}):
-- Jing (Essence): ${currentData?.j_final?.toFixed(1) || 'N/A'}
-- Qi (Vitality): ${currentData?.qi?.toFixed(1) || 'N/A'}
-- Shen (Spirit): ${currentData?.shen?.toFixed(1) || 'N/A'}
+- JING (Essence Total): ${currentData?.j_final?.toFixed(1) || 'N/A'}
+  - Pre-Heaven (Inherited): ${currentData?.jing_prenatal?.toFixed(1) || 'N/A'}
+  - Post-Heaven (Acquired Buffer): ${currentData?.jing_postnatal?.toFixed(1) || 'N/A'}
+- QI (Vitality Total): ${currentData?.qi?.toFixed(1) || 'N/A'}
+  - Yuan Qi (Innate/Pre-Heaven): ${currentData?.qi_pre_heaven?.toFixed(1) || 'N/A'}
+  - Acquired Qi (Post-Heaven/Metabolic): ${currentData?.qi_post_heaven?.toFixed(1) || 'N/A'}
+- SHEN (Spirit): ${currentData?.shen?.toFixed(1) || 'N/A'}
+- Prenatal Integrity: ${currentData?.prenatal_integrity ? (currentData.prenatal_integrity * 100).toFixed(0) + '%' : 'N/A'}
 
 LIFESPAN TRENDS:
-- Peak Qi (Vitality) occurs at age ${peakQi?.age} (Value: ${peakQi?.qi?.toFixed(1)})
-- Peak Shen (Spirit) occurs at age ${peakShen?.age} (Value: ${peakShen?.shen?.toFixed(1)})
+- Peak Qi at age ${peakQi?.age} (${peakQi?.qi?.toFixed(1)})
+- Peak Shen at age ${peakShen?.age} (${peakShen?.shen?.toFixed(1)})
 
 CHART CONTEXT:
 - Day Master: ${dmInfo?.element} ${dmInfo?.polarity}
 - Strength: ${chartContext.dmStrength}
 
 RULES:
-1. Explain the current life stage and energy balance based on the provided Jing, Qi, and Shen data.
-2. Analyze the overall trajectory: Is energy rising, peaking, or stabilizing?
-3. Provide practical advice for the current age to preserve Jing and cultivate Shen.
-4. Keep it philosophical yet grounded in the traditional "Three Treasures" concept.
-5. Maximum 220 words.`;
+1. Explain the distinction between Pre-Heaven (inherited, Yuan) and Post-Heaven (acquired, metabolic) energies.
+2. Assess the person's "Prenatal Integrity" - how well is their original essence preserved?
+3. Advise on cultivation practices to protect Pre-Heaven reserves while building Post-Heaven support.
+4. Reference traditional Chinese Medicine concepts (Three Treasures, Yuan Qi).
+5. Maximum 250 words.`;
     },
 
     daymaster: (cardData, chartContext) => {

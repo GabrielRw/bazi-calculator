@@ -2,21 +2,24 @@
 
 import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LifespanCurvePoint } from "@/types/bazi";
+import { LifespanCurvePoint, LifespanResult } from "@/types/bazi";
 import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
-import { Activity, Zap, Brain, Droplets, Sparkles } from "lucide-react";
+import { Activity, Zap, Brain, Droplets, Sparkles, Loader2 } from "lucide-react";
 import AskAIButton from "./AskAIButton";
 
 interface JingQiShenChartProps {
     data: LifespanCurvePoint[];
+    metadata?: LifespanResult["metadata"];
     currentAge?: number;
+    cultivationFactor?: number;
+    onCultivationChange?: (value: number) => void;
     chartContext?: ChartContext;
     onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
     onAIRequest?: (cardTitle: string) => void;
     aiHistory?: AIHistoryItem[];
 }
 
-export default function JingQiShenChart({ data, currentAge, chartContext, onAIExplanation, onAIRequest, aiHistory }: JingQiShenChartProps) {
+export default function JingQiShenChart({ data, metadata, currentAge, cultivationFactor = 0.5, onCultivationChange, chartContext, onAIExplanation, onAIRequest, aiHistory }: JingQiShenChartProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -164,6 +167,32 @@ export default function JingQiShenChart({ data, currentAge, chartContext, onAIEx
                 </div>
             </div>
 
+            {/* Cultivation Slider */}
+            {onCultivationChange && (
+                <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-gray-400">
+                            Cultivation Scenario
+                        </label>
+                        <span className="text-xs font-mono text-jade">{Math.round(cultivationFactor * 100)}%</span>
+                    </div>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={cultivationFactor}
+                        onChange={(e) => onCultivationChange(parseFloat(e.target.value))}
+                        className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-jade"
+                    />
+                    <div className="flex justify-between text-[9px] text-gray-500 mt-1">
+                        <span>Depleted</span>
+                        <span>Average</span>
+                        <span>Cultivated</span>
+                    </div>
+                </div>
+            )}
+
             <div className="relative w-full aspect-[2.6/1]">
                 <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
                     {/* Grid Lines */}
@@ -272,18 +301,47 @@ export default function JingQiShenChart({ data, currentAge, chartContext, onAIEx
                             </div>
 
                             <div className="space-y-2 mb-3">
+                                {/* Jing Section */}
                                 <div className="flex justify-between text-xs">
                                     <span className="text-blue-400 font-bold flex items-center gap-1.5"><Droplets className="w-3 h-3" /> Jing</span>
                                     <span className="font-mono text-white">{activePoint.j_final.toFixed(1)}</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
+                                <div className="flex justify-between text-[10px] pl-4 text-gray-500">
+                                    <span>Pre-Heaven (Inherited)</span>
+                                    <span className="font-mono">{activePoint.jing_prenatal?.toFixed(1) ?? '-'}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] pl-4 text-gray-500">
+                                    <span>Post-Heaven (Acquired)</span>
+                                    <span className="font-mono">{activePoint.jing_postnatal?.toFixed(1) ?? '-'}</span>
+                                </div>
+
+                                {/* Qi Section */}
+                                <div className="flex justify-between text-xs mt-2">
                                     <span className="text-green-400 font-bold flex items-center gap-1.5"><Zap className="w-3 h-3" /> Qi</span>
                                     <span className="font-mono text-white">{activePoint.qi.toFixed(1)}</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
+                                <div className="flex justify-between text-[10px] pl-4 text-gray-500">
+                                    <span>Yuan Qi (Innate Flow)</span>
+                                    <span className="font-mono">{activePoint.qi_pre_heaven?.toFixed(1) ?? '-'}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] pl-4 text-gray-500">
+                                    <span>Metabolic Qi (Lifestyle)</span>
+                                    <span className="font-mono">{activePoint.qi_post_heaven?.toFixed(1) ?? '-'}</span>
+                                </div>
+
+                                {/* Shen Section */}
+                                <div className="flex justify-between text-xs mt-2">
                                     <span className="text-yellow-400 font-bold flex items-center gap-1.5"><Brain className="w-3 h-3" /> Shen</span>
                                     <span className="font-mono text-white">{activePoint.shen.toFixed(1)}</span>
                                 </div>
+
+                                {/* Prenatal Integrity */}
+                                {activePoint.prenatal_integrity !== undefined && (
+                                    <div className="flex justify-between text-[10px] mt-2 pt-2 border-t border-white/10">
+                                        <span className="text-purple-400 font-bold">Prenatal Integrity</span>
+                                        <span className="font-mono text-purple-300">{(activePoint.prenatal_integrity * 100).toFixed(0)}%</span>
+                                    </div>
+                                )}
                             </div>
 
                             {activePoint.explain && (

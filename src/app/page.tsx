@@ -39,6 +39,7 @@ export default function Home() {
   const [result, setResult] = useState<BaziResult | null>(null);
   const [flowResult, setFlowResult] = useState<BaziFlowResult | null>(null);
   const [lifespanResult, setLifespanResult] = useState<LifespanResult | null>(null);
+  const [cultivationFactor, setCultivationFactor] = useState(0.5);
   const [synastryResult, setSynastryResult] = useState<SynastryResult | null>(null);
   const [synastryNames, setSynastryNames] = useState<{ a: string; b: string } | null>(null);
 
@@ -157,6 +158,34 @@ export default function Home() {
       }
     }
   }, [chartId]);
+
+  // Refetch lifespan when cultivation factor changes
+  useEffect(() => {
+    if (!birthData || !result) return;
+
+    const headers = { "Content-Type": "application/json" };
+    const payload = {
+      year: birthData.year,
+      month: birthData.month,
+      day: birthData.day,
+      hour: birthData.hour,
+      minute: birthData.minute,
+      city: birthData.city,
+      sex: birthData.gender === "male" ? "M" : "F",
+      time_standard: "true_solar_absolute",
+      max_age: 120,
+      cultivation_factor: cultivationFactor
+    };
+
+    fetch("/api/bazi/lifespan", {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setLifespanResult(data); })
+      .catch(err => console.error("Lifespan refetch error:", err));
+  }, [cultivationFactor, birthData, result]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saveToHistory = (formData: any, resultData: BaziResult, flowData: BaziFlowResult) => {
@@ -621,7 +650,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         fetch("/api/bazi/lifespan", {
           method: "POST",
           headers,
-          body: JSON.stringify({ ...payload, time_standard: "true_solar_absolute" })
+          body: JSON.stringify({ ...payload, time_standard: "true_solar_absolute", cultivation_factor: cultivationFactor })
         })
           .then(res => {
             if (res.ok) return res.json();
@@ -795,7 +824,10 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         {lifespanResult && (
                           <JingQiShenChart
                             data={lifespanResult.curve}
+                            metadata={lifespanResult.metadata}
                             currentAge={result.current_age}
+                            cultivationFactor={cultivationFactor}
+                            onCultivationChange={setCultivationFactor}
                             chartContext={chartContext}
                             onAIExplanation={handleAIExplanation}
                             onAIRequest={handleAIRequest}
