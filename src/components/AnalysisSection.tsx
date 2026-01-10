@@ -1,7 +1,7 @@
 "use client";
 
 import { BaziResult, Star as StarType } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Zap, Briefcase, Info, Activity, Sparkles, BookOpen } from "lucide-react";
 import { getBranchData, getGanzhiPinyin } from "@/lib/ganzhi";
@@ -76,22 +76,27 @@ const VOID_BRANCH_DETAILS: Record<string, { themes: string; void: string; activa
 interface AnalysisSectionProps {
     result: BaziResult;
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation }: {
-    star: any,
-    index: number,
-    onShowDetail: (star: StarType) => void,
-    chartContext?: ChartContext,
-    onAIExplanation?: (explanation: string, cardTitle: string) => void
-}) {
+interface StarCardProps {
+    star: any;
+    index: number;
+    onShowDetail: (star: StarType) => void;
+    chartContext?: ChartContext;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
+}
+
+function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation, onAIRequest, aiHistory }: StarCardProps) {
     const [showInfo, setShowInfo] = useState(false);
 
     const handleAskAI = (explanation: string) => {
         if (onAIExplanation) {
-            onAIExplanation(explanation, `Star: ${star.name}`);
+            onAIExplanation(explanation, `Star: ${star.name}`, "star");
         }
     };
 
@@ -139,6 +144,9 @@ function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation }: 
                                     chartContext={chartContext}
                                     onExplanation={handleAskAI}
                                     onError={(error) => console.error('AI Error:', error)}
+                                    onRequestStart={onAIRequest}
+                                    cardTitle={`Star: ${star.name}`}
+                                    history={aiHistory}
                                     size="sm"
                                 />
                             )}
@@ -166,12 +174,12 @@ function StarCard({ star, index, onShowDetail, chartContext, onAIExplanation }: 
     );
 }
 
-export default function AnalysisSection({ result, chartContext, onAIExplanation }: AnalysisSectionProps) {
+export default function AnalysisSection({ result, chartContext, onAIExplanation, onAIRequest, aiHistory }: AnalysisSectionProps) {
     const [selectedStar, setSelectedStar] = useState<StarType | null>(null);
 
-    const handleAIExplanation = (explanation: string, cardTitle: string) => {
+    const handleAIExplanation = (explanation: string, cardTitle: string, cardType?: AICardType) => {
         if (onAIExplanation) {
-            onAIExplanation(explanation, cardTitle);
+            onAIExplanation(explanation, cardTitle, cardType);
         }
     };
 
@@ -197,6 +205,8 @@ export default function AnalysisSection({ result, chartContext, onAIExplanation 
                             onShowDetail={(s) => setSelectedStar(s)}
                             chartContext={chartContext}
                             onAIExplanation={handleAIExplanation}
+                            onAIRequest={onAIRequest}
+                            aiHistory={aiHistory}
                         />
                     ))}
                 </div>
@@ -214,8 +224,11 @@ export default function AnalysisSection({ result, chartContext, onAIExplanation 
                                 cardType="void"
                                 cardData={result.xun_kong as unknown as Record<string, unknown>}
                                 chartContext={chartContext}
-                                onExplanation={(exp) => handleAIExplanation(exp, "Void Branches (Xun Kong)")}
+                                onExplanation={(exp) => handleAIExplanation(exp, "Void Branches (Xun Kong)", "void")}
                                 onError={(error) => console.error('AI Error:', error)}
+                                onRequestStart={onAIRequest}
+                                cardTitle="Void Branches (Xun Kong)"
+                                history={aiHistory}
                                 size="sm"
                             />
                         )}
@@ -386,8 +399,11 @@ export default function AnalysisSection({ result, chartContext, onAIExplanation 
                                                     cardType="interaction"
                                                     cardData={interaction as unknown as Record<string, unknown>}
                                                     chartContext={chartContext}
-                                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Interaction: ${interaction.id?.replace(/_/g, ' ') || interaction.type}`)}
+                                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Interaction: ${interaction.id?.replace(/_/g, ' ') || interaction.type}`, "interaction")}
                                                     onError={(error) => console.error('AI Error:', error)}
+                                                    onRequestStart={onAIRequest}
+                                                    cardTitle={`Interaction: ${interaction.id?.replace(/_/g, ' ') || interaction.type}`}
+                                                    history={aiHistory}
                                                     size="sm"
                                                 />
                                             </div>
@@ -465,8 +481,11 @@ export default function AnalysisSection({ result, chartContext, onAIExplanation 
                                     cardType="structure"
                                     cardData={result.professional as unknown as Record<string, unknown>}
                                     chartContext={chartContext}
-                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Structure: ${result.professional.structure}`)}
+                                    onExplanation={(explanation) => handleAIExplanation(explanation, `Structure: ${result.professional.structure}`, "structure")}
                                     onError={(error) => console.error('AI Error:', error)}
+                                    onRequestStart={onAIRequest}
+                                    cardTitle={`Structure: ${result.professional.structure}`}
+                                    history={aiHistory}
                                     size="md"
                                 />
                             </div>

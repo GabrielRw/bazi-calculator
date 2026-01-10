@@ -3,16 +3,19 @@
 import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LifespanCurvePoint } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
 import { Activity, Zap, Brain, Droplets, Sparkles } from "lucide-react";
+import AskAIButton from "./AskAIButton";
 
 interface JingQiShenChartProps {
     data: LifespanCurvePoint[];
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
-export default function JingQiShenChart({ data, chartContext, onAIExplanation }: JingQiShenChartProps) {
+export default function JingQiShenChart({ data, chartContext, onAIExplanation, onAIRequest, aiHistory }: JingQiShenChartProps) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -104,28 +107,6 @@ export default function JingQiShenChart({ data, chartContext, onAIExplanation }:
         }
     };
 
-    const handleAskAI = async () => {
-        if (!chartContext || !onAIExplanation) return;
-
-        try {
-            const response = await fetch('/api/bazi/explain', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cardType: 'lifespan',
-                    cardData: {},
-                    chartContext
-                }),
-            });
-            const responseData = await response.json();
-            if (response.ok) {
-                onAIExplanation(responseData.explanation, "Life Energy Curves");
-            }
-        } catch (err) {
-            console.error('AI Error:', err);
-        }
-    };
-
     const activePoint = hoveredIndex !== null ? data[hoveredIndex] : null;
 
     return (
@@ -143,12 +124,17 @@ export default function JingQiShenChart({ data, chartContext, onAIExplanation }:
                 <div className="flex items-center gap-4">
                     {/* AI Button */}
                     {chartContext && onAIExplanation && (
-                        <button
-                            onClick={handleAskAI}
-                            className="p-1.5 text-[10px] flex items-center gap-1 bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300 print:hidden"
-                        >
-                            <Sparkles className="w-3 h-3" />
-                        </button>
+                        <AskAIButton
+                            cardType="lifespan"
+                            cardData={data as unknown as Record<string, unknown>}
+                            chartContext={chartContext}
+                            onExplanation={(exp) => onAIExplanation(exp, "Life Energy Curves", "lifespan")}
+                            onError={(err) => console.error(err)}
+                            onRequestStart={onAIRequest}
+                            cardTitle="Life Energy Curves"
+                            history={aiHistory}
+                            size="md"
+                        />
                     )}
 
                     {/* Legend */}

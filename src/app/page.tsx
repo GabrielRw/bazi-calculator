@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { ChartContext, AICardType, AIHistoryItem } from "@/types/ai";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
 import ElementChart from "@/components/ElementChart";
@@ -14,13 +14,15 @@ import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
 import SynastryResultView from "@/components/SynastryResult";
 import AISidebar from "@/components/AISidebar";
+import AskAIButton from "@/components/AskAIButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Moon, Activity, Info, Clock, Map, Bot, Check, ArrowLeft, History } from "lucide-react";
 import Image from "next/image";
 import logo from "./logo.png";
 import clsx from "clsx";
 import BaziReport from "@/components/BaziReport";
-import { AIHistoryItem } from "@/types/ai";
+import AIIcon from "@/components/AIIcon";
+
 
 interface BirthData {
   year: number;
@@ -81,7 +83,7 @@ export default function Home() {
   const [aiLoading, setAiLoading] = useState(false);
 
   // Global AI explanation handler passed to all components
-  const handleAIExplanation = useCallback((explanation: string, cardTitle: string) => {
+  const handleAIExplanation = useCallback((explanation: string, cardTitle: string, cardType: AICardType = 'pillar') => {
     setAiExplanation(explanation);
     setAiCardTitle(cardTitle);
     setAiSidebarOpen(true);
@@ -92,7 +94,7 @@ export default function Home() {
       const newItem: AIHistoryItem = {
         id: Math.random().toString(36).substring(7),
         timestamp: Date.now(),
-        cardType: 'pillar', // Default or passed type, for now pillar
+        cardType,
         cardTitle,
         explanation,
         chartId
@@ -107,9 +109,12 @@ export default function Home() {
   }, [chartId]);
 
   // Handler for when AI request starts
-  const handleAIRequest = useCallback((cardTitle: string) => {
+  const handleAIRequest = useCallback((cardTitle: string, isCacheHit?: boolean) => {
     setAiCardTitle(cardTitle);
-    setAiLoading(true);
+    if (!isCacheHit) {
+      setAiLoading(true);
+      setAiExplanation(""); // Clear current while loading new one
+    }
     setAiSidebarOpen(true);
   }, []);
 
@@ -670,7 +675,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           className="fixed top-1/2 right-0 -translate-y-1/2 z-[190] bg-jade text-void p-3 rounded-l-2xl shadow-[0_0_20px_rgba(34,197,94,0.3)] group transition-all print:hidden"
         >
           <div className="flex flex-col items-center gap-1">
-            <Sparkles className="w-5 h-5" />
+            <AIIcon size={18} className="text-void" />
             <span className="text-[10px] font-bold uppercase [writing-mode:vertical-lr]">AI</span>
           </div>
         </motion.button>
@@ -739,7 +744,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
                     )}
                   >
-                    {copied ? <Check className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4" /> : <AIIcon size={16} className="text-current" />}
                     {copied ? "Copied! Paste into AI tool" : "Extract to AI"}
                   </button>
                 </div>
@@ -755,26 +760,38 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                   <div className="space-y-12">
                     {/* 1. Four Pillars (Centerpiece) */}
                     <section>
-                      <FourPillars pillars={result.pillars} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                      <FourPillars
+                        pillars={result.pillars}
+                        chartContext={chartContext}
+                        onAIExplanation={handleAIExplanation}
+                        onAIRequest={handleAIRequest}
+                        aiHistory={aiHistory}
+                      />
                     </section>
 
                     {/* 2. Charts Row */}
-                    <section className="grid lg:grid-cols-3 gap-8">
+                    <div className="grid lg:grid-cols-3 gap-8">
                       <div className="lg:col-span-2 space-y-8">
                         <ElementChart data={result.elements} />
                         {lifespanResult && (
-                          <JingQiShenChart data={lifespanResult.curve} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                          <JingQiShenChart
+                            data={lifespanResult.curve}
+                            chartContext={chartContext}
+                            onAIExplanation={handleAIExplanation}
+                            onAIRequest={handleAIRequest}
+                            aiHistory={aiHistory}
+                          />
                         )}
                       </div>
+
                       <div className="glass-card rounded-2xl p-8 flex flex-col justify-center text-center relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                          <Sparkles className="w-20 h-20 text-clay" />
-                        </div>
                         <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-500 mb-8">
                           Day Master Energy
                         </h3>
                         <div className="space-y-6">
-                          <div className="text-8xl font-serif text-white hover:scale-110 transition-transform cursor-default select-none">{result.day_master.stem}</div>
+                          <div className="text-8xl font-serif text-white hover:scale-110 transition-transform cursor-default select-none">
+                            {result.day_master.stem}
+                          </div>
                           <div>
                             <div className="text-2xl font-bold text-clay mb-1">{result.day_master.info.name}</div>
                             <div className="text-xs text-spirit uppercase tracking-widest">{result.day_master.info.polarity} {result.day_master.info.element}</div>
@@ -784,45 +801,38 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                               &quot;{result.professional.interpretation.split('.')[0]}.&quot;
                             </p>
                           </div>
+
                           {/* Ask AI Button for Day Master */}
                           {chartContext && (
                             <div className="pt-4 print:hidden">
-                              <button
-                                onClick={async () => {
-                                  handleAIRequest("Day Master");
-                                  try {
-                                    const response = await fetch('/api/bazi/explain', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        cardType: 'daymaster',
-                                        cardData: result.day_master,
-                                        chartContext
-                                      }),
-                                    });
-                                    const data = await response.json();
-                                    if (response.ok) {
-                                      handleAIExplanation(data.explanation, "Day Master");
-                                    }
-                                  } catch (err) {
-                                    console.error('AI Error:', err);
-                                    setAiLoading(false);
-                                  }
-                                }}
-                                className="flex items-center gap-1.5 mx-auto px-3 py-1.5 text-xs bg-jade/10 hover:bg-jade/20 border border-jade/30 hover:border-jade/50 text-jade hover:text-white rounded-lg font-bold uppercase tracking-wider transition-all duration-300"
-                              >
-                                <Sparkles className="w-3 h-3" />
-                                Ask AI
-                              </button>
+                              <AskAIButton
+                                cardType="daymaster"
+                                cardData={result.day_master as unknown as Record<string, unknown>}
+                                chartContext={chartContext}
+                                onExplanation={(exp: string) => handleAIExplanation(exp, "Day Master", "daymaster")}
+                                onError={(err: string) => console.error('AI Error:', err)}
+                                onRequestStart={handleAIRequest}
+                                cardTitle="Day Master"
+                                history={aiHistory}
+                                size="sm"
+                                className="mx-auto"
+                              />
                             </div>
                           )}
                         </div>
                       </div>
-                    </section>
+                    </div>
 
                     {/* 2.5 Wuxing Five Phases Chart */}
                     <section>
-                      <WuxingChart data={result.elements} pillars={result.pillars} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                      <WuxingChart
+                        data={result.elements}
+                        pillars={result.pillars}
+                        chartContext={chartContext}
+                        onAIExplanation={handleAIExplanation}
+                        onAIRequest={handleAIRequest}
+                        aiHistory={aiHistory}
+                      />
                     </section>
 
                     {/* 3. Luck Pillars */}
@@ -835,8 +845,8 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
 
                     {/* 3. Deep Analysis & Yong Shen */}
                     <section className="space-y-8">
-                      <YongShenSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
-                      <AnalysisSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} />
+                      <YongShenSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} onAIRequest={handleAIRequest} aiHistory={aiHistory} />
+                      <AnalysisSection result={result} chartContext={chartContext} onAIExplanation={handleAIExplanation} onAIRequest={handleAIRequest} aiHistory={aiHistory} />
                     </section>
 
                     {/* 5. Precise Technical Data */}
@@ -850,7 +860,6 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                           <div className="h-px bg-white/20 flex-1" />
                         </div>
                         <div className="grid md:grid-cols-2 gap-x-12 gap-y-4">
-                          {/* Safe Date Formatter Helper */}
                           {(() => {
                             const formatDate = (dateStr: string | undefined, mode: "full" | "time") => {
                               if (!dateStr) return "--:--";
@@ -934,7 +943,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                           : "text-spirit hover:text-white border-white/10 hover:bg-white/5"
                       )}
                     >
-                      {copied ? <Check className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+                      {copied ? <Check className="w-3 h-3" /> : <AIIcon size={12} className="text-current" />}
                       {copied ? "Copied Prompt" : "AI Extract"}
                     </button>
                   </div>
@@ -977,6 +986,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
         onSelectHistory={(item) => {
           setAiExplanation(item.explanation);
           setAiCardTitle(item.cardTitle);
+          setAiLoading(false); // Explicitly set aiLoading to false when selecting from history
         }}
         onClearHistory={() => {
           if (chartId) {

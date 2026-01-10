@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Copy, Check, ChevronRight, History, Trash2 } from "lucide-react";
+import { X, Copy, Check, ChevronRight, History, Trash2, Clock } from "lucide-react";
+import AIIcon from "./AIIcon";
 import { AIHistoryItem } from "@/types/ai";
 
 interface AISidebarProps {
@@ -111,6 +112,8 @@ export default function AISidebar({
         setMounted(true);
     }, []);
 
+    const prevLoadingRef = useRef(false);
+
     // Switch to current view when a new explanation arrives or loading starts
     useEffect(() => {
         if (explanation || isLoading) {
@@ -118,25 +121,45 @@ export default function AISidebar({
         }
     }, [explanation, isLoading]);
 
-    // Typewriter effect
+    // Reset loading state when sidebar closes or view changes to history
+    useEffect(() => {
+        if (!isOpen || view === "history") {
+            prevLoadingRef.current = false;
+        }
+    }, [isOpen, view]);
+
+    // Typewriter effect logic
     useEffect(() => {
         if (!isOpen || !explanation || view !== "current") {
-            if (view === "current") setDisplayedText("");
+            if (view === "current" && !isLoading) setDisplayedText("");
             return;
         }
 
-        let index = 0;
-        const interval = setInterval(() => {
-            if (index < explanation.length) {
-                setDisplayedText(explanation.slice(0, index + 1));
-                index++;
-            } else {
-                clearInterval(interval);
-            }
-        }, 5);
+        if (isLoading) {
+            setDisplayedText("");
+            prevLoadingRef.current = true;
+            return;
+        }
 
-        return () => clearInterval(interval);
-    }, [isOpen, explanation, view]);
+        // Only type if we were explicitly loading or if there's no displayed text yet
+        // This prevents re-typing when switching views or coming from history (which sets isLoading=false immediately)
+        if (prevLoadingRef.current) {
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < explanation.length) {
+                    setDisplayedText(explanation.slice(0, index + 1));
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    prevLoadingRef.current = false;
+                }
+            }, 5);
+            return () => clearInterval(interval);
+        } else {
+            // Show immediately (history or direct cached hit)
+            setDisplayedText(explanation);
+        }
+    }, [isOpen, explanation, isLoading, view]);
 
     const parsedContent = useMemo(() => parseMarkdown(view === "current" ? displayedText : explanation), [displayedText, explanation, view]);
 
@@ -183,7 +206,7 @@ export default function AISidebar({
                                     )}
                                     title={view === "current" ? "View History" : "Back to Analysis"}
                                 >
-                                    {view === "current" ? <History className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                                    {view === "current" ? <History className="w-4 h-4" /> : <AIIcon className="w-4 h-4" />}
                                 </button>
                                 <div>
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">
@@ -251,7 +274,7 @@ export default function AISidebar({
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                                        <Sparkles className="w-12 h-12 text-jade/20" />
+                                        <AIIcon className="w-12 h-12 text-jade/20" />
                                         <div>
                                             <p className="text-sm text-gray-400">No analysis yet</p>
                                             <p className="text-xs text-gray-600 mt-1">Click an Ask AI button to get started</p>
@@ -271,23 +294,32 @@ export default function AISidebar({
                                                 }}
                                                 className="w-full text-left p-4 rounded-xl bg-white/5 border border-white/5 hover:border-jade/30 hover:bg-white/10 transition-all group"
                                             >
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <span className="text-xs font-bold text-jade group-hover:text-white transition-colors">
-                                                        {item.cardTitle}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-600">
-                                                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                                <div className="flex justify-between items-start gap-3">
+                                                    <div className="flex gap-3">
+                                                        <div className="mt-1 p-2 bg-white/5 rounded-lg">
+                                                            <AIIcon size={14} className="text-spirit" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-white font-bold text-sm mb-1">{item.cardTitle}</div>
+                                                            <div className="text-[10px] text-gray-500 flex items-center gap-1.5 uppercase tracking-wider">
+                                                                <Clock className="w-3 h-3" />
+                                                                {new Date(item.timestamp).toLocaleDateString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">
+                                                <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed mt-2">
                                                     {item.explanation}
                                                 </p>
                                             </button>
                                         ))
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-                                            <History className="w-12 h-12 text-gray-800" />
-                                            <p className="text-sm text-gray-500">History is empty</p>
+                                        <div className="text-center py-20 px-10">
+                                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <AIIcon size={32} className="text-gray-700" />
+                                            </div>
+                                            <div className="text-gray-500 text-sm font-serif">No analysis history yet</div>
+                                            <div className="text-[10px] text-gray-600 uppercase tracking-widest mt-2">Insights will appear here</div>
                                         </div>
                                     )}
                                 </div>

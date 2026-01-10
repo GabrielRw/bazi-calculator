@@ -1,7 +1,7 @@
 "use client";
 
 import { BaziResult } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowRight, BookOpen, Quote } from "lucide-react";
 import { useState } from "react";
@@ -84,10 +84,12 @@ const YONG_SHEN_SUGGESTIONS: Record<string, { title: string; actions: string[]; 
 interface YongShenSectionProps {
     result: BaziResult;
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
-export default function YongShenSection({ result, chartContext, onAIExplanation }: YongShenSectionProps) {
+export default function YongShenSection({ result, chartContext, onAIExplanation, onAIRequest, aiHistory }: YongShenSectionProps) {
     const usefulElements = result.professional.yong_shen_candidates || [];
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -195,14 +197,13 @@ export default function YongShenSection({ result, chartContext, onAIExplanation 
                                                 <div className="mt-4 pt-3 border-t border-white/5 flex justify-end print:hidden">
                                                     <AskAIButton
                                                         cardType="yongshen"
-                                                        cardData={usefulElements as unknown as Record<string, unknown>}
+                                                        cardData={result as unknown as Record<string, unknown>}
                                                         chartContext={chartContext}
-                                                        onExplanation={(exp) => {
-                                                            if (onAIExplanation) {
-                                                                onAIExplanation(exp, "Yong Shen Analysis");
-                                                            }
-                                                        }}
+                                                        onExplanation={(exp) => onAIExplanation(exp, "Useful God Analysis", "yongshen")}
                                                         onError={(err) => console.error(err)}
+                                                        onRequestStart={onAIRequest}
+                                                        cardTitle="Useful God Analysis"
+                                                        history={aiHistory}
                                                         size="sm"
                                                     />
                                                 </div>

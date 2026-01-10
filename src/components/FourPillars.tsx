@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pillar } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { ChartContext, AICardType, AIHistoryItem } from "@/types/ai";
 import { cn, getElementColor } from "@/lib/utils";
 import { Info, X, Zap, Sparkles, User } from "lucide-react";
 import AskAIButton from "./AskAIButton";
@@ -12,7 +12,9 @@ import AskAIButton from "./AskAIButton";
 interface FourPillarsProps {
     pillars: Pillar[];
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
 const pillarDomains: Record<string, string> = {
@@ -35,7 +37,7 @@ const tenGodArchetypes: Record<string, string> = {
     "Indirect Resource": "The Seeker"
 };
 
-export default function FourPillars({ pillars, chartContext, onAIExplanation }: FourPillarsProps) {
+export default function FourPillars({ pillars, chartContext, onAIExplanation, onAIRequest, aiHistory }: FourPillarsProps) {
     const [activePillarIndex, setActivePillarIndex] = useState<number | null>(null);
     const [mounted, setMounted] = useState(false);
 
@@ -61,6 +63,8 @@ export default function FourPillars({ pillars, chartContext, onAIExplanation }: 
                         onClick={() => setActivePillarIndex(index)}
                         chartContext={chartContext}
                         onAIExplanation={handleAIExplanation}
+                        onAIRequest={onAIRequest}
+                        aiHistory={aiHistory}
                     />
                 ))}
             </div>
@@ -92,6 +96,8 @@ export default function FourPillars({ pillars, chartContext, onAIExplanation }: 
                                     onClose={() => setActivePillarIndex(null)}
                                     chartContext={chartContext}
                                     onAIExplanation={handleAIExplanation}
+                                    onAIRequest={onAIRequest}
+                                    aiHistory={aiHistory}
                                 />
                             </motion.div>
                         </div>
@@ -103,12 +109,14 @@ export default function FourPillars({ pillars, chartContext, onAIExplanation }: 
     );
 }
 
-function PillarCard({ pillar, index, onClick, chartContext, onAIExplanation }: {
+function PillarCard({ pillar, index, onClick, chartContext, onAIExplanation, onAIRequest, aiHistory }: {
     pillar: Pillar;
     index: number;
     onClick: () => void;
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }) {
     const ganColor = getElementColor(pillar.gan_info.element);
     const zhiColor = getElementColor(pillar.zhi_info.element);
@@ -187,8 +195,11 @@ function PillarCard({ pillar, index, onClick, chartContext, onAIExplanation }: {
                         cardType="pillar"
                         cardData={pillar as unknown as Record<string, unknown>}
                         chartContext={chartContext}
-                        onExplanation={(exp) => onAIExplanation(exp, `${pillar.label} Pillar`)}
+                        onExplanation={(exp) => onAIExplanation?.(exp, `${pillar.label} Pillar`, "pillar")}
                         onError={(err) => console.error(err)}
+                        onRequestStart={onAIRequest}
+                        cardTitle={`${pillar.label} Pillar`}
+                        history={aiHistory}
                         size="sm"
                     />
                 )}
@@ -197,11 +208,13 @@ function PillarCard({ pillar, index, onClick, chartContext, onAIExplanation }: {
     );
 }
 
-function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation }: {
+function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation, onAIRequest, aiHistory }: {
     pillar: Pillar;
     onClose: () => void;
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }) {
     const ganColor = getElementColor(pillar.gan_info.element);
     const zhiColor = getElementColor(pillar.zhi_info.element);
@@ -304,6 +317,9 @@ function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation }: {
                                 chartContext={chartContext}
                                 onExplanation={handleAskAI}
                                 onError={(error) => console.error('AI Error:', error)}
+                                onRequestStart={onAIRequest}
+                                cardTitle={`${pillar.label} Pillar`}
+                                history={aiHistory}
                                 size="md"
                             />
                         </div>
@@ -325,8 +341,11 @@ function PillarDetailView({ pillar, onClose, chartContext, onAIExplanation }: {
                                         hidden_stems: pillar.ten_gods.hidden
                                     }}
                                     chartContext={chartContext}
-                                    onExplanation={(exp) => onAIExplanation?.(exp, `${pillar.label} Root Potential`)}
+                                    onExplanation={(exp) => onAIExplanation?.(exp, `${pillar.label} Root Potential`, "roots")}
                                     onError={(error) => console.error('AI Error:', error)}
+                                    onRequestStart={onAIRequest}
+                                    cardTitle={`${pillar.label} Root Potential`}
+                                    history={aiHistory}
                                     size="xs"
                                 />
                             )}

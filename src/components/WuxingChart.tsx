@@ -1,7 +1,7 @@
 "use client";
 
 import { ElementData, Pillar } from "@/types/bazi";
-import { ChartContext } from "@/types/ai";
+import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Droplets, Flame, Mountain, Hammer, Waves, Shield, Activity, Zap, Scale } from "lucide-react";
@@ -9,9 +9,11 @@ import AskAIButton from "./AskAIButton";
 
 interface WuxingChartProps {
     data: ElementData;
-    pillars?: Pillar[];
+    pillars: Pillar[];
     chartContext?: ChartContext;
-    onAIExplanation?: (explanation: string, cardTitle: string) => void;
+    onAIExplanation?: (explanation: string, cardTitle: string, cardType?: AICardType) => void;
+    onAIRequest?: (cardTitle: string) => void;
+    aiHistory?: AIHistoryItem[];
 }
 
 // Element positions in a pentagon (clockwise from top: Fire, Earth, Metal, Water, Wood)
@@ -97,7 +99,7 @@ const ELEMENT_REMEDIES: Record<string, { nourish: string; express: string; contr
     },
 };
 
-export default function WuxingChart({ data, pillars, chartContext, onAIExplanation }: WuxingChartProps) {
+export default function WuxingChart({ data, pillars, chartContext, onAIExplanation, onAIRequest, aiHistory }: WuxingChartProps) {
     const [showInsights, setShowInsights] = useState(false);
     const centerX = 150;
     const centerY = 150;
@@ -152,14 +154,32 @@ export default function WuxingChart({ data, pillars, chartContext, onAIExplanati
     // Get element index for animation delay
     const getElementIndex = (name: string) => ELEMENTS.findIndex(e => e.name === name);
 
-    // Calculate curved path for controlling cycle (inner star)
+    // Calculate curved path for controlling cycle (inner star) with offsets
     const getControlPath = (from: string, to: string) => {
         const start = elementPositions[from];
         const end = elementPositions[to];
+
+        // Calculate angle of the line connecting start and end
+        const angleLine = Math.atan2(end.y - start.y, end.x - start.x);
+
+        // Offset start and end points to avoid overlapping with nodes
+        const adjustedStart = {
+            x: start.x + nodeRadius * Math.cos(angleLine),
+            y: start.y + nodeRadius * Math.sin(angleLine)
+        };
+
+        // Adjust end point to account for marker size (markerWidth="10", refX="8")
+        const markerOffset = 10; // Approximate marker length
+        const adjustedEnd = {
+            x: end.x - (nodeRadius + markerOffset) * Math.cos(angleLine),
+            y: end.y - (nodeRadius + markerOffset) * Math.sin(angleLine)
+        };
+
         // Create a slightly curved path toward center
-        const midX = (start.x + end.x) / 2 + (centerX - (start.x + end.x) / 2) * 0.3;
-        const midY = (start.y + end.y) / 2 + (centerY - (start.y + end.y) / 2) * 0.3;
-        return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
+        const midX = (adjustedStart.x + adjustedEnd.x) / 2 + (centerX - (adjustedStart.x + adjustedEnd.x) / 2) * 0.3;
+        const midY = (adjustedStart.y + adjustedEnd.y) / 2 + (centerY - (adjustedStart.y + adjustedEnd.y) / 2) * 0.3;
+
+        return `M ${adjustedStart.x} ${adjustedStart.y} Q ${midX} ${midY} ${adjustedEnd.x} ${adjustedEnd.y}`;
     };
 
     return (
@@ -189,8 +209,8 @@ export default function WuxingChart({ data, pillars, chartContext, onAIExplanati
                                     <path d="M0,0 L0,6 L8,3 z" fill="#22c55e" opacity="0.7" />
                                 </marker>
                                 {/* Arrow marker for controlling cycle */}
-                                <marker id="arrow-ctrl" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto">
-                                    <path d="M0,0 L0,4 L6,2 z" fill="#ef4444" opacity="0.5" />
+                                <marker id="arrow-ctrl" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                                    <path d="M0,0 L0,10 L10,5 z" fill="#ef4444" opacity="0.8" />
                                 </marker>
                             </defs>
 
@@ -472,15 +492,14 @@ export default function WuxingChart({ data, pillars, chartContext, onAIExplanati
                                             <div className="mt-6 pt-4 border-t border-white/5 flex justify-end print:hidden">
                                                 <AskAIButton
                                                     cardType="wuxing"
-                                                    cardData={data as unknown as Record<string, unknown>}
+                                                    cardData={{ elements: data, context: chartContext }}
                                                     chartContext={chartContext}
-                                                    onExplanation={(explanation) => {
-                                                        if (onAIExplanation) {
-                                                            onAIExplanation(explanation, "Wu Xing Analysis");
-                                                        }
-                                                    }}
-                                                    onError={(error) => console.error('AI Error:', error)}
-                                                    size="md"
+                                                    onExplanation={(exp) => onAIExplanation?.(exp, "Strategic Element Analysis", "wuxing")}
+                                                    onError={(err) => console.error(err)}
+                                                    onRequestStart={onAIRequest}
+                                                    cardTitle="Strategic Element Analysis"
+                                                    history={aiHistory}
+                                                    size="sm"
                                                 />
                                             </div>
                                         )}
