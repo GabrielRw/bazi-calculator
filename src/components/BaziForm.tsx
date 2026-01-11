@@ -37,6 +37,12 @@ export interface FormData {
     gender: "male" | "female";
     timeStandard: string;
     calendar: string;
+    sectionOptions?: {
+        wuxing: boolean;
+        health: boolean;
+        neijing: boolean;
+        famousMatches: boolean;
+    };
 }
 
 export interface SynastryRequest {
@@ -73,6 +79,12 @@ const DEFAULT_FORM_DATA = {
     gender: "male",
     timeStandard: "true_solar_absolute",
     calendar: "gregorian",
+    sectionOptions: {
+        wuxing: true,
+        health: true,
+        neijing: true,
+        famousMatches: true,
+    },
 };
 
 // Static cache of popular cities for instant results
@@ -837,6 +849,42 @@ export default function BaziForm({
                                                     placeholder="Longitude (e.g. 2.3522)"
                                                 />
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Optional Sections */}
+                                    <div>
+                                        <label className="text-[10px] uppercase text-gray-500 font-bold tracking-wider mb-2 block">Optional Sections</label>
+                                        <p className="text-[10px] text-gray-600 mb-3">Toggle which analysis sections to display</p>
+                                        <div className="space-y-2">
+                                            {[
+                                                { key: 'wuxing', label: 'Wu Xing Chart', desc: 'Five Elements balance' },
+                                                { key: 'health', label: 'Health & Constitution', desc: 'TCM constitutional analysis' },
+                                                { key: 'neijing', label: 'Neijing Life Curve', desc: 'Jing-Qi-Shen energetics' },
+                                                { key: 'famousMatches', label: 'Famous Chart Matches', desc: 'Compare with historical figures' },
+                                            ].map(({ key, label, desc }) => (
+                                                <label key={key} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 cursor-pointer group">
+                                                    <div>
+                                                        <div className="text-xs text-white">{label}</div>
+                                                        <div className="text-[9px] text-gray-500">{desc}</div>
+                                                    </div>
+                                                    <div
+                                                        className={`w-10 h-5 rounded-full transition-all ${personA.sectionOptions?.[key as keyof typeof personA.sectionOptions] ? 'bg-jade' : 'bg-white/10'} relative`}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setPersonA({
+                                                                ...personA,
+                                                                sectionOptions: {
+                                                                    ...personA.sectionOptions,
+                                                                    [key]: !personA.sectionOptions?.[key as keyof typeof personA.sectionOptions]
+                                                                }
+                                                            });
+                                                        }}
+                                                    >
+                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${personA.sectionOptions?.[key as keyof typeof personA.sectionOptions] ? 'left-5' : 'left-0.5'}`} />
+                                                    </div>
+                                                </label>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>

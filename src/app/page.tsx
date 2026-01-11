@@ -10,6 +10,7 @@ import WuxingChart from "@/components/WuxingChart";
 import JingQiShenChart from "@/components/JingQiShenChart";
 import YongShenSection from "@/components/YongShenSection";
 import HealthSection from "@/components/HealthSection";
+import FamousMatchesSection from "@/components/FamousMatchesSection";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -34,6 +35,12 @@ interface BirthData {
   city: string;
   gender: string;
   timeStandard: string;
+  sectionOptions?: {
+    wuxing: boolean;
+    health: boolean;
+    neijing: boolean;
+    famousMatches: boolean;
+  };
 }
 
 export default function Home() {
@@ -638,7 +645,8 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           minute: data.minute,
           city: data.city,
           gender: data.gender,
-          timeStandard: data.timeStandard
+          timeStandard: data.timeStandard,
+          sectionOptions: data.sectionOptions
         });
         setActiveTab("natal");
 
@@ -838,7 +846,7 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                     <div className="grid lg:grid-cols-3 gap-8 w-full overflow-hidden">
                       <div className="lg:col-span-2 space-y-8 min-w-0">
                         <ElementChart data={result.elements} />
-                        {lifespanResult && (
+                        {lifespanResult && birthData?.sectionOptions?.neijing !== false && (
                           <JingQiShenChart
                             data={lifespanResult.curve}
                             metadata={lifespanResult.metadata}
@@ -893,22 +901,37 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                     </div>
 
                     {/* 2.5 Wuxing Five Phases Chart */}
-                    <section>
-                      <WuxingChart
-                        data={result.elements}
-                        pillars={result.pillars}
-                        chartContext={chartContext}
-                        onAIExplanation={handleAIExplanation}
-                        onAIRequest={handleAIRequest}
-                        aiHistory={aiHistory}
-                      />
-                    </section>
+                    {birthData?.sectionOptions?.wuxing !== false && (
+                      <section>
+                        <WuxingChart
+                          data={result.elements}
+                          pillars={result.pillars}
+                          chartContext={chartContext}
+                          onAIExplanation={handleAIExplanation}
+                          onAIRequest={handleAIRequest}
+                          aiHistory={aiHistory}
+                        />
+                      </section>
+                    )}
 
                     {/* 2.6 Health & Constitution Section */}
-                    {healthResult && (
+                    {healthResult && birthData?.sectionOptions?.health !== false && (
                       <section>
                         <HealthSection
                           data={healthResult}
+                          chartContext={chartContext}
+                          onAIExplanation={handleAIExplanation}
+                          onAIRequest={handleAIRequest}
+                          aiHistory={aiHistory}
+                        />
+                      </section>
+                    )}
+
+                    {/* 2.7 Famous Chart Matches */}
+                    {birthData?.sectionOptions?.famousMatches !== false && (
+                      <section>
+                        <FamousMatchesSection
+                          result={result}
                           chartContext={chartContext}
                           onAIExplanation={handleAIExplanation}
                           onAIRequest={handleAIRequest}
