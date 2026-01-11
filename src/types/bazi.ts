@@ -165,6 +165,7 @@ export interface BaziResult {
         longitude?: number;
     };
     current_age?: number;
+    health?: HealthResult;
 }
 
 export interface SynastryResult {

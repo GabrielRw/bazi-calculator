@@ -24,6 +24,8 @@ export const metadata: Metadata = {
   }
 };
 
+import TopNav from "@/components/TopNav";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,9 +34,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0e0e0e] text-white min-h-screen relative selection:bg-jade/30 selection:text-jade-100`}
       >
-        {children}
+        <TopNav />
+        <main className="pt-20 md:pt-24 min-h-screen">
+          {children}
+        </main>
       </body>
     </html>
   );
