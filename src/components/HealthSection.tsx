@@ -3,7 +3,7 @@
 import { HealthResult } from "@/types/bazi";
 import { AICardType, ChartContext, AIHistoryItem } from "@/types/ai";
 import { motion } from "framer-motion";
-import { Heart, Thermometer, Droplets, Shield, AlertTriangle, TrendingUp, Sparkles, Activity, Leaf, Info } from "lucide-react";
+import { Thermometer, Droplets, Shield, AlertTriangle, TrendingUp, Sparkles, Activity, Leaf, Info } from "lucide-react";
 import AskAIButton from "./AskAIButton";
 
 // Element colors for consistent styling
@@ -47,8 +47,8 @@ function TemperatureGauge({ score, label }: { score: number; label: string }) {
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Temperature</span>
                 </div>
                 <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full ${isHot ? "bg-red-500/20 text-red-400" :
-                        isCold ? "bg-blue-500/20 text-blue-400" :
-                            "bg-gray-500/20 text-gray-400"
+                    isCold ? "bg-blue-500/20 text-blue-400" :
+                        "bg-gray-500/20 text-gray-400"
                     }`}>
                     {label}
                 </span>
@@ -82,8 +82,8 @@ function MoistureGauge({ score, label }: { score: number; label: string }) {
                     <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Moisture</span>
                 </div>
                 <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full ${isDamp ? "bg-cyan-500/20 text-cyan-400" :
-                        isDry ? "bg-orange-500/20 text-orange-400" :
-                            "bg-gray-500/20 text-gray-400"
+                    isDry ? "bg-orange-500/20 text-orange-400" :
+                        "bg-gray-500/20 text-gray-400"
                     }`}>
                     {label}
                 </span>
@@ -236,9 +236,6 @@ export default function HealthSection({ data, chartContext, onAIExplanation, onA
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* Constitution Card (Main Feature) */}
                 <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                        <Heart className="w-32 h-32 text-jade" />
-                    </div>
 
                     <div className="relative z-10 space-y-6">
                         <div className="flex items-center justify-between">
@@ -248,14 +245,14 @@ export default function HealthSection({ data, chartContext, onAIExplanation, onA
                             </h4>
                             <div className="flex gap-1">
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${constitution.temperature === "hot" ? "bg-red-500/20 text-red-400" :
-                                        constitution.temperature === "cold" ? "bg-blue-500/20 text-blue-400" :
-                                            "bg-gray-500/20 text-gray-400"
+                                    constitution.temperature === "cold" ? "bg-blue-500/20 text-blue-400" :
+                                        "bg-gray-500/20 text-gray-400"
                                     }`}>
                                     {constitution.temperature}
                                 </span>
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${constitution.moisture === "damp" ? "bg-cyan-500/20 text-cyan-400" :
-                                        constitution.moisture === "dry" ? "bg-orange-500/20 text-orange-400" :
-                                            "bg-gray-500/20 text-gray-400"
+                                    constitution.moisture === "dry" ? "bg-orange-500/20 text-orange-400" :
+                                        "bg-gray-500/20 text-gray-400"
                                     }`}>
                                     {constitution.moisture}
                                 </span>

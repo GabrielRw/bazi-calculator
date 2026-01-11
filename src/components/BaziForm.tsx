@@ -81,7 +81,7 @@ const DEFAULT_FORM_DATA = {
     calendar: "gregorian",
     sectionOptions: {
         wuxing: true,
-        health: true,
+        health: false,
         neijing: true,
         famousMatches: true,
     },
