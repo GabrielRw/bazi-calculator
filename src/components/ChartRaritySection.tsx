@@ -11,182 +11,217 @@ interface ChartRaritySectionProps {
 /**
  * Calculate chart rarity based on BaZi characteristics
  * 
- * Factors considered:
- * 1. Day Master stem (10 options) - 1/10
- * 2. Hour pillar Gan-Zhi (60 combinations) - 1/60  
- * 3. Month pillar affects season (12 months) - 1/12
- * 4. Year pillar (60 year cycle) - 1/60
- * 5. Special structures are rarer
- * 6. Extreme element distributions are rarer
- * 7. Special star configurations
- * 
- * Base calculation: 10 stems × 12 branches = 60 Jia Zi
- * Four pillars: 60^4 theoretical but constrained by calendar
- * Realistic unique daily pillars per 60-year cycle ≈ 21,900 days
- * With hour pillar: 21,900 × 12 = 262,800 unique chart patterns per cycle
+ * The approach: Start with a base ratio reflecting average charts,
+ * then apply multipliers ONLY for genuinely unusual features.
+ * Most charts should fall in the "Typical" to "Somewhat Uncommon" range.
  */
 function calculateRarity(result: BaziResult): {
     ratio: number;
     label: string;
     description: string;
-    factors: { name: string; multiplier: number; note: string }[];
+    factors: { name: string; rarity: string; isUnusual: boolean }[];
 } {
-    const factors: { name: string; multiplier: number; note: string }[] = [];
-    let rarityMultiplier = 1;
+    const factors: { name: string; rarity: string; isUnusual: boolean }[] = [];
+    let rarityScore = 0; // Additive score, not multiplicative
 
-    // 1. Day Master base (10 stems, roughly equal)
+    // 1. Day Master - all roughly equal, not a rarity factor
     factors.push({
-        name: "Day Master Stem",
-        multiplier: 10,
-        note: `${result.day_master.stem} is one of 10 Day Masters`
+        name: "Day Master",
+        rarity: `${result.day_master.stem} (${result.day_master.info.element})`,
+        isUnusual: false
     });
-    rarityMultiplier *= 10;
 
-    // 2. Day Master Strength (Strong ~40%, Weak ~40%, Balanced ~20%)
+    // 2. Day Master Strength
     const strength = result.professional.dm_strength.toLowerCase();
-    if (strength.includes('balanced') || strength.includes('neutral')) {
+    if (strength.includes('balanced') || strength.includes('neutral') || strength.includes('average')) {
+        rarityScore += 15;
         factors.push({
             name: "DM Strength",
-            multiplier: 5,
-            note: "Balanced/Neutral strength is rarer (~20%)"
+            rarity: "Balanced (uncommon ~15%)",
+            isUnusual: true
         });
-        rarityMultiplier *= 5;
     } else {
         factors.push({
             name: "DM Strength",
-            multiplier: 2.5,
-            note: "Strong/Weak strength (~40% each)"
+            rarity: result.professional.dm_strength,
+            isUnusual: false
         });
-        rarityMultiplier *= 2.5;
     }
 
-    // 3. Structure type rarity
+    // 3. Structure type - only special structures are rare
     const structure = result.professional.structure.toLowerCase();
-    const rareStructures = ['follow', 'special', 'fake', 'transform'];
-    const uncommonStructures = ['killing', 'hurting', 'indirect'];
+    const veryRareStructures = ['follow', 'special', 'fake', 'transform', 'dominant'];
+    const uncommonStructures = ['killing', 'hurting officer'];
 
-    if (rareStructures.some(s => structure.includes(s))) {
+    if (veryRareStructures.some(s => structure.includes(s))) {
+        rarityScore += 40;
         factors.push({
-            name: "Structure Type",
-            multiplier: 50,
-            note: `${result.professional.structure} is a rare structure (~2%)`
+            name: "Structure",
+            rarity: `${result.professional.structure} (rare ~3%)`,
+            isUnusual: true
         });
-        rarityMultiplier *= 50;
     } else if (uncommonStructures.some(s => structure.includes(s))) {
+        rarityScore += 10;
         factors.push({
-            name: "Structure Type",
-            multiplier: 10,
-            note: `${result.professional.structure} is uncommon (~10%)`
+            name: "Structure",
+            rarity: `${result.professional.structure} (less common ~20%)`,
+            isUnusual: true
         });
-        rarityMultiplier *= 10;
     } else {
         factors.push({
-            name: "Structure Type",
-            multiplier: 4,
-            note: `${result.professional.structure} is a common structure (~25%)`
+            name: "Structure",
+            rarity: `${result.professional.structure} (typical)`,
+            isUnusual: false
         });
-        rarityMultiplier *= 4;
     }
 
-    // 4. Element distribution extremity
+    // 4. Element distribution - only extremes are notable
     const percentages = Object.values(result.elements.percentages);
     const maxElement = Math.max(...percentages);
     const minElement = Math.min(...percentages);
+    const elements = Object.keys(result.elements.percentages);
+    const maxElementName = elements.find(e => result.elements.percentages[e as keyof typeof result.elements.percentages] === maxElement);
 
     if (minElement === 0) {
+        rarityScore += 20;
         factors.push({
-            name: "Missing Element",
-            multiplier: 8,
-            note: "Chart missing one element entirely (~12%)"
+            name: "Element Balance",
+            rarity: "Missing element (uncommon ~10%)",
+            isUnusual: true
         });
-        rarityMultiplier *= 8;
-    } else if (maxElement >= 50) {
+    } else if (maxElement >= 60) {
+        rarityScore += 25;
         factors.push({
-            name: "Dominant Element",
-            multiplier: 6,
-            note: `One element dominates 50%+ (~15%)`
+            name: "Element Balance",
+            rarity: `Very dominant ${maxElementName} (${maxElement}%)`,
+            isUnusual: true
         });
-        rarityMultiplier *= 6;
-    } else if (maxElement - minElement <= 10) {
+    } else if (maxElement - minElement <= 8) {
+        rarityScore += 30;
         factors.push({
-            name: "Balanced Elements",
-            multiplier: 10,
-            note: "Very balanced element distribution (~10%)"
+            name: "Element Balance",
+            rarity: "Exceptionally balanced (rare ~5%)",
+            isUnusual: true
         });
-        rarityMultiplier *= 10;
+    } else {
+        factors.push({
+            name: "Element Balance",
+            rarity: "Normal distribution",
+            isUnusual: false
+        });
     }
 
-    // 5. Symbolic stars count
+    // 5. Symbolic stars - only extremes matter
     const starCount = result.stars?.length || 0;
-    if (starCount >= 8) {
+    if (starCount >= 10) {
+        rarityScore += 15;
         factors.push({
-            name: "Many Stars",
-            multiplier: 5,
-            note: `${starCount} symbolic stars (top 20%)`
+            name: "Symbolic Stars",
+            rarity: `${starCount} stars (high, top 10%)`,
+            isUnusual: true
         });
-        rarityMultiplier *= 5;
-    } else if (starCount <= 2) {
+    } else if (starCount <= 1) {
+        rarityScore += 10;
         factors.push({
-            name: "Few Stars",
-            multiplier: 4,
-            note: `Only ${starCount} symbolic stars (~25%)`
+            name: "Symbolic Stars",
+            rarity: `${starCount} stars (rare, bottom 15%)`,
+            isUnusual: true
         });
-        rarityMultiplier *= 4;
+    } else {
+        factors.push({
+            name: "Symbolic Stars",
+            rarity: `${starCount} stars (typical)`,
+            isUnusual: false
+        });
     }
 
-    // 6. Calculate final ratio
-    // Base population of chart variations in a 60-year cycle
-    const baseChartVariations = 262800; // Approximate unique patterns
-    const effectiveRatio = Math.round(baseChartVariations * rarityMultiplier / 100);
+    // 6. Check for same-element pillars (all stems same element)
+    const pillars = result.pillars;
+    if (pillars && pillars.length >= 4) {
+        const stemElements = pillars.map(p => p.gan_info.element);
+        const uniqueStemElements = new Set(stemElements);
+        if (uniqueStemElements.size <= 2) {
+            rarityScore += 20;
+            factors.push({
+                name: "Pillar Harmony",
+                rarity: "Stems share few elements (unusual)",
+                isUnusual: true
+            });
+        }
+    }
+
+    // Convert score to ratio
+    // Score 0 = 1 in 50 (common)
+    // Score 100+ = 1 in 100,000+ (very rare)
+    let ratio: number;
+    if (rarityScore === 0) {
+        ratio = 50;
+    } else if (rarityScore < 20) {
+        ratio = 100 + rarityScore * 10;
+    } else if (rarityScore < 40) {
+        ratio = 500 + (rarityScore - 20) * 50;
+    } else if (rarityScore < 60) {
+        ratio = 2000 + (rarityScore - 40) * 200;
+    } else if (rarityScore < 80) {
+        ratio = 8000 + (rarityScore - 60) * 500;
+    } else {
+        ratio = 20000 + (rarityScore - 80) * 2000;
+    }
 
     // Determine label and description
     let label: string;
     let description: string;
 
-    if (effectiveRatio >= 1000000) {
+    if (ratio >= 50000) {
         label = "Exceptionally Rare";
-        description = `Approximately 1 in ${(effectiveRatio / 1000000).toFixed(1)} million charts share your pattern`;
-    } else if (effectiveRatio >= 100000) {
+        description = `Only ~1 in ${Math.round(ratio / 1000)}K charts share this exact pattern`;
+    } else if (ratio >= 10000) {
         label = "Very Rare";
-        description = `Approximately 1 in ${Math.round(effectiveRatio / 1000)}K charts share your pattern`;
-    } else if (effectiveRatio >= 10000) {
+        description = `Approximately 1 in ${Math.round(ratio / 1000)}K charts share this pattern`;
+    } else if (ratio >= 2000) {
         label = "Uncommon";
-        description = `Approximately 1 in ${Math.round(effectiveRatio / 1000)}K charts share your pattern`;
-    } else if (effectiveRatio >= 1000) {
-        label = "Somewhat Rare";
-        description = `Approximately 1 in ${effectiveRatio.toLocaleString()} charts share your pattern`;
+        description = `About 1 in ${ratio.toLocaleString()} charts have similar characteristics`;
+    } else if (ratio >= 500) {
+        label = "Somewhat Unusual";
+        description = `Roughly 1 in ${ratio} charts share these traits`;
+    } else if (ratio >= 150) {
+        label = "Slightly Distinctive";
+        description = `Around 1 in ${ratio} charts have this configuration`;
     } else {
         label = "Common Pattern";
-        description = `Approximately 1 in ${effectiveRatio.toLocaleString()} charts share your pattern`;
+        description = `A fairly typical chart configuration (~1 in ${ratio})`;
     }
 
-    return { ratio: effectiveRatio, label, description, factors };
+    return { ratio, label, description, factors };
 }
 
 export default function ChartRaritySection({ result }: ChartRaritySectionProps) {
     const rarity = calculateRarity(result);
 
-    // Calculate a visual percentage for the gauge (log scale)
-    const logRatio = Math.log10(rarity.ratio);
-    const maxLog = 7; // 10 million
-    const gaugePercent = Math.min((logRatio / maxLog) * 100, 100);
+    // Calculate a visual percentage for the gauge (log scale, capped)
+    const logRatio = Math.log10(Math.max(rarity.ratio, 1));
+    const minLog = Math.log10(50); // 1 in 50
+    const maxLog = Math.log10(100000); // 1 in 100K
+    const gaugePercent = Math.min(Math.max(((logRatio - minLog) / (maxLog - minLog)) * 100, 5), 100);
 
     // Color based on rarity
     const getColor = () => {
-        if (rarity.ratio >= 1000000) return "text-purple-400";
-        if (rarity.ratio >= 100000) return "text-jade";
-        if (rarity.ratio >= 10000) return "text-blue-400";
-        if (rarity.ratio >= 1000) return "text-amber-400";
+        if (rarity.ratio >= 50000) return "text-purple-400";
+        if (rarity.ratio >= 10000) return "text-jade";
+        if (rarity.ratio >= 2000) return "text-blue-400";
+        if (rarity.ratio >= 500) return "text-amber-400";
         return "text-gray-400";
     };
 
     const getBgColor = () => {
-        if (rarity.ratio >= 1000000) return "from-purple-500/20 to-purple-500/5";
-        if (rarity.ratio >= 100000) return "from-jade/20 to-jade/5";
-        if (rarity.ratio >= 10000) return "from-blue-500/20 to-blue-500/5";
-        if (rarity.ratio >= 1000) return "from-amber-500/20 to-amber-500/5";
+        if (rarity.ratio >= 50000) return "from-purple-500/20 to-purple-500/5";
+        if (rarity.ratio >= 10000) return "from-jade/20 to-jade/5";
+        if (rarity.ratio >= 2000) return "from-blue-500/20 to-blue-500/5";
+        if (rarity.ratio >= 500) return "from-amber-500/20 to-amber-500/5";
         return "from-gray-500/20 to-gray-500/5";
     };
+
+    const unusualFactors = rarity.factors.filter(f => f.isUnusual);
 
     return (
         <div className="space-y-4">
@@ -221,11 +256,9 @@ export default function ChartRaritySection({ result }: ChartRaritySectionProps) 
                         </div>
 
                         <div className="text-3xl md:text-4xl font-bold text-white mb-2">
-                            1 in {rarity.ratio >= 1000000
-                                ? `${(rarity.ratio / 1000000).toFixed(1)}M`
-                                : rarity.ratio >= 1000
-                                    ? `${(rarity.ratio / 1000).toFixed(0)}K`
-                                    : rarity.ratio.toLocaleString()}
+                            1 in {rarity.ratio >= 1000
+                                ? `${(rarity.ratio / 1000).toFixed(rarity.ratio >= 10000 ? 0 : 1)}K`
+                                : rarity.ratio.toLocaleString()}
                         </div>
 
                         <p className="text-xs text-gray-400">{rarity.description}</p>
@@ -252,29 +285,33 @@ export default function ChartRaritySection({ result }: ChartRaritySectionProps) 
                         <div className="flex justify-between text-[8px] text-gray-600 mt-1">
                             <span>Common</span>
                             <span>Rare</span>
-                            <span>Unique</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Factors breakdown */}
-                <div className="mt-6 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-wider mb-3">
-                        <Info className="w-3 h-3" />
-                        Contributing Factors
-                    </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {rarity.factors.map((factor, i) => (
-                            <div key={i} className="text-[10px] p-2 rounded-lg bg-white/5">
-                                <div className="flex justify-between mb-1">
-                                    <span className="text-gray-400">{factor.name}</span>
-                                    <span className="text-white font-medium">×{factor.multiplier}</span>
+                {/* Factors breakdown - only show unusual ones prominently */}
+                {unusualFactors.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-white/5">
+                        <div className="flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-wider mb-3">
+                            <Info className="w-3 h-3" />
+                            What Makes Your Chart Distinctive
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {unusualFactors.map((factor, i) => (
+                                <div key={i} className="text-[10px] px-3 py-1.5 rounded-full bg-white/10 text-white">
+                                    <span className="text-gray-400">{factor.name}:</span>{" "}
+                                    <span className="font-medium">{factor.rarity}</span>
                                 </div>
-                                <div className="text-[9px] text-gray-600">{factor.note}</div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {unusualFactors.length === 0 && (
+                    <div className="mt-4 text-[10px] text-gray-500 text-center">
+                        Your chart has a typical configuration with no extreme characteristics.
+                    </div>
+                )}
             </motion.div>
         </div>
     );

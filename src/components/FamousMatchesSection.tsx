@@ -6,8 +6,7 @@ import { motion } from "framer-motion";
 import { Users, Star, ChevronDown, ChevronUp, Sparkles, Crown, Palette, FlaskConical, Briefcase, Trophy } from "lucide-react";
 import { useState, useMemo } from "react";
 import { matchCharts, ChartMatch, getMatchDescription } from "@/lib/chartMatcher";
-import { CATEGORY_LABELS, CATEGORY_COLORS, FamousCategory } from "@/data/famousPeople";
-import AskAIButton from "./AskAIButton";
+import { CATEGORY_COLORS, FamousCategory } from "@/data/famousPeople";
 
 // Category icons
 const CATEGORY_ICONS: Record<FamousCategory, React.ReactNode> = {
@@ -205,30 +204,6 @@ export default function FamousMatchesSection({
                             </>
                         )}
                     </button>
-                </div>
-            )}
-
-            {/* AI Button */}
-            {chartContext && (
-                <div className="flex justify-end print:hidden">
-                    <AskAIButton
-                        cardType="structure"
-                        cardData={{
-                            topMatches: matches.slice(0, 3).map(m => ({
-                                name: m.person.name,
-                                score: m.score,
-                                commonalities: m.commonalities,
-                                category: m.person.category
-                            }))
-                        } as unknown as Record<string, unknown>}
-                        chartContext={chartContext}
-                        onExplanation={(exp) => onAIExplanation(exp, "Famous Chart Matches", "structure")}
-                        onError={(err) => console.error(err)}
-                        onRequestStart={onAIRequest}
-                        cardTitle="Famous Chart Matches"
-                        history={aiHistory}
-                        size="sm"
-                    />
                 </div>
             )}
         </div>
