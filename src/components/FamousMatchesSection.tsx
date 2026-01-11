@@ -35,30 +35,16 @@ function MatchCard({ match, rank }: { match: ChartMatch; rank: number }) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: rank * 0.1 }}
+            transition={{ delay: Math.min(rank * 0.05, 0.3) }}
             className="glass-card rounded-xl p-4 relative overflow-hidden group hover:border-white/20 transition-all"
         >
-            {/* Rank Badge */}
-            <div className="absolute top-3 right-3 w-7 h-7 rounded-full bg-jade/20 text-jade flex items-center justify-center text-xs font-bold">
-                #{rank + 1}
-            </div>
-
             {/* Header */}
-            <div className="flex items-start gap-3 mb-3">
-                {/* Avatar placeholder with initials */}
-                <div className={`w-12 h-12 rounded-full ${categoryColors.bg} ${categoryColors.text} flex items-center justify-center text-lg font-bold flex-shrink-0`}>
-                    {person.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-bold text-sm truncate">{person.name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors.bg} ${categoryColors.text} font-bold uppercase flex items-center gap-1`}>
-                            {CATEGORY_ICONS[person.category]}
-                            {person.category}
-                        </span>
-                    </div>
-                </div>
+            <div className="mb-3">
+                <h4 className="text-white font-bold text-sm truncate mb-1.5">{person.name}</h4>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors.bg} ${categoryColors.text} font-bold uppercase inline-flex items-center gap-1`}>
+                    {CATEGORY_ICONS[person.category]}
+                    {person.category}
+                </span>
             </div>
 
             {/* Score */}
@@ -77,8 +63,8 @@ function MatchCard({ match, rank }: { match: ChartMatch; rank: number }) {
                     {person.dayMaster.polarity} {person.dayMaster.element}
                 </span>
                 <span className={`text-[10px] px-2 py-0.5 rounded ${person.dmStrength === 'Strong' ? 'bg-jade/20 text-jade' :
-                        person.dmStrength === 'Weak' ? 'bg-red-500/20 text-red-400' :
-                            'bg-gray-500/20 text-gray-400'
+                    person.dmStrength === 'Weak' ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
                     }`}>
                     {person.dmStrength}
                 </span>
@@ -124,33 +110,28 @@ function MatchCard({ match, rank }: { match: ChartMatch; rank: number }) {
                     </div>
 
                     {/* Score Breakdown */}
-                    <div className="space-y-1.5">
-                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Match Breakdown</div>
-                        <div className="grid grid-cols-3 gap-2 text-[9px]">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Day Master</span>
-                                <span className="text-white">{breakdown.dayMaster}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Strength</span>
-                                <span className="text-white">{breakdown.dmStrength}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Elements</span>
-                                <span className="text-white">{breakdown.elements}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Structure</span>
-                                <span className="text-white">{breakdown.structure}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Pillars</span>
-                                <span className="text-white">{breakdown.pillars}%</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">Stars</span>
-                                <span className="text-white">{breakdown.stars}%</span>
-                            </div>
+                    <div className="space-y-2">
+                        <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-2">Match Breakdown</div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
+                            {[
+                                { label: 'Day Master', value: breakdown.dayMaster },
+                                { label: 'Strength', value: breakdown.dmStrength },
+                                { label: 'Elements', value: breakdown.elements },
+                                { label: 'Structure', value: breakdown.structure },
+                                { label: 'Pillars', value: breakdown.pillars },
+                                { label: 'Stars', value: breakdown.stars },
+                            ].map(({ label, value }) => (
+                                <div key={label} className="flex items-center gap-2">
+                                    <span className="text-gray-500 w-16 flex-shrink-0">{label}</span>
+                                    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-jade/60 rounded-full"
+                                            style={{ width: `${value}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-white w-8 text-right">{value}%</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </motion.div>
@@ -184,7 +165,7 @@ export default function FamousMatchesSection({
                 <div className="flex-1 h-px bg-white/5" />
                 <span className="text-[9px] text-gray-600 flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    50 Historical Figures
+                    100 Historical Figures
                 </span>
             </div>
 
