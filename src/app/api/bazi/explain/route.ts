@@ -263,6 +263,42 @@ RULES:
 3. Provide practical insight into how they experience this specific elemental energy.
 4. Keep it focused ONLY on this element's balance.
 5. Maximum 150 words.`;
+    },
+
+    health: (cardData, chartContext) => {
+        const data = cardData as {
+            bazi_context: { day_master: string; day_master_element: string; day_master_strength: string; favorable_elements: string[]; unfavorable_elements: string[]; balance_strategy: { priority_elements: string[]; reason: string[] } };
+            element_balance: { effective_distribution: Record<string, number>; dominant_elements: string[]; weak_elements: string[]; rooting_scores: Record<string, number> };
+            constitution: { temperature: string; temperature_score: number; moisture: string; moisture_score: number };
+            timing?: { decade_peaks: { period: string; strain_index: number; drivers?: string[] }[]; year_peaks: { year: number; strain_index: number }[] };
+        };
+
+        const dmInfo = (chartContext.dayMaster as { info?: { element?: string; polarity?: string } })?.info;
+
+        return `You are an expert BaZi (Four Pillars of Destiny) and Traditional Chinese Medicine analyst specializing in constitutional health patterns.
+
+HEALTH & CONSTITUTION DATA:
+- Day Master: ${data.bazi_context.day_master} (${data.bazi_context.day_master_element}, ${data.bazi_context.day_master_strength})
+- Constitution: ${data.constitution.temperature} (${data.constitution.temperature_score.toFixed(2)}) / ${data.constitution.moisture} (${data.constitution.moisture_score.toFixed(2)})
+- Dominant Elements: ${data.element_balance.dominant_elements.join(', ')}
+- Weak Elements: ${data.element_balance.weak_elements.join(', ')}
+- Priority Balance Elements: ${data.bazi_context.balance_strategy.priority_elements.join(', ')}
+${data.timing?.decade_peaks?.length ? `- Upcoming Strain Periods: ${data.timing.decade_peaks.slice(0, 2).map(p => p.period).join(', ')}` : ''}
+
+ROOTING DEPTH: ${Object.entries(data.element_balance.rooting_scores).map(([el, score]) => `${el}: ${(score * 100).toFixed(0)}%`).join(', ')}
+
+CHART CONTEXT:
+- Day Master: ${dmInfo?.element} ${dmInfo?.polarity}
+- Strength: ${chartContext.dmStrength}
+
+RULES:
+1. Focus on constitutional health patterns based on TCM Five Element theory.
+2. Explain what the temperature (hot/cold) and moisture (damp/dry) scores mean for this person's health tendencies.
+3. Connect element imbalances to potential organ system vulnerabilities (Wood→Liver, Fire→Heart, Earth→Spleen, Metal→Lungs, Water→Kidneys).
+4. Suggest lifestyle, dietary, and environmental adjustments aligned with their constitution.
+5. If timing strain periods are shown, briefly mention when extra care is needed.
+6. IMPORTANT: Include a disclaimer that this is based on traditional frameworks, not medical diagnosis.
+7. Maximum 280 words.`;
     }
 };
 

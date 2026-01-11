@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult } from "@/types/bazi";
+import { BaziResult, BaziFlowResult, SynastryResult, LifespanResult, HealthResult } from "@/types/bazi";
 import { ChartContext, AICardType, AIHistoryItem } from "@/types/ai";
 import BaziForm from "@/components/BaziForm";
 import FourPillars from "@/components/FourPillars";
@@ -9,6 +9,7 @@ import ElementChart from "@/components/ElementChart";
 import WuxingChart from "@/components/WuxingChart";
 import JingQiShenChart from "@/components/JingQiShenChart";
 import YongShenSection from "@/components/YongShenSection";
+import HealthSection from "@/components/HealthSection";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -39,6 +40,7 @@ export default function Home() {
   const [result, setResult] = useState<BaziResult | null>(null);
   const [flowResult, setFlowResult] = useState<BaziFlowResult | null>(null);
   const [lifespanResult, setLifespanResult] = useState<LifespanResult | null>(null);
+  const [healthResult, setHealthResult] = useState<HealthResult | null>(null);
   const [cultivationFactor, setCultivationFactor] = useState(0.5);
   const [synastryResult, setSynastryResult] = useState<SynastryResult | null>(null);
   const [synastryNames, setSynastryNames] = useState<{ a: string; b: string } | null>(null);
@@ -661,6 +663,21 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
           })
           .catch(err => console.error("Lifespan fetch error:", err));
 
+        // Fetch Health Data Asynchronously (Non-blocking)
+        fetch("/api/bazi/health", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ ...payload, include_timing: true, timing_years_ahead: 10 })
+        })
+          .then(res => {
+            if (res.ok) return res.json();
+            return null;
+          })
+          .then(data => {
+            if (data) setHealthResult(data);
+          })
+          .catch(err => console.error("Health fetch error:", err));
+
       }
 
     } catch (err) {
@@ -886,6 +903,19 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         aiHistory={aiHistory}
                       />
                     </section>
+
+                    {/* 2.6 Health & Constitution Section */}
+                    {healthResult && (
+                      <section>
+                        <HealthSection
+                          data={healthResult}
+                          chartContext={chartContext}
+                          onAIExplanation={handleAIExplanation}
+                          onAIRequest={handleAIRequest}
+                          aiHistory={aiHistory}
+                        />
+                      </section>
+                    )}
 
                     {/* 3. Luck Pillars */}
                     <section>

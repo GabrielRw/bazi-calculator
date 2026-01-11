@@ -251,3 +251,80 @@ export interface LifespanResult {
     };
     curve: LifespanCurvePoint[];
 }
+
+// Health & Constitution Types
+export interface HealthBalanceStrategy {
+    priority_elements: string[];
+    reason: string[];
+}
+
+export interface HealthBaziContext {
+    day_master: string;
+    day_master_element: string;
+    day_master_strength: string;
+    favorable_elements: string[];
+    unfavorable_elements: string[];
+    rationale: string[];
+    balance_strategy: HealthBalanceStrategy;
+}
+
+export interface SeasonalAdjustments {
+    month_branch: string;
+    multipliers: Record<string, number>;
+}
+
+export interface HealthElementBalance {
+    raw_absolute: Record<string, number>;
+    raw_total: number;
+    raw_distribution: Record<string, number>;
+    effective_pre_normalized: Record<string, number>;
+    effective_distribution: Record<string, number>;
+    effective_method: string;
+    seasonal_adjustments: SeasonalAdjustments;
+    rooting_scores: Record<string, number>;
+    rooting_raw: Record<string, number>;
+    dominant_elements: string[];
+    weak_elements: string[];
+}
+
+export interface HealthConstitution {
+    temperature: string;
+    temperature_score: number;
+    temperature_scale: string;
+    temperature_components: Record<string, number>;
+    moisture: string;
+    moisture_score: number;
+    moisture_scale?: string;
+    moisture_components?: Record<string, number>;
+}
+
+export interface HealthTimingPeak {
+    period?: string;  // For decade peaks
+    year?: number;    // For year peaks
+    gan_zhi: string;
+    strain_index: number;
+    strain_type?: string;
+    drivers?: string[];
+    level: string;
+}
+
+export interface HealthTiming {
+    decade_peaks: HealthTimingPeak[];
+    year_peaks: HealthTimingPeak[];
+    analysis_range: string;
+}
+
+export interface HealthDataQuality {
+    rooting_model: string;
+    hidden_stems_weighting: string;
+    transformations: string;
+}
+
+export interface HealthResult {
+    bazi_context: HealthBaziContext;
+    element_balance: HealthElementBalance;
+    constitution: HealthConstitution;
+    timing?: HealthTiming;
+    data_quality: HealthDataQuality;
+    disclaimer: string;
+}
