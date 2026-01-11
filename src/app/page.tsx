@@ -11,6 +11,7 @@ import JingQiShenChart from "@/components/JingQiShenChart";
 import YongShenSection from "@/components/YongShenSection";
 import HealthSection from "@/components/HealthSection";
 import FamousMatchesSection from "@/components/FamousMatchesSection";
+import ChartRaritySection from "@/components/ChartRaritySection";
 import LuckPillars from "@/components/LuckPillars";
 import AnalysisSection from "@/components/AnalysisSection";
 import FlowSection from "@/components/FlowSection";
@@ -939,6 +940,11 @@ The report must be detailed, practical, and non-repetitive. Depth > fluff.`;
                         />
                       </section>
                     )}
+
+                    {/* 2.8 Chart Rarity */}
+                    <section>
+                      <ChartRaritySection result={result} />
+                    </section>
 
                     {/* 3. Luck Pillars */}
                     <section>

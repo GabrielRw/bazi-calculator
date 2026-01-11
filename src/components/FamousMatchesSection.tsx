@@ -111,8 +111,8 @@ function MatchCard({ match, rank }: { match: ChartMatch; rank: number }) {
 
                     {/* Score Breakdown */}
                     <div className="space-y-2">
-                        <div className="text-[9px] text-gray-500 uppercase tracking-wider mb-2">Match Breakdown</div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
+                        <div className="text-[9px] text-gray-500 uppercase tracking-wider">Match Breakdown</div>
+                        <div className="space-y-1">
                             {[
                                 { label: 'Day Master', value: breakdown.dayMaster },
                                 { label: 'Strength', value: breakdown.dmStrength },
@@ -121,15 +121,17 @@ function MatchCard({ match, rank }: { match: ChartMatch; rank: number }) {
                                 { label: 'Pillars', value: breakdown.pillars },
                                 { label: 'Stars', value: breakdown.stars },
                             ].map(({ label, value }) => (
-                                <div key={label} className="flex items-center gap-2">
-                                    <span className="text-gray-500 w-16 flex-shrink-0">{label}</span>
-                                    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-jade/60 rounded-full"
-                                            style={{ width: `${value}%` }}
-                                        />
+                                <div key={label} className="flex items-center justify-between text-[10px]">
+                                    <span className="text-gray-500">{label}</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-12 h-1 bg-white/10 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-jade rounded-full"
+                                                style={{ width: `${value}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-white w-7 text-right font-medium">{value}%</span>
                                     </div>
-                                    <span className="text-white w-8 text-right">{value}%</span>
                                 </div>
                             ))}
                         </div>
@@ -165,7 +167,7 @@ export default function FamousMatchesSection({
                 <div className="flex-1 h-px bg-white/5" />
                 <span className="text-[9px] text-gray-600 flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    100 Historical Figures
+                    150 Historical Figures
                 </span>
             </div>
 
