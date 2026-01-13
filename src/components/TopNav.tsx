@@ -21,9 +21,14 @@ export default function TopNav() {
             <div className="max-w-7xl mx-auto">
                 <div className="glass-card rounded-2xl px-4 py-3 flex items-center justify-between bg-black/40 backdrop-blur-md border border-white/10 shadow-xl">
                     {/* Logo/Brand */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-jade to-emerald-700 flex items-center justify-center text-white font-serif font-bold text-lg shadow-lg group-hover:scale-105 transition-transform">
-                            八
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-500">
+                            <div className="absolute inset-0 bg-jade/20 blur-lg rounded-full" />
+                            <img
+                                src="/logo.png"
+                                alt="True BaZi Logo"
+                                className="relative w-full h-full object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                            />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-sm font-bold text-white tracking-wide">TRUE BAZI</span>

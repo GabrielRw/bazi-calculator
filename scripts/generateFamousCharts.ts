@@ -3,18 +3,11 @@
  * Run with: npx ts-node --esm scripts/generateFamousCharts.ts
  */
 
-const FAMOUS_PEOPLE_SUBSET = [
-    { id: 'mozart', name: 'Wolfgang Amadeus Mozart', birth: { year: 1756, month: 1, day: 27, hour: 20, minute: 0, city: 'Salzburg', country: 'Austria' }, category: 'artist', brief: 'Prolific and influential composer of the Classical period.' },
-    { id: 'picasso', name: 'Pablo Picasso', birth: { year: 1881, month: 10, day: 25, hour: 23, minute: 15, city: 'Málaga', country: 'Spain' }, category: 'artist', brief: 'Co-founder of Cubism and one of the most influential artists.' },
-    { id: 'beethoven', name: 'Ludwig van Beethoven', birth: { year: 1770, month: 12, day: 16, hour: 13, minute: 0, city: 'Bonn', country: 'Germany' }, category: 'artist', brief: 'German composer who bridged Classical and Romantic eras.' },
-    { id: 'einstein', name: 'Albert Einstein', birth: { year: 1879, month: 3, day: 14, hour: 11, minute: 30, city: 'Ulm', country: 'Germany' }, category: 'scientist', brief: 'Theoretical physicist who developed the theory of relativity.' },
-    { id: 'napoleon', name: 'Napoleon Bonaparte', birth: { year: 1769, month: 8, day: 15, hour: 10, minute: 0, city: 'Ajaccio', country: 'France' }, category: 'leader', brief: 'French military leader and emperor who conquered much of Europe.' },
-    { id: 'steve-jobs', name: 'Steve Jobs', birth: { year: 1955, month: 2, day: 24, hour: 19, minute: 15, city: 'San Francisco', country: 'USA' }, category: 'entrepreneur', brief: 'Co-founder of Apple who revolutionized personal computing.' },
-    { id: 'michael-jordan', name: 'Michael Jordan', birth: { year: 1963, month: 2, day: 17, hour: 13, minute: 40, city: 'Brooklyn', country: 'USA' }, category: 'performer', brief: 'Widely considered the greatest basketball player of all time.' },
-    { id: 'marilyn-monroe', name: 'Marilyn Monroe', birth: { year: 1926, month: 6, day: 1, hour: 9, minute: 30, city: 'Los Angeles', country: 'USA' }, category: 'performer', brief: 'Iconic actress and model, symbol of 1950s glamour.' },
-    { id: 'elon-musk', name: 'Elon Musk', birth: { year: 1971, month: 6, day: 28, hour: 7, minute: 30, city: 'Pretoria', country: 'South Africa' }, category: 'entrepreneur', brief: 'Entrepreneur behind Tesla, SpaceX, and various tech ventures.' },
-    { id: 'oprah-winfrey', name: 'Oprah Winfrey', birth: { year: 1954, month: 1, day: 29, hour: 4, minute: 30, city: 'Kosciusko', country: 'USA' }, category: 'performer', brief: 'Media mogul, talk show host, and philanthropist.' },
-];
+// Import FAMOUS_PEOPLE from source file (need to use ts-node to handle the TS import)
+import { FAMOUS_PEOPLE } from '../src/data/famousPeople';
+
+// Use full list
+const FAMOUS_PEOPLE_SUBSET = FAMOUS_PEOPLE;
 
 const API_URL = 'https://astro-api-1qnc.onrender.com/api/v1/chinese/bazi';
 
