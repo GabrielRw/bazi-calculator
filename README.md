@@ -1,36 +1,189 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# True BaZi Calculator
 
-## Getting Started
+![License](https://img.shields.io/badge/license-MIT-green)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-First, run the development server:
+A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calculator built with Next.js. Features true solar time calculations, famous chart comparisons, AI-powered insights, and comprehensive destiny analysis.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+![True BaZi Calculator Screenshot](docs/screenshot-hero.png)
+
+## ✨ Features
+
+### Core Calculator
+- **Four Pillars Chart** - Year, Month, Day, and Hour pillars with Heavenly Stems & Earthly Branches
+- **True Solar Time** - Precise calculations using geographic coordinates (not just timezone)
+- **Day Master Analysis** - Personality insights based on your Day Master element
+- **Element Balance (Wu Xing)** - Interactive five-element distribution visualization
+- **Luck Cycles** - 10-year luck pillars with timing analysis
+
+### Advanced Analysis
+- **Health & Constitution** - TCM-based constitutional analysis
+- **Symbolic Stars (Shen Sha)** - Traditional star interpretations
+- **Yong Shen / Useful Gods** - Strategic element recommendations
+- **Chart Rarity Score** - How unique is your destiny chart?
+- **Neijing Life Curve** - Jing-Qi-Shen energy modeling
+
+### Famous Charts Library
+- **138+ Historical Figures** - Pre-computed charts for celebrities, leaders, scientists
+- **SEO-Optimized Pages** - Individual pages for each famous person
+- **Chart Matching** - Compare your chart with famous personalities
+
+### AI Integration
+- **Smart Explanations** - Context-aware AI insights for each chart section
+- **History Tracking** - Review past AI explanations
+
+## 📸 Screenshots
+
+<!-- Add your screenshots here -->
+![Four Pillars Chart](docs/screenshot-pillars.png)
+![Element Balance](docs/screenshot-wuxing.png)
+![Famous Charts](docs/screenshot-famous.png)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm, yarn, or pnpm
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/GabrielRw/bazi-calculator.git
+   cd bazi-calculator
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Edit `.env.local` and add your API keys (see [API Configuration](#api-configuration) below).
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🔑 API Configuration
+
+This project uses the [Free Astro API](https://freeastroapi.com) for BaZi calculations. You'll need to obtain an API key:
+
+1. Visit [freeastroapi.com](https://freeastroapi.com)
+2. Sign up for a free account
+3. Copy your API key
+
+### Environment Variables
+
+Create a `.env.local` file with:
+
+```env
+# Required: Free Astro API Key
+# Get yours at https://freeastroapi.com
+ASTRO_API_KEY=your_api_key_here
+
+# Optional: OpenAI API Key (for AI explanations)
+OPENAI_API_KEY=your_openai_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> ⚠️ **Important**: Never commit your `.env.local` file. It's already in `.gitignore`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes (proxy to Free Astro API)
+│   ├── famous-charts/     # Famous people chart pages
+│   └── contact/           # Contact page
+├── components/            # React components
+│   ├── FourPillars.tsx   # Four Pillars display
+│   ├── WuxingChart.tsx   # Five Elements visualization
+│   ├── HealthSection.tsx # TCM constitution analysis
+│   └── ...
+├── data/                  # Static data
+│   ├── famousPeople.ts   # Famous people database
+│   └── famousPeopleCharts.ts  # Pre-computed charts
+├── lib/                   # Utilities
+│   └── chartMatcher.ts   # Chart matching algorithm
+└── types/                 # TypeScript definitions
+```
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: [Next.js 16](https://nextjs.org) (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **API**: [Free Astro API](https://freeastroapi.com) for BaZi calculations
+- **AI**: OpenAI GPT-4 for explanations (optional)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📊 API Endpoints
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The app proxies requests through internal API routes:
 
-## Deploy on Vercel
+| Endpoint | Description |
+|----------|-------------|
+| `/api/bazi/natal` | Calculate natal chart |
+| `/api/bazi/flow` | Get annual/monthly flow |
+| `/api/bazi/health` | Health & constitution analysis |
+| `/api/bazi/lifespan` | Neijing energy curve |
+| `/api/bazi/synastry` | Relationship compatibility |
+| `/api/bazi/explain` | AI explanations |
+| `/api/geo/search` | City/location search |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🌟 Famous Charts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project includes pre-computed BaZi charts for 138+ historical figures:
+
+- **Artists**: Mozart, Picasso, Beethoven, David Bowie...
+- **Leaders**: Napoleon, Lincoln, Gandhi, Obama...
+- **Scientists**: Einstein, Tesla, Marie Curie...
+- **Entrepreneurs**: Steve Jobs, Elon Musk, Oprah...
+- **Performers**: Michael Jordan, Marilyn Monroe...
+
+### Regenerating Famous Charts
+
+To regenerate the famous charts data:
+
+```bash
+npx tsx scripts/generateFamousCharts.ts
+```
+
+This requires the `ASTRO_API_KEY` in your `.env.local`.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Free Astro API](https://freeastroapi.com) - For providing the BaZi calculation engine
+- The traditional Chinese metaphysics community for preserving this ancient wisdom
+
+## 📬 Contact
+
+For questions or feedback, please open an issue or visit the [Contact page](https://truebazi.com/contact).
+
+---
+
+Made with ☯ by the True BaZi team
