@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Calculator, Sparkles, Mail, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "@/app/logo.png";
 
 export default function TopNav() {
     const pathname = usePathname();
@@ -24,9 +26,11 @@ export default function TopNav() {
                     <Link href="/" className="flex items-center gap-3 group">
                         <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-500">
                             <div className="absolute inset-0 bg-jade/20 blur-lg rounded-full" />
-                            <img
-                                src="/logo.png"
+                            <Image
+                                src={logo}
                                 alt="True BaZi Logo"
+                                width={32}
+                                height={32}
                                 className="relative w-full h-full object-contain drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                             />
                         </div>
