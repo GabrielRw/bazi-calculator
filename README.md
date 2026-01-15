@@ -10,35 +10,66 @@ A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calc
 
 ## ✨ Features
 
-### Core Calculator
-- **Four Pillars Chart** - Year, Month, Day, and Hour pillars with Heavenly Stems & Earthly Branches
-- **True Solar Time** - Precise calculations using geographic coordinates (not just timezone)
-- **Day Master Analysis** - Personality insights based on your Day Master element
-- **Element Balance (Wu Xing)** - Interactive five-element distribution visualization
-- **Luck Cycles** - 10-year luck pillars with timing analysis
+### 🏛️ Four Pillars Chart
+Complete natal chart with Year, Month, Day, and Hour pillars showing Heavenly Stems & Earthly Branches.
 
-### Advanced Analysis
-- **Health & Constitution** - TCM-based constitutional analysis
-- **Symbolic Stars (Shen Sha)** - Traditional star interpretations
-- **Yong Shen / Useful Gods** - Strategic element recommendations
-- **Chart Rarity Score** - How unique is your destiny chart?
-- **Neijing Life Curve** - Jing-Qi-Shen energy modeling
-
-### Famous Charts Library
-- **138+ Historical Figures** - Pre-computed charts for celebrities, leaders, scientists
-- **SEO-Optimized Pages** - Individual pages for each famous person
-- **Chart Matching** - Compare your chart with famous personalities
-
-### AI Integration
-- **Smart Explanations** - Context-aware AI insights for each chart section
-- **History Tracking** - Review past AI explanations
-
-## 📸 Screenshots
-
-<!-- Add your screenshots here -->
 ![Four Pillars Chart](docs/screenshot-pillars.png)
+
+### ☯️ Element Balance (Wu Xing)
+Interactive five-element distribution visualization with generating and controlling cycle relationships.
+
 ![Element Balance](docs/screenshot-wuxing.png)
+
+### 🔮 Deep Pillar Analysis
+Detailed breakdown of each pillar with hidden stems, symbolic stars, and element interactions.
+
+![Pillar Analysis](docs/screenshot-pillaranalysis.png)
+
+### ⭐ Symbolic Stars (Shen Sha)
+Traditional star interpretations with detailed modal explanations.
+
+![Symbolic Stars](docs/screenshot-stars.png)
+
+### 🌀 Void Branches (Xun Kong)
+Analysis of void branches and their influence on your chart.
+
+![Void Branches](docs/screenshot-voidbranch.png)
+
+### 📊 Chart Rarity Score
+How unique is your destiny chart? Statistical rarity analysis.
+
+![Chart Rarity](docs/screenshot-rarity.png)
+
+### 🌊 Neijing Life Curve
+Jing-Qi-Shen energy modeling based on traditional Chinese medicine principles.
+
+![Neijing Life Curve](docs/screeenshot-neijing.png)
+
+### 📅 Destiny Flow
+Annual and monthly flow analysis showing interactions with your natal chart.
+
+![Destiny Flow](docs/screenshot-destinyflow.png)
+
+![Flow Transitions](docs/screenshot-destinyflowtransitions.png)
+
+### 💑 Synastry / Compatibility
+Relationship compatibility analysis between two charts.
+
+![Synastry Analysis](docs/screenshot-bazisynastry.png)
+
+![Element Support](docs/screenshot-synastry-elementsupport.png)
+
+### 🤖 AI-Powered Insights
+Context-aware AI explanations for each chart section.
+
+![AI Insights](docs/screenshot-ai.png)
+
+### 🌟 Famous Charts Library
+Pre-computed charts for 138+ historical figures with full analysis.
+
 ![Famous Charts](docs/screenshot-famous.png)
+
+---
 
 ## 🚀 Getting Started
 
@@ -64,7 +95,7 @@ A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calc
    cp .env.example .env.local
    ```
    
-   Edit `.env.local` and add your API keys (see [API Configuration](#api-configuration) below).
+   Edit `.env.local` and add your API keys (see [API Configuration](#-api-configuration) below).
 
 4. **Run the development server**
    ```bash
@@ -72,6 +103,8 @@ A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calc
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
 
 ## 🔑 API Configuration
 
@@ -96,6 +129,8 @@ OPENAI_API_KEY=your_openai_key_here
 
 > ⚠️ **Important**: Never commit your `.env.local` file. It's already in `.gitignore`.
 
+---
+
 ## 📁 Project Structure
 
 ```
@@ -117,6 +152,8 @@ src/
 └── types/                 # TypeScript definitions
 ```
 
+---
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [Next.js 16](https://nextjs.org) (App Router)
@@ -126,6 +163,8 @@ src/
 - **Icons**: Lucide React
 - **API**: [Free Astro API](https://freeastroapi.com) for BaZi calculations
 - **AI**: OpenAI GPT-4 for explanations (optional)
+
+---
 
 ## 📊 API Endpoints
 
@@ -140,6 +179,8 @@ The app proxies requests through internal API routes:
 | `/api/bazi/synastry` | Relationship compatibility |
 | `/api/bazi/explain` | AI explanations |
 | `/api/geo/search` | City/location search |
+
+---
 
 ## 🌟 Famous Charts
 
@@ -161,9 +202,11 @@ npx tsx scripts/generateFamousCharts.ts
 
 This requires the `ASTRO_API_KEY` in your `.env.local`.
 
+---
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -171,14 +214,20 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
 
 ## 🙏 Acknowledgments
 
 - [Free Astro API](https://freeastroapi.com) - For providing the BaZi calculation engine
 - The traditional Chinese metaphysics community for preserving this ancient wisdom
+
+---
 
 ## 📬 Contact
 
