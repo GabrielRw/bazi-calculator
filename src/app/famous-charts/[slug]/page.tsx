@@ -22,9 +22,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
     if (!person) return {};
 
+    const title = `${person.name} Bazi Chart - Four Pillars Analysis | True Bazi`;
+    const description = `Explore ${person.name}'s Bazi (Four Pillars of Destiny) chart. Discover their Day Master, element balance, luck cycles, and destiny patterns. Complete Chinese astrology analysis.`;
+
     return {
-        title: `${person.name} BaZi Chart Analysis | True Bazi`,
-        description: `Detailed Four Pillars of Destiny (BaZi) analysis for ${person.name}. Explore their element balance, luck cycles, and destiny chart.`,
+        title,
+        description,
+        keywords: [`${person.name} bazi`, `${person.name} four pillars`, `${person.name} chinese astrology`, `${person.name} birth chart`, 'bazi calculator', 'four pillars of destiny'],
+        openGraph: {
+            title,
+            description,
+            type: 'article',
+            siteName: 'True Bazi',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+        },
     };
 }
 
