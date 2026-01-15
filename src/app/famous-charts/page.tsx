@@ -2,18 +2,13 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Sparkles, Filter, ChevronRight } from "lucide-react";
+import { Search, Sparkles, ChevronRight } from "lucide-react";
 import { FAMOUS_PEOPLE, CATEGORY_COLORS, FamousCategory } from "@/data/famousPeople";
+import { FAMOUS_CHARTS_DATA } from "@/data/famousPeopleCharts";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Helper to check if we have full verified data for this person
-// For now, based on the script we ran, the first 10 are:
-// mozart, picasso, beethoven, einstein, napoleon, steve-jobs, michael-jordan, marilyn-monroe, elon-musk, oprah-winfrey
-// In a real app, we'd check against the keys in FAMOUS_CHARTS_DATA or similar.
-const VERIFIED_IDS = new Set([
-    'mozart', 'picasso', 'beethoven', 'einstein', 'napoleon',
-    'steve-jobs', 'michael-jordan', 'marilyn-monroe', 'elon-musk', 'oprah-winfrey'
-]);
+// Dynamically build verified IDs from actual chart data
+const VERIFIED_IDS = new Set(FAMOUS_CHARTS_DATA.map(p => p.id));
 
 const ALL_CATEGORIES: FamousCategory[] = ['artist', 'leader', 'scientist', 'entrepreneur', 'performer'];
 
