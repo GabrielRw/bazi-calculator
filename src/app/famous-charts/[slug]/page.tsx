@@ -85,11 +85,31 @@ export default async function FamousPersonPage({ params }: { params: Promise<{ s
 
                 <div className="glass-card p-6 md:p-8 rounded-2xl bg-white/5 border border-white/10">
                     <h2 className="text-lg font-bold text-jade mb-3">About</h2>
-                    <p className="text-lg text-gray-300 leading-relaxed">
+                    <p className="text-lg text-gray-300 leading-relaxed mb-6">
                         {person.brief}
                     </p>
-                    <div className="mt-4 pt-4 border-t border-white/5 text-sm text-gray-500">
-                        Birth data: {person.birth.city}, {person.birth.country} • True Solar Time calculated
+
+                    {/* Birth Data Section */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-white/10">
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Birth Date</div>
+                            <div className="text-white font-mono">{person.birth.year}-{String(person.birth.month).padStart(2, '0')}-{String(person.birth.day).padStart(2, '0')}</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Birth Time</div>
+                            <div className="text-white font-mono">{String(person.birth.hour).padStart(2, '0')}:{String(person.birth.minute || 0).padStart(2, '0')}</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Birth City</div>
+                            <div className="text-white">{person.birth.city}</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Country</div>
+                            <div className="text-white">{person.birth.country}</div>
+                        </div>
+                    </div>
+                    <div className="mt-3 text-[10px] text-gray-600 uppercase tracking-wider">
+                        ✦ Calculated using True Solar Time for maximum precision
                     </div>
                 </div>
             </div>
