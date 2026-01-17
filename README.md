@@ -3,6 +3,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/riellabs)
 
 A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calculator built with Next.js. Features true solar time calculations, famous chart comparisons, AI-powered insights, and comprehensive destiny analysis.
 
@@ -533,6 +534,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Free Astro API](https://freeastroapi.com) - For providing the BaZi calculation engine
 - The traditional Chinese metaphysics community for preserving this ancient wisdom
+
+## Support
+
+If you find this project useful, consider buying me a coffee:
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/riellabs)
 
 ---
 
