@@ -9,7 +9,23 @@ A professional-grade **Chinese astrology (BaZi / Four Pillars of Destiny)** calc
 
 **[Live Demo →](https://bazi-calculator-liart.vercel.app)**
 
+
 ![True BaZi Calculator Screenshot](docs/screenshot-hero.png)
+
+## 中文介绍 (Chinese Introduction)
+
+**True BaZi Calculator (专业八字排盘系统)** 是一个基于 Next.js 构建的专业级中国占星（八字/四柱）计算器。
+
+**核心功能 / Key Features:**
+- **真太阳时计算 (True Solar Time):** 考虑地理经度和均时差，确保八字排盘精准无误。
+- **由 AI 驱动的命理解析 (AI-Powered Insights):** 结合上下文分析，提供个性化的运势解读。
+- **完整盘面分析:** 包含四柱、藏干、十神关系、纳音五行等。
+- **神煞系统 (Symbolic Stars):** 集成传统神煞（贵人、桃花、文昌等）并附带详细解释。
+- **五行旺衰 (Wu Xing Balance):** 动态可视化五行强弱分布与生克关系。
+- **大运与流年 (Destiny Flow):** 展示十年大运与流年运势的交互影响。
+- **名人案例库:** 包含 130+ 位历史名人的八字案例供研究对比。
+
+**[在线演示 / Live Demo →](https://bazi-calculator-liart.vercel.app)**
 
 ---
 
