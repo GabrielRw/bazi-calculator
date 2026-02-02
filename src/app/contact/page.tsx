@@ -38,7 +38,7 @@ export default function ContactPage() {
                         </div>
 
                         <a
-                            href="mailto:contact@truebazi.com"
+                            href="mailto:gabriel.naulleau@gmail.com"
                             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-jade text-black font-bold hover:bg-jade-light transition-colors"
                         >
                             <Mail className="w-4 h-4" />
@@ -67,17 +67,10 @@ export default function ContactPage() {
 
                         <div className="space-y-3">
                             <Link
-                                href="#"
+                                href="https://x.com/GabrielNolo"
                                 className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group/link"
                             >
-                                <span className="text-sm font-medium text-gray-300">Twitter / X</span>
-                                <ExternalLink className="w-4 h-4 text-gray-500 group-hover/link:text-white transition-colors" />
-                            </Link>
-                            <Link
-                                href="#"
-                                className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors group/link"
-                            >
-                                <span className="text-sm font-medium text-gray-300">Instagram</span>
+                                <span className="text-sm font-medium text-gray-300">X (@GabrielNolo)</span>
                                 <ExternalLink className="w-4 h-4 text-gray-500 group-hover/link:text-white transition-colors" />
                             </Link>
                         </div>
