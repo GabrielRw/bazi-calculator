@@ -1,4 +1,4 @@
-# True BaZi Calculator
+# Open Source Bazi Calculator
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
