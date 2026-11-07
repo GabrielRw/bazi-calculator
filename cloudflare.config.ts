@@ -3,6 +3,7 @@ import { bindings, defineConfig, defineWorker } from "cf/config";
 export default defineConfig({
   worker: defineWorker({
     name: "bazi-calculator",
+    domains: ["bazi.freeastroapi.com"],
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-11-06",
     assets: {
